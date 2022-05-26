@@ -1,0 +1,6 @@
+*~
+*.pyc
+/build/*
+/.vscode/*
+/.pytest_cache/*
+/.idea/*
