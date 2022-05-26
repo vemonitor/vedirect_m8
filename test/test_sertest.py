@@ -1,5 +1,5 @@
 import pytest
-from vedirect.sertest import SerialTestHelper
+from vedirect_m8.sertest import SerialTestHelper
 
 
 class TestSerialTestHelper:

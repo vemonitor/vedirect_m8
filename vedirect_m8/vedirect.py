@@ -13,8 +13,8 @@ import logging
 import time
 import serial
 from ve_utils.utils import UType as Ut, USys as USys
-from vedirect.serconnect import SerialConnection
-from vedirect.serutils import SettingInvalidException, InputReadException
+from vedirect_m8.serconnect import SerialConnection
+from vedirect_m8.serutils import SettingInvalidException, InputReadException
 
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"

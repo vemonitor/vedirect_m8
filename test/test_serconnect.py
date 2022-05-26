@@ -1,7 +1,7 @@
 import pytest
-from vedirect.serconnect import SerialConnection
+from vedirect_m8.serconnect import SerialConnection
 from ve_utils.utils import USys as USys
-from vedirect.serutils import SerialUtils as Ut
+from vedirect_m8.serutils import SerialUtils as Ut
 
 
 class TestSerialConnection:

@@ -6,7 +6,11 @@ This is a forked version of a package originally created by Janne Kario (https:/
 ## Installation
 To install directly from GitHub:
 
-``$ python3 -m pip install "git+https://github.com/mano8/vedirect"``
+``$ python3 -m pip install "git+https://github.com/mano8/vedirect_m8"``
+
+To install from PypI :
+
+``python3 -m pip install vedirect_m8``
 
 ## Test on virtual serial port
 The sim_data directory contains a set of live recordings of the serial port data sent by the 3 devices that I own.

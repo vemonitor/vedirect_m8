@@ -17,9 +17,9 @@ import time
 import serial
 
 from ve_utils.utils import UType as Ut
-from vedirect.sertest import SerialTestHelper
-from vedirect.vedirect import Vedirect, VedirectException
-from vedirect.serutils import InputReadException, TimeoutException
+from vedirect_m8.sertest import SerialTestHelper
+from vedirect_m8.vedirect import Vedirect, VedirectException
+from vedirect_m8.serutils import InputReadException, TimeoutException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"

@@ -3,7 +3,7 @@
 
 import argparse
 import paho.mqtt.client as mqtt
-from vedirect.vedirect import Vedirect
+from vedirect_m8.vedirect import Vedirect
 
 
 if __name__ == '__main__':

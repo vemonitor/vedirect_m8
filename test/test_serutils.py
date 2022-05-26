@@ -1,5 +1,5 @@
 import pytest
-from vedirect.serutils import SerialUtils
+from vedirect_m8.serutils import SerialUtils
 
 
 class TestSerialUtils:

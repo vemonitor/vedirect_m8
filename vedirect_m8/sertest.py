@@ -6,8 +6,8 @@ Test decoded serial vedirect data to identify a valid serial port.
  .. raises: SettingInvalidException
 """
 import logging
-from vedirect.serutils import SerialUtils as Ut
-from vedirect.serutils import SettingInvalidException
+from vedirect_m8.serutils import SerialUtils as Ut
+from vedirect_m8.serutils import SettingInvalidException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"

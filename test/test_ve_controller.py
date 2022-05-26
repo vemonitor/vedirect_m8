@@ -1,5 +1,5 @@
 import pytest
-from vedirect.ve_controller import VedirectController
+from vedirect_m8.ve_controller import VedirectController
 from ve_utils.utils import UType as Ut, USys as USys
 
 

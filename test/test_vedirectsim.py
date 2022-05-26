@@ -1,7 +1,7 @@
 import pytest
 import serial
 
-from vedirect.vedirectsim import Vedirectsim
+from vedirect_m8.vedirectsim import Vedirectsim
 from ve_utils.utils import USys as USys
 
 

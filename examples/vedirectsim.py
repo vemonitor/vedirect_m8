@@ -4,8 +4,8 @@ import logging
 import argparse
 import sys
 
-from vedirect.vedirectsim import Vedirectsim
-from vedirect import configure_logging
+from vedirect_m8.vedirectsim import Vedirectsim
+from vedirect_m8 import configure_logging
 
 logging.basicConfig()
 logger = logging.getLogger("vedirect")

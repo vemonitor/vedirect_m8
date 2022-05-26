@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-from vedirect.vedirect import Vedirect
+from vedirect_m8.vedirect import Vedirect
 
 
 def print_data_callback(packet):

@@ -12,7 +12,7 @@ import logging
 import serial
 import os
 from ve_utils.utils import USys as USys
-from vedirect.serutils import SerialUtils as Ut
+from vedirect_m8.serutils import SerialUtils as Ut
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
