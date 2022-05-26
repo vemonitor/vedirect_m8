@@ -1,3 +1,19 @@
+Metadata-Version: 2.1
+Name: vedirect-m8
+Version: 1.0.5
+Summary: Victron VE.Direct decoder for Python
+Home-page: https://github.com/mano8/vedirect_m8
+Author: Janne Kario, Eli Serra
+Author-email: eli.serra173@gmail.com
+License: MIT
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Requires-Python: >3.5.2
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # VeDirect M8
 This is a Python library for decoding the Victron Energy VE.Direct text protocol used in their range of MPPT solar charge controllers and battery monitors.
 
@@ -152,3 +168,5 @@ Then, when a valid serial port is found, it will start to decode VeDirect data f
 Later, if you disconnect the serial USB cable and reconnect it to another USB port, the serial port will change and the connection will fail. 
 
 This will restart the same process, it is waiting for an available serial port that matches all the tests above. Then, when a valid serial port is found, it resumes decoding VeDirect data from that serial port normally.
+
+

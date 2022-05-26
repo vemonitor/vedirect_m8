@@ -8,11 +8,11 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(name='vedirect_m8',
-      version='1.0.4',
+      version='1.0.5',
       description='Victron VE.Direct decoder for Python',
       long_description=README,
       long_description_content_type="text/markdown",
-      url='https://github.com/mano8/vedirect',
+      url='https://github.com/mano8/vedirect_m8',
       author='Janne Kario, Eli Serra',
       author_email='eli.serra173@gmail.com',
       license='MIT',
@@ -21,7 +21,7 @@ setup(name='vedirect_m8',
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.7",
       ],
-      packages=['vedirect'],
+      packages=['vedirect_m8'],
       include_package_data=True,
       install_requires=[
           'pytest',
