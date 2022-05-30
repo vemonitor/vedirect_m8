@@ -169,6 +169,7 @@ class Vedirectsim:
         return result
                       
     def send_packet(self):
+        start = time.time()
         packet = self.convert(self.dict)
         try:
             self.ser.write(bytes(packet))
@@ -185,7 +186,11 @@ class Vedirectsim:
             self.ser.cancel_write()
             self.ser.reset_output_buffer()
         self.dict = dict()
-        time.sleep(1)
+        now = time.time()
+        sleep_time = 0.5 - (now - start)
+        if sleep_time > 0:
+            logger.debug("---> Sleeping %ss" % sleep_time)
+            time.sleep(sleep_time)
         
     def run(self, max_writes: int or None = None) -> bool:
         if self.is_ready():
