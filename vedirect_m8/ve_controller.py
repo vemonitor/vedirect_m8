@@ -202,39 +202,6 @@ class VedirectController(Vedirect):
             "Exception : %s" % exception
         )
 
-    def read_data_single(self, timeout: int = 60):
-        """
-        Read a single block from the serial port and returns it as a dictionary.
-        
-        :param self: Reference the class instance
-        :param timeout: Set the timeout for the read_data_single function
-        :return: A dictionary of the data
-        :doc-author: Trelent
-        """
-        bc, now, tim = True, time.time(), 0
-        if self.is_ready():
-
-            while bc:
-                tim = time.time()
-                    
-                byte = self._com._ser.read(1)
-                packet = self.input_read(byte)
-
-                if packet is not None:
-                    logger.debug(
-                        "Serial reader success: dict: %s" % self.dict)
-                    return self.dict
-                
-                # timeout serial read
-                if tim-now > timeout:
-                    logger.error(
-                        '[VeDirect] Unable to read serial data. Timeout error - data : %s' % packet)
-                    bc = False
-        else:
-            logger.error('[VeDirect] Unable to read serial data. Not connected to serial port...')
-        
-        return None
-
     def read_data_callback(self, 
                            callback_func,
                            timeout: int = 60,
