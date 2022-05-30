@@ -14,7 +14,7 @@ import time
 import serial
 from ve_utils.utils import UType as Ut, USys as USys
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.serutils import SettingInvalidException, InputReadException
+from vedirect_m8.serutils import SettingInvalidException, InputReadException, TimeoutException
 
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"
@@ -166,76 +166,68 @@ class Vedirect:
                 "Serial input read error %s " % ex
             )
 
+    def get_serial_packet(self):
+        """Get Ve Direct block packet from serial reader."""
+        byte = self._com._ser.read(1)
+        if byte == b'\x00':
+            byte = self._com._ser.read(1)
+        return self.input_read(byte)
+    
+    def is_timeout(self, elapsed: float, timeout:float = 60):
+        """Test if elapsed time is greater than timeout."""
+        if elapsed > timeout:
+            raise TimeoutException(
+                '[VeDirect] Unable to read serial data. '
+                'Timeout error.')
+        return True
+        
     def read_data_single(self, timeout: int = 60):
-        """ Read on serial and return single vedirect data """
+        """
+        Read a single block from the serial port and returns it as a dictionary.
+        
+        :param self: Reference the class instance
+        :param timeout: Set the timeout for the read_data_single function
+        :return: A dictionary of the data
+        :doc-author: Trelent
+        """
         bc, now, tim = True, time.time(), 0
 
         if self.is_ready():
             while bc:
-                tim = time.time()
+                packet, tim = None, time.time()
                     
-                try:
-                    byte = self._com._ser.read(1)
-                    packet = self.input_read(byte)
-                except (
-                        InputReadException,
-                        serial.SerialException,
-                        serial.SerialTimeoutException
-                        ) as ex:
-                    raise VedirectException(
-                        "[VeDirect::read_data_single] "
-                        "Unable to read serial data single. "
-                        "exception : %s. " %
-                        ex
-                    )
+                packet = self.get_serial_packet()
                     
                 if packet is not None:
                     logger.debug("Serial reader success: dict: %s" % self.dict)
-                    return self.dict
+                    return packet
                 
                 # timeout serial read
-                if tim-now > timeout:
-                    logger.error('[VeDirect] Unable to read serial data. Timeout error - data : %s' % packet)
-                    bc = False
+                self.is_timeout(tim-now, timeout)
         else:
             logger.error('[VeDirect] Unable to read serial data. Not connected to serial port...')
         
         return None
 
-    def read_data_callback(self, callback_function):
+    def read_data_callback(self, callback_function, timeout: int = 60):
         """ Read on serial and return vedirect data on callback function """
-        bc, now, tim, tdebug = True, time.time(), 0, 0
-        debug = list()
+        bc, now, tim = True, time.time(), 0
         if self.is_ready():
             while bc:
                 tim = time.time()
-                byte = self._com._ser.read(1)
-                if byte == b'\x00':
-                    byte = self._com._ser.read(1)
-                packet = self.input_read(byte)
+                
+                packet = self.get_serial_packet()
+                
                 if packet is not None:
                     logger.debug(
-                        "Serial reader success: byte: %s -- packet: %s "
+                        "Serial reader success: packet: %s "
                         "-- dict: %s -- state: %s -- bytes_sum: %s " %
-                        (byte, packet, self.dict, self.state, self.bytes_sum))
+                        (packet, self.dict, self.state, self.bytes_sum))
                     callback_function(packet)
                     now = tim
-                debug.append(
-                    "\n\r byte: %s -- packet: %s -- dict: %s -- state: %s -- bytes_sum: %s " %
-                    (byte, packet, self.dict, self.state, self.bytes_sum))
                 
-                if self._debug and tdebug != Ut.get_int(tim) and Ut.get_int(tim) % 2 == 0:
-                    tdebug = Ut.get_int(tim)
-                    logger.debug("Serial reader : %s" % debug)
-                    debug = list()
                 # timeout serial read
-                if tim-now > 120:
-                    USys.print_danger(
-                        '[VeDirect] Unable to read serial data. Timeout error - data : %s' %
-                        packet
-                    )
-                    bc = False
-            else:
-                USys.print_danger('[VeDirect] Unable to read serial data. Not connected to serial port...')
-        
-        callback_function(None)
+                self.is_timeout(tim-now, timeout)
+        else:
+            logger.error('[VeDirect] Unable to read serial data. Not connected to serial port...')
+            callback_function(None)
