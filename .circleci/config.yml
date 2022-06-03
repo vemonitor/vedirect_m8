@@ -33,6 +33,10 @@ jobs:
       - python/install-packages:
           pkg-manager: pip
       - run:
+          name: Install vedirect_m8
+          # This assumes pytest is installed via the install-package step above
+          command: pip install vedirect_m8
+      - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
           command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1
