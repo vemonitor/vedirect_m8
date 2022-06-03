@@ -43,6 +43,14 @@ jobs:
       - attach_workspace:
             at: .
       - run:
+          name: Update packages list
+          # This assumes pytest is installed via the install-package step above
+          command: sudo apt-get update
+      - run:
+          name: Install socat
+          # This assumes pytest is installed via the install-package step above
+          command: sudo apt-get install socat
+      - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
           command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1
@@ -55,10 +63,12 @@ jobs:
           docker_layer_caching: true
       - attach_workspace:
             at: .
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
-          command: pytest      
+          command: pytest -s   
   
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
