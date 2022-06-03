@@ -41,10 +41,10 @@ jobs:
           name: is file /tmp/vmodem0
           # This assumes pytest is installed via the install-package step above
           command: ls -l /tmp/vmodem0
-      #- run:
-      #    name: Run tests
+      - run:
+          name: Run tests
           # This assumes pytest is installed via the install-package step above
-      #    command: pytest -s 
+          command: pytest -s 
   
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
