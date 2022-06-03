@@ -1,0 +1,68 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+# Orbs are reusable packages of CircleCI configuration that you may share across projects, enabling you to create encapsulated, parameterized commands, jobs, and executors that can be used across multiple projects.
+# See: https://circleci.com/docs/2.0/orb-intro/
+orbs:
+  # The python orb contains a set of prepackaged CircleCI configuration you can use repeatedly in your configuration files
+  # Orb commands and jobs help you with common scripting around a language/tool
+  # so you dont have to copy and paste it everywhere.
+  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
+  python: circleci/python@1.5.0
+
+executors:
+  my-executor:
+    docker:
+      - image: cimg/python:3.9.7
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  install_deps_and_test:
+    executor: my-executor
+    steps:
+      - checkout
+      - run:
+          name: Update packages list
+          # This assumes pytest is installed via the install-package step above
+          command: sudo apt-get update
+      - run:
+          name: Install socat
+          # This assumes pytest is installed via the install-package step above
+          command: sudo apt-get install socat
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Install vedirect_m8
+          # This assumes pytest is installed via the install-package step above
+          command: pip install vedirect_m8
+      - run:
+          name: run socat 
+          # This assumes pytest is installed via the install-package step above
+          command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1
+          background: true
+      - run:
+          name: is file /tmp/vmodem0
+          # This assumes pytest is installed via the install-package step above
+          command: ls -l /tmp/vmodem0
+      - run:
+          name: view current directory
+          # This assumes pytest is installed via the install-package step above
+          command: ls -l
+      - run:
+          name: run vedirectsim
+          # This assumes pytest is installed via the install-package step above
+          command: python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv702
+          background: true
+      - run:
+          name: Run tests
+          # This assumes pytest is installed via the install-package step above
+          command: pytest -s 
+  
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  sample: # This is the name of the workflow, feel free to change it to better match your workflow.
+    # Inside the workflow, you define the jobs you want to run.
+    jobs:
+      - install_deps_and_test
