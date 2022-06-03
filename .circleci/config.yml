@@ -34,9 +34,10 @@ jobs:
           #app-dir: ~/vedirect_m8.egg-info   # If you're requirements.txt isn't in the root directory.
           #pip-dependency-file: requires.txt  # if you have a different name for your requirements file, maybe one that combines your runtime and test requirements.
       - run:
-          name: Run tests
+          name: Install socat
           # This assumes pytest is installed via the install-package step above
-          command: pytest
+          command: sudo apt-get install socat
+      
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
