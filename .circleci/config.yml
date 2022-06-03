@@ -33,7 +33,7 @@ jobs:
       - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
-          command: gnome-terminal -- bash -c 'socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1'
+          command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1 > /dev/tty2
       - python/install-packages:
           pkg-manager: pip
       - run:
