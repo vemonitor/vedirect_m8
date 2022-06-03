@@ -22,8 +22,6 @@ jobs:
     executor: my-executor
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
       - run:
           name: Update packages list
           # This assumes pytest is installed via the install-package step above
@@ -32,18 +30,10 @@ jobs:
           name: Install socat
           # This assumes pytest is installed via the install-package step above
           command: sudo apt-get install socat
-      - persist_to_workspace:
-          root: .
-          paths:
-            - '*'
   run_socat:
     executor: my-executor
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - attach_workspace:
-            at: .
       - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
@@ -52,10 +42,6 @@ jobs:
     executor: my-executor
     steps:
       - checkout
-      - setup_remote_docker:
-          docker_layer_caching: true
-      - attach_workspace:
-            at: .
       - python/install-packages:
           pkg-manager: pip
       - run:
