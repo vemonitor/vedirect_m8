@@ -19,6 +19,8 @@ jobs:
       - image: cimg/python:3.10.2
     steps:
       - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
       - run:
           name: Update packages list
           # This assumes pytest is installed via the install-package step above
