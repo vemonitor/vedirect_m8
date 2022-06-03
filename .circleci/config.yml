@@ -30,16 +30,12 @@ jobs:
           name: Install socat
           # This assumes pytest is installed via the install-package step above
           command: sudo apt-get install socat
-      - run:
-          name: run socat 
-          # This assumes pytest is installed via the install-package step above
-          command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1 &
       - python/install-packages:
           pkg-manager: pip
       - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
-          command: ls -l /tmp/vmodem0
+          command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1 & ls -l /tmp/vmodem0
       #- run:
       #    name: Run tests
           # This assumes pytest is installed via the install-package step above
