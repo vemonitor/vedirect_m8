@@ -42,9 +42,10 @@ jobs:
           # This assumes pytest is installed via the install-package step above
           command: ls -l /tmp/vmodem0
       - run:
-          name: Run tests
+          name: view current directory
           # This assumes pytest is installed via the install-package step above
-          command: pytest -s 
+          command: ls -l
+      
   
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
