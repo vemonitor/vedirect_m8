@@ -5,7 +5,7 @@ __copyright__ = "Copyright 2015, Janne Kario"
 __deprecated__ = False
 __license__ = "MIT"
 __status__ = "Production"
-__version__ = "1.0.6"
+__version__ = "1.0.7"
 
 
 class AppFilter(logging.Filter):

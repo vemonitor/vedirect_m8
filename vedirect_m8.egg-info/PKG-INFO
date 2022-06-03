@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: vedirect-m8
-Version: 1.0.6
+Version: 1.0.7
 Summary: Victron VE.Direct decoder for Python
 Home-page: https://github.com/mano8/vedirect_m8
 Author: Janne Kario, Eli Serra
@@ -15,6 +15,9 @@ Description-Content-Type: text/markdown
 License-File: LICENSE
 
 # VeDirect M8
+[![CircleCI](https://circleci.com/gh/mano8/vedirect_m8.svg?style=svg)](https://app.circleci.com/pipelines/github/mano8/vedirect_m8)
+[![PyPI package](https://img.shields.io/pypi/v/vedirect_m8.svg)](https://pypi.org/project/vedirect_m8/)
+   
 This is a Python library for decoding the Victron Energy VE.Direct text protocol used in their range of MPPT solar charge controllers and battery monitors.
 
 This is a forked version of a package originally created by Janne Kario (https://github.com/karioja/vedirect).
