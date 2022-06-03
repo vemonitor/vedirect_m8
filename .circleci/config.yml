@@ -33,13 +33,17 @@ jobs:
       - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
-          command: sudo socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1 &
+          command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1 &
       - python/install-packages:
           pkg-manager: pip
       - run:
-          name: Run tests
+          name: run socat 
           # This assumes pytest is installed via the install-package step above
-          command: pytest -s 
+          command: echo ls /tmp/vmodem0
+      #- run:
+      #    name: Run tests
+          # This assumes pytest is installed via the install-package step above
+      #    command: pytest -s 
   
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
