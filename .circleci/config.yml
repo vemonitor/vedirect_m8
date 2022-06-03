@@ -11,12 +11,15 @@ orbs:
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
   python: circleci/python@1.5.0
 
+executors:
+  my-executor:
+    docker:
+      - image: cimg/python:3.9.7
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
   install_deps:
-    docker:
-      - image: cimg/python:3.10.2
+    executor: my-executor
     steps:
       - checkout
       - setup_remote_docker:
@@ -34,8 +37,7 @@ jobs:
           paths:
             - '*'
   run_socat:
-    docker:
-      - image: cimg/python:3.10.2
+    executor: my-executor
     steps:
       - checkout
       - setup_remote_docker:
@@ -43,20 +45,11 @@ jobs:
       - attach_workspace:
             at: .
       - run:
-          name: Update packages list
-          # This assumes pytest is installed via the install-package step above
-          command: sudo apt-get update
-      - run:
-          name: Install socat
-          # This assumes pytest is installed via the install-package step above
-          command: sudo apt-get install socat
-      - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
           command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1
   run_tests:
-    docker:
-      - image: cimg/python:3.10.2
+    executor: my-executor
     steps:
       - checkout
       - setup_remote_docker:
