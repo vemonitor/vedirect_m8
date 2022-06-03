@@ -36,6 +36,11 @@ jobs:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
           command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1 & ls -l /tmp/vmodem0
+          background: true
+      - run:
+          name: is file /tmp/vmodem0
+          # This assumes pytest is installed via the install-package step above
+          command: ls -l /tmp/vmodem0
       #- run:
       #    name: Run tests
           # This assumes pytest is installed via the install-package step above
