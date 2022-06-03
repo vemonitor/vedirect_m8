@@ -18,7 +18,7 @@ executors:
 # Define a job to be invoked later in a workflow.
 # See: https://circleci.com/docs/2.0/configuration-reference/#jobs
 jobs:
-  install_deps:
+  install_deps_and_test:
     executor: my-executor
     steps:
       - checkout
@@ -30,24 +30,16 @@ jobs:
           name: Install socat
           # This assumes pytest is installed via the install-package step above
           command: sudo apt-get install socat
-  run_socat:
-    executor: my-executor
-    steps:
-      - checkout
       - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
-          command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1
-  run_tests:
-    executor: my-executor
-    steps:
-      - checkout
+          command: gnome-terminal -- bash -c 'socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1'
       - python/install-packages:
           pkg-manager: pip
       - run:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
-          command: pytest -s   
+          command: pytest -s 
   
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
@@ -55,10 +47,4 @@ workflows:
   sample: # This is the name of the workflow, feel free to change it to better match your workflow.
     # Inside the workflow, you define the jobs you want to run.
     jobs:
-      - install_deps
-      - run_socat:
-          requires:
-             - install_deps
-      - run_tests:
-          requires:
-             - install_deps
+      - install_deps_and_test
