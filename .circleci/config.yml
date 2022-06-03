@@ -45,7 +45,15 @@ jobs:
           name: view current directory
           # This assumes pytest is installed via the install-package step above
           command: ls -l
-      
+      - run:
+          name: run vedirectsim
+          # This assumes pytest is installed via the install-package step above
+          command: python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv702
+          background: true
+      - run:
+          name: Run tests
+          # This assumes pytest is installed via the install-package step above
+          command: pytest -s 
   
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
