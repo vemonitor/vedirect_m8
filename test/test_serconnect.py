@@ -11,12 +11,10 @@ class TestSerialConnection:
         Invoked for every test function in the module.
         """
         conf = {
-            'serialPort': "COM1"
+            'serialPort': "/tmp/vmodem1",
+            'baud': 19200,
+            'timeout': 2,
         }
-
-        if USys.is_op_sys_type("unix"):
-            conf['serialPort'] = "/tmp/vmodem1"
-            conf['serialPath'] = "/tmp/"
 
         self.obj = SerialConnection(**conf)
 
@@ -26,38 +24,35 @@ class TestSerialConnection:
         """
         pass
 
-    def test_properties(self):
-        """"""
+    def test_settings(self):
+        """Test configuration settings from SerialConnection constructor"""
+        assert self.obj._settings.get('serialPort') == "/tmp/vmodem1"
+        assert self.obj._settings.get('baud') == 19200
+        assert self.obj._settings.get('timeout') == 2
         assert self.obj.is_settings()
-
+        bauds = [
+                110, 300, 600, 1200,
+                2400, 4800, 9600, 14400,
+                19200, 38400, 57600, 115200,
+                128000, 256000, 0, 1, 10, 302,
+                2500, 4900, "300"
+                ]
+        tests = [x for x in bauds if self.obj.is_baud(x)]
+        assert len(tests) == 14
+        timeouts = [
+                1, 5, 10,
+                "2400", 0.1, 0
+                ]
+        tests = [x for x in timeouts if self.obj.is_timeout(x)]
+        assert len(tests) == 3
+        
+    def test_connect(self):
+        """"""
+        assert self.obj.connect()
+        assert self.obj.is_serial_ready()
+        assert self.obj.is_ready()
+        
     def test_get_serial_ports_list(self):
         """"""
         assert Ut.is_list_not_empty(self.obj.get_serial_ports_list())
 
-    def test_connect(self):
-        """"""
-        assert self.obj.connect()
-
-    def test_is_key_pattern(self):
-        """"""
-        assert not Ut.is_key_pattern('_hello')
-        assert not Ut.is_key_pattern('hel lo')
-        assert Ut.is_key_pattern("hj_58Hyui")
-
-    def test_is_unix_serial_port_pattern(self):
-        """"""
-        assert not Ut.is_unix_serial_port_pattern('/etc/ttyUSB1')
-        assert not Ut.is_unix_serial_port_pattern("/dev/tty")
-        assert not Ut.is_unix_serial_port_pattern("/dev/tty1")
-        assert Ut.is_unix_serial_port_pattern("/tmp/vmodem1")
-        assert Ut.is_unix_serial_port_pattern("/dev/ttyUSB3")
-
-    def test_is_win_serial_port_pattern(self):
-        """"""
-        assert not Ut.is_win_serial_port_pattern('/etc/ttyUSB1')
-        assert not Ut.is_win_serial_port_pattern('/dev/COM3')
-        assert not Ut.is_win_serial_port_pattern('/COM3')
-        assert not Ut.is_win_serial_port_pattern('COM')
-        assert Ut.is_win_serial_port_pattern("COM255")
-        assert Ut.is_win_serial_port_pattern("COM3")
-        assert Ut.is_win_serial_port_pattern("COM3")
