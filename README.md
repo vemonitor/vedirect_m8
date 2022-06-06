@@ -6,7 +6,7 @@ This is a Python library for decoding the Victron Energy VE.Direct text protocol
 
 This is a forked version of a package originally created by Janne Kario (https://github.com/karioja/vedirect).
 
-## Installation
+# Installation
 To install directly from GitHub:
 
 ``$ python3 -m pip install "git+https://github.com/mano8/vedirect_m8"``
@@ -22,9 +22,17 @@ The sim_data directory contains a set of live recordings of the serial port data
 * BlueSolar MPPT 75/15 running firmware version 1.23
 * BVM 702 battery monitor running firmware version 3.08
 
-These recordings can be fed to the Vedirect decoder using a pair of virtual serial ports.
+On unix systems, these recordings can be fed to the Vedirect decoder using a pair of virtual serial ports.
 
-To create a pair of virtual serial ports issue the following command:
+First you need install socat on your machine.
+On debian systems type on your terminal :
+```
+sudo apt-get install socat
+```
+
+Next install the vedirect_m8 package ``see above``.
+
+Now, to create a pair of virtual serial ports issue the following command:
 ```
 $ socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1
 ```
@@ -37,12 +45,18 @@ In other terminal, run the vedirectsim script with your desired device:
 ```
 python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv700
 ```
-Device option must be ``bmv700``, ``bluesolar_1.23`` or ``smartsolar_1.39``.
+Or if you need to see the inputs sended on serial port :
+```
+python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv700 --debug
+```
+Device option must be ``bmv700, bluesolar_1.23, or smartsolar_1.39``.
 
 Then, in other terminal, attach the decoder to /tmp/vmodem1:
 ```
 python examples/vedirect_print.py --port /tmp/vmodem1
 ```
+All the inputs from the selected device file, are encoded to the vmodem0 serial port, then echoed to the vmodem1 by socat, and finnally decoded by the vedirect module.
+
 ## The Vedirect Controller
 
 This script extends from Vedirect, and add ability to automate connection to serial port.
@@ -52,21 +66,6 @@ Useful if you don't know the serial port, or if you disconnect VeDirect USB cabl
 To do so, we need a serialTest extra configuration settings.
 
 Warning, all the test must successful for validate the serial port.
-
-The script run as fallow :
-- If no serialPort is specified, or if the serial connection shuts down.
-- The script will wait for new connection in a while loop and every 2 seconds:
-    - Scan all available serial ports (only scan on /dev and /tmp)
-    - For any port available* open a new serial connection
-    - Run the vedirect decoder to read data from it
-    - And execute the serialTests on the data
-    - If the serialTests fails, restart the same process.
-    - Else If all the tests are successful, break this loop and stay connected
-    - Finally, continue where connection shuts down.
-
-(*): the available ports must be validated depending on your running system :
-- For Unix systems : ```r'^((?:/dev/|/tmp/)((?:(?:tty(?:USB|ACM))|(?:vmodem))(?:\d{1,5})))$'```
-- For Windows systems : ```r'^(COM\d{1,3})$'```
 
 ### Available serialTest :
 
