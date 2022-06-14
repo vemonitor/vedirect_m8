@@ -18,8 +18,9 @@ import serial
 
 from ve_utils.utils import UType as Ut
 from vedirect_m8.sertest import SerialTestHelper
-from vedirect_m8.vedirect import Vedirect, VedirectException
-from vedirect_m8.serutils import InputReadException, TimeoutException
+from vedirect_m8.vedirect import Vedirect
+from vedirect_m8.serconnect import SerialConnection
+from vedirect_m8.exceptions import InputReadException, TimeoutException, VedirectException, SettingInvalidException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
@@ -33,70 +34,141 @@ logger = logging.getLogger("vedirect")
 
 
 class VedirectController(Vedirect):
+    """
+    Used to decode the Victron Energy VE.Direct text protocol.
 
-    def __init__(self, **kwargs):
-        Vedirect.__init__(self, **kwargs)
+    Extends Vedirect, and add ability to wait for serial connection,
+    at start, and or when reading serial data.
+
+     .. seealso:: Vedirect
+     .. raises:: InputReadException,
+                 serial.SerialException,
+                 serial.SerialTimeoutException,
+                 VedirectException
+    """
+    def __init__(self,
+                 serial_test: dict,
+                 serial_port: str or None = None,
+                 baud: int = 19200,
+                 timeout: int or float = 0,
+                 source_name: str = 'VedirectController',
+                 ):
+        """
+        Constructor of VedirectController class.
+
+        :Example:
+            - > sc = VedirectController(serial_port = "/dev/ttyUSB1")
+            - > sc.connect()
+            - > True # if connection opened on serial port "/dev/tyyUSB1"
+        :param self: Refer to the object instance itself,
+        :param serial_test: The serial_test to execute to retrieve the serial port,
+        :param serial_port: The serial port to connect,
+        :param baud: Baud rate such as 9600 or 115200 etc.
+        :param timeout: Set a read timeout value in seconds,
+        :param source_name: This is used in logger to identify the source of call.
+        :return: Nothing
+        """
+        Vedirect.__init__(self,
+                          serial_port=serial_port,
+                          baud=baud,
+                          timeout=timeout,
+                          source_name=source_name)
         self._ser_test = None
-        self.init_serial_test(**kwargs)
+        self.init_serial_test(serial_test)
     
     def has_serial_test(self) -> bool:
         """ Test if is valid serial test helper """
         return isinstance(self._ser_test, SerialTestHelper)\
             and self._ser_test.has_serial_tests()
-    
-    def init_serial_test(self, **kwargs) -> bool:
-        """
-        The init_serial_test function initialises the serial test helper.
 
-        It takes a dictionary of arguments and passes it to SerialTestHelper.
+    def is_ready(self) -> bool:
+        """Test if class Vedirect is ready"""
+        return self.is_serial_ready() and self.has_serial_test()
+
+    def is_ready_to_search_ports(self) -> bool:
+        """Test if class Vedirect is ready"""
+        return self.has_serial_com() and self.has_serial_test()
+
+    def init_serial_test(self, serial_test: dict) -> bool:
+        """
+        Initialises the serial test helper.
+
+        It takes a dictionary of arguments and passes it to SerialTestHelper,
+        Raise SettingInvalidException
         :param self: Refer to the object of the class
-        :return: A boolean value
-        :doc-author: Trelent
+        :param serial_test: The serial_test to execute to retrieve the serial port,
+        :return: True if SerialTestHelper initialisation success.
         """
-        if Ut.is_dict_not_empty(kwargs.get("serialTest")):
-            self._ser_test = SerialTestHelper(kwargs.get("serialTest"))
-            return self._ser_test.has_serial_tests()
-        return False
+        if Ut.is_dict_not_empty(serial_test):
+            self._ser_test = SerialTestHelper(serial_test)
+            if not self._ser_test.has_serial_tests():
+                raise SettingInvalidException(
+                    "[Vedirect::init_serial_test] "
+                    "Unable to init SerialTestHelper, "
+                    "bad parameters : %s." %
+                    serial_test
+                )
+            return True
+        raise SettingInvalidException(
+            "[Vedirect::init_serial_test] "
+            "Unable to init SerialTestHelper, "
+            "bad parameters : %s." %
+            serial_test
+        )
 
-    def connect_to_serial(self):
-        """ Test if is valid kwargs """
-        if self.has_serial_com():
-            if not self._com.is_ready() and self._com.connect():
-                return True
-            elif not self._com.is_ready():
-                if self.wait_or_search_serial_connection():
-                    return True
-        return False
-
-    def init_settings(self, **kwargs):
+    def init_settings(self,
+                      serial_port: str or None = None,
+                      baud: int = 19200,
+                      timeout: int or float = 0,
+                      source_name: str = 'VedirectController',
+                      wait_timeout: int or float = 3600
+                      ) -> bool:
         """
         Initialise the settings for the class.
 
-        It is called by __init__ and provides a convenient way
-        to set default values of class attributes.
-        These can be overwritten by passing them in
-        as keyword arguments to __init__.
-        :param self: Refer to the object itself.
-        :return: A dictionary of the settings that were passed to it.
-        :doc-author: Trelent
+        At least serial_port must be provided.
+        Default :
+         - baud rate = 19200,
+         - timeout = 0 (non blocking mode)
+         - source_name = 'Vedirect'
+        Raise:
+         - SettingInvalidException if serial_port, baud or timeout are not valid.
+         - VedirectException if connection to serial port fails
+        :Example :
+            - >self.init_settings(serial_port="/tmp/vmodem0")
+            - >True
+        :param self: Refer to the object itself,
+        :param serial_port: The serial port to connect,
+        :param baud: Baud rate such as 9600 or 115200 etc.
+        :param timeout: Set a read timeout value in seconds,
+        :param source_name: This is used in logger to identify the source of call.
+        :param wait_timeout: Timeout value to search valid serial port in case of connection fails.
+        :return: True if connection to serial port success.
+
+        .. raises:: SettingInvalidException, VedirectException
         """
-        """ Initialise settings from kwargs """
-        self.init_serial_test(**kwargs)
         try:
-            return self.init_serial_connection(**kwargs)
-        except Exception as ex:
-            if self.wait_or_search_serial_connection(exception=ex):
+            return self.init_serial_connection(serial_port=serial_port,
+                                               baud=baud,
+                                               timeout=timeout,
+                                               source_name=source_name
+                                               )
+        except VedirectException as ex:
+            if self.wait_or_search_serial_connection(timeout=wait_timeout, exception=ex):
                 return True
         return False
 
     def read_data_to_test(self) -> dict:
+        """
+        Return decoded Vedirect blocks from serial to identify the right serial port.
+        """
         res = None
-        if self.is_serial_ready():
+        if self.is_ready():
             try:
                 res = dict()
-                # read data 4 times to ensure getting all vedirect blocks on result
-                for i in range(4):
-                    res.update(self.read_data_single(timeout=3))
+                data = self.read_data_single(timeout=1)
+                if Ut.is_dict_not_empty(data):
+                    res.update(data)
             except Exception as ex:
                 logger.debug(
                     '[VeDirect] Unable to read serial data to test'
@@ -122,16 +194,16 @@ class VedirectController(Vedirect):
         .. raises:: VedirectException,
         :doc-author: Trelent
         """
-        if self.has_serial_com()\
-                and self.has_serial_test():
+        if self.is_ready_to_search_ports():
             if Ut.is_list_not_empty(ports):
                 for port in ports:
-                    if self._com.is_serial_port(port):
-                        if self._com.connect(**{"serialPort": port, 'timeout': 2}):
+                    if SerialConnection.is_serial_port(port):
+
+                        if self._com.connect(**{"serial_port": port, 'timeout': 0}):
+                            time.sleep(0.5)
                             data = self.read_data_to_test()
                             if self._ser_test.run_serial_tests(data):
-                                timeout = self._com._settings.get('timeout')
-                                self._com._ser.timeout = timeout
+                                self._com.ser.timeout = self._com._timeout
                                 logger.info(
                                     "[VeDirect::test_serial_ports] "
                                     "New connection established to serial port %s. " % 
@@ -139,7 +211,8 @@ class VedirectController(Vedirect):
                                 )
                                 return True
                             else:
-                                self._com._ser.close()
+                                self._com.ser.close()
+
                 return False
         else:
             raise VedirectException(
@@ -149,9 +222,18 @@ class VedirectController(Vedirect):
                 "are not ready."
             )
 
+    def search_serial_port(self) -> bool:
+        """Search the serial port from serial tests."""
+        if self.is_ready_to_search_ports():
+            ports = self._com.get_serial_ports_list()
+            if self.test_serial_ports(ports):
+                self.init_data_read()
+                return True
+        return False
+
     def wait_or_search_serial_connection(self,
                                          exception: Exception or None = None,
-                                         timeout: int = 18400
+                                         timeout: int or float = 18400
                                          ) -> bool:
         """
         Wait or search for a new serial connection.
@@ -173,7 +255,7 @@ class VedirectController(Vedirect):
         .. raises:: TimeoutException, VedirectException
         :doc-author: Trelent
         """
-        if self.has_serial_com() and self.has_serial_test():
+        if self.is_ready_to_search_ports():
             logger.info(
                 "[VeDirect::wait_or_search_serial_connection] "
                 "Lost serial connection, attempting to reconnect. "
@@ -182,9 +264,7 @@ class VedirectController(Vedirect):
             bc, now, tim = True, time.time(), 0
             while bc:
                 tim = time.time()
-                ports = self._com.get_serial_ports_list()
-                if self.test_serial_ports(ports):
-                    self.init_data_read()
+                if self.search_serial_port():
                     return True
 
                 if tim-now > timeout:
@@ -195,7 +275,7 @@ class VedirectController(Vedirect):
                         (timeout, exception)
                     )
                 
-                time.sleep(2)
+                time.sleep(2.5)
         raise VedirectException(
             "[VeDirect::wait_or_search_serial_connection] "
             "Unable to connect to any serial item. "
@@ -205,7 +285,7 @@ class VedirectController(Vedirect):
     def read_data_callback(self, 
                            callback_func,
                            timeout: int = 60,
-                           connection_timeout: int = 18400,
+                           connection_timeout: int = 3600,
                            max_loops: int or None = None
                            ) -> dict or None:
         """
@@ -222,14 +302,10 @@ class VedirectController(Vedirect):
         bc, now, tim, i = True, time.time(), 0, 0
         packet = None
         if self.is_ready():
-            byte = None
             while bc:
                 tim = time.time()
                 try:
-                    byte = self._com._ser.read(1)
-                    if byte == b'\x00':
-                        byte = self._com._ser.read(1)
-                    packet = self.input_read(byte)
+                    packet = self.get_serial_packet()
                 except (
                         InputReadException,
                         serial.SerialException,
@@ -250,22 +326,17 @@ class VedirectController(Vedirect):
                     now = tim
                     i = i+1
                     packet = None
+
                 # timeout serial read
-                if tim-now > timeout:
-                    logger.error(
-                        '[VeDirect::read_data_callback] '
-                        'Unable to read serial data. Timeout error. '
-                        '- data : %s' % packet)
-                    callback_func(False)
-                    return False
+                Vedirect.is_timeout(tim - now, timeout)
 
                 if Ut.is_int(max_loops) and i > max_loops:
                     return True
                 time.sleep(0.95)
-            else:
-                logger.error(
-                    '[VeDirect::read_data_callback] '
-                    'Unable to read serial data. '
-                    'Not connected to serial port...')
+        else:
+            logger.error(
+                '[VeDirect::read_data_callback] '
+                'Unable to read serial data. '
+                'Not connected to serial port...')
         
         callback_func(None)
