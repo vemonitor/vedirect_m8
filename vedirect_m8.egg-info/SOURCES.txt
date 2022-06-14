@@ -16,6 +16,7 @@ test/test_ve_controller.py
 test/test_vedirect.py
 test/test_vedirectsim.py
 vedirect_m8/__init__.py
+vedirect_m8/exceptions.py
 vedirect_m8/serconnect.py
 vedirect_m8/sertest.py
 vedirect_m8/serutils.py
