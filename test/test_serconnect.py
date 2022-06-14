@@ -1,21 +1,39 @@
-import pytest
+# -*- coding: utf-8 -*-
+"""
+SerialConnection unittest class.
+
+Use pytest package.
+"""
+import os
 from vedirect_m8.serconnect import SerialConnection
-from ve_utils.utils import USys as USys
 from vedirect_m8.serutils import SerialUtils as Ut
+
+__author__ = "Eli Serra"
+__copyright__ = "Copyright 2020, Eli Serra"
+__deprecated__ = False
+__license__ = "MIT"
+__status__ = "Production"
+__version__ = "1.0.0"
 
 
 class TestSerialConnection:
 
     def setup_method(self):
-        """ setup any state tied to the execution of the given function.
+        """
+        Setup any state tied to the execution of the given function.
+
         Invoked for every test function in the module.
         """
         conf = {
-            'serialPort': "/tmp/vmodem1",
+            'serial_port': "/tmp/vmodem1",
             'baud': 19200,
-            'timeout': 2,
+            'timeout': 0,
         }
 
+        if not SerialConnection.is_serial_port_exists("/tmp/vmodem1"):
+            conf.update(
+                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1")}
+            )
         self.obj = SerialConnection(**conf)
 
     def teardown_method(self):
@@ -26,33 +44,138 @@ class TestSerialConnection:
 
     def test_settings(self):
         """Test configuration settings from SerialConnection constructor"""
-        assert self.obj._settings.get('serialPort') == "/tmp/vmodem1"
-        assert self.obj._settings.get('baud') == 19200
-        assert self.obj._settings.get('timeout') == 2
         assert self.obj.is_settings()
-        bauds = [
-                110, 300, 600, 1200,
-                2400, 4800, 9600, 14400,
-                19200, 38400, 57600, 115200,
-                128000, 256000, 0, 1, 10, 302,
-                2500, 4900, "300"
-                ]
-        tests = [x for x in bauds if self.obj.is_baud(x)]
-        assert len(tests) == 14
-        timeouts = [
-                1, 5, 10,
-                "2400", 0.1, 0
-                ]
-        tests = [x for x in timeouts if self.obj.is_timeout(x)]
+
+    def test_get_virtual_ports_paths(self):
+        """Test get_virtual_ports_paths method"""
+        paths = SerialConnection.get_virtual_ports_paths()
+        assert Ut.is_list(paths) and len(paths) == 2
+        assert paths[0] == "/tmp"
+        assert paths[1] == os.path.expanduser('~')
+
+    def test_get_virtual_home_serial_port(self):
+        """Test get_virtual_home_serial_port method"""
+        v_ports = [
+            SerialConnection.get_virtual_home_serial_port("vmodem999"),
+            SerialConnection.get_virtual_home_serial_port("vmodem0"),
+            SerialConnection.get_virtual_home_serial_port("vmodem"),
+            SerialConnection.get_virtual_home_serial_port("vmodem9999"),
+            SerialConnection.get_virtual_home_serial_port("z9999"),
+            SerialConnection.get_virtual_home_serial_port(1),
+            SerialConnection.get_virtual_home_serial_port(dict())
+        ]
+        tests = [x for x in v_ports if x is not None]
+        assert len(tests) == 2
+
+    def test_is_virtual_serial_port(self):
+        """Test is_virtual_serial_port method"""
+        v_ports = [
+            SerialConnection.get_virtual_home_serial_port("vmodem999"),
+            SerialConnection.get_virtual_home_serial_port("vmodem0"),
+            SerialConnection.get_virtual_home_serial_port("vmodem"),
+            SerialConnection.get_virtual_home_serial_port("vmodem9999"),
+            SerialConnection.get_virtual_home_serial_port("z9999"),
+            SerialConnection.get_virtual_home_serial_port(1),
+            SerialConnection.get_virtual_home_serial_port(dict())
+        ]
+        tests = [x for x in v_ports if SerialConnection.is_virtual_serial_port(x)]
+        assert len(tests) == 2
+
+    def test_split_serial_port(self):
+        """Test split_serial_port method"""
+        ports = [
+            "r",
+            "/r",
+            "a/b/c/r",
+            "/r/",
+            "\\r"
+        ]
+        tests = [x for x in ports if SerialConnection.split_serial_port(x)[0] == 'r']
         assert len(tests) == 3
-        
+
+    def test_is_serial_port_exists(self):
+        """Test is_serial_port_exists method"""
+        ports = [
+            "/tmp/vmodem0",
+            "/tmp/vmodem1",
+            SerialConnection.get_virtual_home_serial_port("vmodem0"),
+            SerialConnection.get_virtual_home_serial_port("vmodem1")
+        ]
+        tests = [x for x in ports if SerialConnection.is_serial_port_exists(x)]
+        assert len(tests) == 2
+
+    def test_is_serial_port(self):
+        """Test is_serial_port method"""
+        ports = [
+            "/tmp/vmodem0",
+            "/tmp/vmodem1",
+            SerialConnection.get_virtual_home_serial_port("vmodem0"),
+            SerialConnection.get_virtual_home_serial_port("vmodem1"),
+            "/dev/ttyUSB1",
+            "/dev/ttyACM1",
+            "/dev/vmodem0",
+            "/dev/vmodem1",
+            "/dev/COM1",
+            "COM1",
+            "COM1999",  # false
+            "/dev/USB1",  # false
+            "/dev/ACM1",  # false
+            "/dev/1",  # false
+        ]
+        tests = [x for x in ports if SerialConnection.is_serial_port(x)]
+        assert len(tests) == 10
+
+    def test_is_serial_path(self):
+        """Test is_serial_path method"""
+        paths = [
+            "/tmp",  # true
+            os.path.expanduser('~'),  # true
+            "/dev",  # true
+            "/dev/pts/",
+            "/var",
+            "/var/run/",
+            1,
+            1.1,
+            ("COM1999", 1),
+            dict(),
+            None
+        ]
+        tests = [x for x in paths if SerialConnection.is_serial_path(x)]
+        assert len(tests) == 3
+
+    def test_is_baud(self):
+        """Test is_baud method"""
+        bauds = [
+            110, 300, 600, 1200,
+            2400, 4800, 9600, 14400,
+            19200, 38400, 57600, 115200,
+            128000, 256000, 0, 1, 10, 302,
+            2500, 4900, "300"
+        ]
+        tests = [x for x in bauds if SerialConnection.is_baud(x)]
+        assert len(tests) == 14
+
+    def test_is_timeout(self):
+        """Test is_timeout method"""
+        timeouts = [
+            1, 5, 10, 0.1, 0, None,
+            "2400"
+        ]
+        tests = [x for x in timeouts if SerialConnection.is_timeout(x)]
+        assert len(tests) == 6
+
     def test_connect(self):
-        """"""
+        """Test connect method"""
         assert self.obj.connect()
         assert self.obj.is_serial_ready()
         assert self.obj.is_ready()
         
     def test_get_serial_ports_list(self):
-        """"""
-        assert Ut.is_list_not_empty(self.obj.get_serial_ports_list())
+        """Test get_serial_ports_list method"""
+        serial_ports = self.obj.get_serial_ports_list()
+        assert Ut.is_list(serial_ports) and len(serial_ports) == 2
 
+    def test_get_unix_virtual_serial_ports_list(self):
+        """Test get_unix_virtual_serial_ports_list method"""
+        serial_ports = self.obj.get_unix_virtual_serial_ports_list()
+        assert Ut.is_list(serial_ports) and len(serial_ports) == 2
