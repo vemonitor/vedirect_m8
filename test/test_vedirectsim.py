@@ -2,21 +2,24 @@ import pytest
 import serial
 
 from vedirect_m8.vedirectsim import Vedirectsim
+from vedirect_m8.serconnect import SerialConnection
 from ve_utils.utils import USys as USys
 
 
 class TestVeDirectSim:
 
     def setup_method(self):
-        """ setup any state tied to the execution of the given function.
+        """
+        Setup any state tied to the execution of the given function.
+
         Invoked for every test function in the module.
         """
-        serialport = "COM1"
+        serial_port = "/tmp/vmodem0"
+        if not SerialConnection.is_serial_port_exists(serial_port):
+            serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
         device = "bmv702"
-        if USys.is_op_sys_type("unix"):
-            serialport = "/tmp/vmodem0"
 
-        self.obj = Vedirectsim(serialport, device)
+        self.obj = Vedirectsim(serial_port, device)
 
     def teardown_method(self):
         """ teardown any state that was previously setup with a setup_function
