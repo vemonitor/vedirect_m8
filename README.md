@@ -1,7 +1,9 @@
 # VeDirect M8
 [![CircleCI](https://circleci.com/gh/mano8/vedirect_m8.svg?style=svg)](https://app.circleci.com/pipelines/github/mano8/vedirect_m8)
 [![PyPI package](https://img.shields.io/pypi/v/vedirect_m8.svg)](https://pypi.org/project/vedirect_m8/)
-[![Known Vulnerabilities](https://snyk.io/test/github/mano8/vedirect_m8/badge.svg)](https://snyk.io/test/github/mano8/vedirect_m8)   
+[![Known Vulnerabilities](https://snyk.io/test/github/mano8/vedirect_m8/badge.svg)](https://snyk.io/test/github/mano8/vedirect_m8)
+[![codecov](https://codecov.io/gh/mano8/vedirect_m8/branch/main/graph/badge.svg?token=KkAwHvkse6)](https://codecov.io/gh/mano8/vedirect_m8)  
+
 This is a Python library for decoding the Victron Energy VE.Direct text protocol used in their range of MPPT solar charge controllers and battery monitors.
 
 This is a forked version of a package originally created by Janne Kario (https://github.com/karioja/vedirect).
