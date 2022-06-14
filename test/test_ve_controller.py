@@ -158,11 +158,11 @@ class TestVedirectController:
                                             )
         except VedirectException as ex:
             tst = False
-            for i in range(10):
+            for i in range(20):
                 if self.obj.search_serial_port():
                     tst = True
                     break
-                time.sleep(1)
+                time.sleep(0.8)
             assert tst
 
     def test_init_data_read(self):
