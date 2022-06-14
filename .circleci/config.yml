@@ -58,13 +58,10 @@ jobs:
       - run:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
-          command: pytest -s 
-  codecov_upload:
-    docker:
-      - image: cimg/python:3.9.7
-    steps:
+          command: pytest -s
       - codecov/upload:
           token: CODECOV_TOKEN 
+  
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
 workflows:
@@ -72,5 +69,5 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - install_deps_and_test
-      - codecov_upload
+      #- codecov_upload
   
