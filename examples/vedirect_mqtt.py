@@ -16,7 +16,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     conf = {
-        "serialPort": args.port,
+        "serial_port": args.port,
         "timeout": args.timeout
     }
 

@@ -15,7 +15,7 @@ if __name__ == '__main__':
     parser.add_argument('--timeout', help='Serial port read timeout', type=int, default='60')
     args = parser.parse_args()
     conf = {
-        "serialPort": args.port,
+        "serial_port": args.port,
         "timeout": args.timeout
     }
     ve = Vedirect(**conf)

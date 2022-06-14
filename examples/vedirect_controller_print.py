@@ -67,9 +67,9 @@ if __name__ == '__main__':
     configure_logging(parser.debug)
     
     conf = {
-        "serialPort": parser.port,
+        "serial_port": parser.port,
         "timeout": parser.timeout,
-        "serialTest": get_device_serial_tests(parser.device)
+        "serial_test": get_device_serial_tests(parser.device)
     }
     
     ve = VedirectController(**conf)
