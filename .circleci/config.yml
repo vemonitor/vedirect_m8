@@ -9,6 +9,7 @@ orbs:
   # Orb commands and jobs help you with common scripting around a language/tool
   # so you dont have to copy and paste it everywhere.
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
+  codecov: codecov/codecov@3.2.3
   python: circleci/python@1.5.0
 
 executors:
@@ -66,3 +67,8 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - install_deps_and_test
+  upload-to-codecov:
+    jobs:
+      - python/test:
+          post-steps:
+            - codecov/upload
