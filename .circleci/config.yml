@@ -58,7 +58,7 @@ jobs:
       - run:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
-          command: pytest --cov
+          command: coverage run -m pytest -s
       - codecov/upload:
           token: CODECOV_TOKEN 
   
