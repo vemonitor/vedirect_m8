@@ -313,14 +313,15 @@ class VedirectController(Vedirect):
                         ) as ex:
                     if self.wait_or_search_serial_connection(ex, connection_timeout):
                         now = tim = time.time()
+                        packet = self.get_serial_packet()
 
                 if packet is not None:
                     logger.debug(
                         "Serial reader success: "
-                        "byte: %s -- packet: %s -- "
-                        "dict: %s -- state: %s -- "
+                        "packet: %s -- "
+                        "state: %s -- "
                         "bytes_sum: %s " % 
-                        (byte, packet, self.dict, self.state, self.bytes_sum)
+                        (packet, self.state, self.bytes_sum)
                     )
                     callback_func(packet)
                     now = tim
@@ -330,9 +331,9 @@ class VedirectController(Vedirect):
                 # timeout serial read
                 Vedirect.is_timeout(tim - now, timeout)
 
-                if Ut.is_int(max_loops) and i > max_loops:
+                if Ut.is_int(max_loops) and i >= max_loops:
                     return True
-                time.sleep(0.95)
+                time.sleep(0.1)
         else:
             logger.error(
                 '[VeDirect::read_data_callback] '

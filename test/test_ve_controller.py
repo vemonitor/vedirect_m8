@@ -145,6 +145,13 @@ class TestVedirectController:
         # now serial port is same as start
         assert good_serial_port == self.obj._com._serial_port
 
+        with pytest.raises(VedirectException):
+            self.obj._ser_test = None
+            self.obj.init_settings(serial_port="/tmp/vmodem255",
+                                   source_name="TestVedirectController",
+                                   wait_timeout=0.5
+                                   )
+
     def test_read_data_to_test(self):
         """Test read_data_to_test method"""
         data = self.obj.read_data_to_test()
@@ -189,6 +196,26 @@ class TestVedirectController:
             [self.obj.input_read(x) for x in datas]
 
     def test_read_data_single(self):
-        """"""
+        """Test read_data_single method"""
         data = self.obj.read_data_single()
         assert Ut.is_dict_not_empty(data)
+
+    def test_read_data_callback(self):
+        """Test read_data_callback method"""
+
+        def func_callback(data: dict or None):
+            """Callback function"""
+            assert Ut.is_dict_not_empty(data)
+
+        self.obj.read_data_callback(callback_func=func_callback,
+                                    timeout=20,
+                                    connection_timeout=3600,
+                                    max_loops=1
+                                    )
+
+        with pytest.raises(TimeoutException):
+            self.obj.read_data_callback(callback_func=func_callback,
+                                        timeout=0.1,
+                                        connection_timeout=3600,
+                                        max_loops=1
+                                        )
