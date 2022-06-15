@@ -135,3 +135,28 @@ class TestVedirect:
         """Test read_data_single method"""
         data = self.obj.read_data_single()
         assert Ut.is_dict_not_empty(data)
+
+    def test_read_data_callback(self):
+        """Test read_data_callback method"""
+
+        def func_callback(data: dict or None):
+            """Callback function"""
+            assert Ut.is_dict_not_empty(data)
+
+        self.obj.read_data_callback(callback_function=func_callback,
+                                    timeout=20,
+                                    max_loops=1
+                                    )
+
+        with pytest.raises(TimeoutException):
+            self.obj.read_data_callback(callback_function=func_callback,
+                                        timeout=0.1,
+                                        max_loops=1
+                                        )
+
+        with pytest.raises(VedirectException):
+            self.obj._com = None
+            self.obj.read_data_callback(callback_function=func_callback,
+                                        timeout=20,
+                                        max_loops=1
+                                        )

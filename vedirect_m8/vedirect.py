@@ -349,9 +349,21 @@ class Vedirect:
         
         return None
 
-    def read_data_callback(self, callback_function, timeout: int = 60):
-        """ Read on serial and return vedirect data on callback function """
-        bc, now, tim = True, time.time(), 0
+    def read_data_callback(self,
+                           callback_function,
+                           timeout: int = 60,
+                           max_loops: int or None = None
+                           ):
+        """
+        Read data from the serial port and returns it to a callback function.
+
+        :param self: Reference the class instance
+        :param callback_function:function: Pass a function to the read_data_callback function
+        :param timeout:int=60: Set the timeout for the read_data_callback function
+        :param max_loops:int or None=None: Limit the number of loops
+        """
+        bc, now, tim, i = True, time.time(), 0, 0
+        packet = None
         if self.is_ready():
             while bc:
                 tim = time.time()
@@ -361,13 +373,20 @@ class Vedirect:
                 if packet is not None:
                     logger.debug(
                         "Serial reader success: packet: %s "
-                        "-- dict: %s -- state: %s -- bytes_sum: %s " %
-                        (packet, self.dict, self.state, self.bytes_sum))
+                        "-- state: %s -- bytes_sum: %s " %
+                        (packet, self.state, self.bytes_sum))
                     callback_function(packet)
                     now = tim
+                    i = i + 1
+                    packet = None
                 
                 # timeout serial read
                 Vedirect.is_timeout(tim-now, timeout)
+                if isinstance(max_loops, int) and 0 < max_loops <= i:
+                    return True
+                time.sleep(0.1)
         else:
-            logger.error('[VeDirect] Unable to read serial data. Not connected to serial port...')
-            callback_function(None)
+            raise VedirectException(
+                '[VeDirect::read_data_callback] '
+                'Unable to read serial data. '
+                'Not connected to serial port...')
