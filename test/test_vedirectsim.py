@@ -3,7 +3,6 @@ import serial
 
 from vedirect_m8.vedirectsim import Vedirectsim
 from vedirect_m8.serconnect import SerialConnection
-from ve_utils.utils import USys as USys
 
 
 class TestVeDirectSim:

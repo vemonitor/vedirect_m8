@@ -5,7 +5,7 @@ import argparse
 import sys
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8 import configure_logging
-from ve_utils.utils import UType as Ut
+from ve_utils.utype import UType as Ut
 
 logging.basicConfig()
 logger = logging.getLogger("vedirect")

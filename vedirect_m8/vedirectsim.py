@@ -14,7 +14,7 @@ import inspect
 import os
 import serial
 import time
-from ve_utils.utils import UType as Ut
+from ve_utils.utype import UType as Ut
 
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"
@@ -124,7 +124,7 @@ class Vedirectsim:
                     self.dict.update({key: value})
                     if len(self.dict) == 18:
                         self.send_packet()
-                elif Ut.is_dict_not_empty(self.dict):
+                elif Ut.is_dict(self.dict, not_null=True):
                     self.send_packet()
 
     def read_dump_file_lines(self, max_writes: int or None = None) -> bool:

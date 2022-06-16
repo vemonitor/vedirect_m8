@@ -54,7 +54,7 @@ class SerialTestHelper:
         Test if it SerialTestHelper has valid self._tests property.
         :return: True if self._tests is a not empty dictionary.
         """
-        return Ut.is_dict_not_empty(self._tests)
+        return Ut.is_dict(self._tests, not_null=True)
     
     def is_value_test(self, data: dict) -> bool:
         """
@@ -70,7 +70,7 @@ class SerialTestHelper:
         :param data: The value test configuration settings
         :return: True if data is a valid value test configuration settings.
         """
-        return Ut.is_dict_not_empty(data)\
+        return Ut.is_dict(data, not_null=True)\
             and data.get("typeTest") == "value"\
             and Ut.is_serial_key_pattern(data.get("key"))\
             and data.get("value") is not None
@@ -98,7 +98,7 @@ class SerialTestHelper:
         :return: True if value test success on serial_data.
         """
         if self.is_value_test(value_test)\
-                and Ut.is_dict_not_empty(serial_data)\
+                and Ut.is_dict(serial_data, not_null=True)\
                 and value_test.get("key") in serial_data:
             key = value_test.get("key")
             return serial_data.get(key) == value_test.get("value")
@@ -117,9 +117,9 @@ class SerialTestHelper:
         :param data: The columns test configuration settings
         :return: True if data is a valid columns test configuration settings.
         """
-        return Ut.is_dict_not_empty(data)\
+        return Ut.is_dict(data, not_null=True)\
             and data.get("typeTest") == "columns"\
-            and Ut.is_list_not_empty(data.get("keys"))
+            and Ut.is_list(data.get("keys"), not_null=True)
     
     def run_columns_test(self, columns_test: dict, serial_data: dict) -> bool:
         """
@@ -142,7 +142,7 @@ class SerialTestHelper:
         :return: True if columns test success on serial_data.
         """
         if self.is_columns_list_test(columns_test)\
-                and Ut.is_dict_not_empty(serial_data):
+                and Ut.is_dict(serial_data, not_null=True):
             keys = columns_test.get("keys")
             serial_data_keys = serial_data.keys()
             return all(key in serial_data_keys for key in keys)
@@ -172,11 +172,11 @@ class SerialTestHelper:
         :return: True if is valid serialTest configuration settings.
         """
         tst = False
-        if Ut.is_dict_not_empty(data):
+        if Ut.is_dict(data, not_null=True):
             tst = True
             for key, item in data.items():
                 if Ut.is_key_pattern(key)\
-                        and Ut.is_dict_not_empty(item):
+                        and Ut.is_dict(item, not_null=True):
 
                     type_test = item.get("typeTest")
 

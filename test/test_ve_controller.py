@@ -3,7 +3,7 @@ import time
 import pytest
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.serconnect import SerialConnection
-from ve_utils.utils import UType as Ut
+from ve_utils.utype import UType as Ut
 from vedirect_m8.exceptions import SettingInvalidException, InputReadException, TimeoutException, VedirectException
 
 
@@ -155,7 +155,7 @@ class TestVedirectController:
     def test_read_data_to_test(self):
         """Test read_data_to_test method"""
         data = self.obj.read_data_to_test()
-        assert Ut.is_dict_not_empty(data)
+        assert Ut.is_dict(data, not_null=True)
 
     def test_search_serial_port(self):
         """Test search_serial_port method"""
@@ -175,9 +175,9 @@ class TestVedirectController:
     def test_init_data_read(self):
         """Test init_data_read method"""
         self.obj.read_data_single()
-        assert Ut.is_dict_not_empty(self.obj.dict)
+        assert Ut.is_dict(self.obj.dict, not_null=True)
         self.obj.init_data_read()
-        assert not Ut.is_dict_not_empty(self.obj.dict) and Ut.is_dict(self.obj.dict)
+        assert not Ut.is_dict(self.obj.dict, not_null=True) and Ut.is_dict(self.obj.dict)
 
     def test_input_read(self):
         """Test input_read method"""
@@ -186,7 +186,7 @@ class TestVedirectController:
             b'O', b'x', b'0', b'3', b'\r',
         ]
         [self.obj.input_read(x) for x in datas]
-        assert Ut.is_dict_not_empty(self.obj.dict) and self.obj.dict.get('PID') == "Ox03"
+        assert Ut.is_dict(self.obj.dict, not_null=True) and self.obj.dict.get('PID') == "Ox03"
         self.obj.init_data_read()
         datas = [
             b'\r', b'\n', b'C', b'h', b'e', b'c', b'k', b's', b'u', b'm', b'\t',
@@ -198,14 +198,14 @@ class TestVedirectController:
     def test_read_data_single(self):
         """Test read_data_single method"""
         data = self.obj.read_data_single()
-        assert Ut.is_dict_not_empty(data)
+        assert Ut.is_dict(data, not_null=True)
 
     def test_read_data_callback(self):
         """Test read_data_callback method"""
 
         def func_callback(data: dict or None):
             """Callback function"""
-            assert Ut.is_dict_not_empty(data)
+            assert Ut.is_dict(data, not_null=True)
 
         self.obj.read_data_callback(callback_func=func_callback,
                                     timeout=20,

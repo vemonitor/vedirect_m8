@@ -13,7 +13,7 @@ from serial import Serial, SerialException, SerialTimeoutException
 import serial.tools.list_ports as serial_list_ports
 
 import os
-from ve_utils.utils import USys as USys
+from ve_utils.usys import USys
 from vedirect_m8.serutils import SerialUtils as Ut
 
 __author__ = "Eli Serra"

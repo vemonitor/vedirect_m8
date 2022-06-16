@@ -16,7 +16,7 @@ import logging
 import time
 import serial
 
-from ve_utils.utils import UType as Ut
+from ve_utils.utype import UType as Ut
 from vedirect_m8.sertest import SerialTestHelper
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
@@ -99,7 +99,7 @@ class VedirectController(Vedirect):
         :param serial_test: The serial_test to execute to retrieve the serial port,
         :return: True if SerialTestHelper initialisation success.
         """
-        if Ut.is_dict_not_empty(serial_test):
+        if Ut.is_dict(serial_test, not_null=True):
             self._ser_test = SerialTestHelper(serial_test)
             if not self._ser_test.has_serial_tests():
                 raise SettingInvalidException(
@@ -167,7 +167,7 @@ class VedirectController(Vedirect):
             try:
                 res = dict()
                 data = self.read_data_single(timeout=1)
-                if Ut.is_dict_not_empty(data):
+                if Ut.is_dict(data, not_null=True):
                     res.update(data)
             except Exception as ex:
                 logger.debug(
@@ -195,7 +195,7 @@ class VedirectController(Vedirect):
         :doc-author: Trelent
         """
         if self.is_ready_to_search_ports():
-            if Ut.is_list_not_empty(ports):
+            if Ut.is_list(ports, not_null=True):
                 for port in ports:
                     if SerialConnection.is_serial_port(port):
 
