@@ -119,29 +119,37 @@ Example for the bmv702 device from sim_data directory:
 In this example, we search a serial port, sending vedirect encoded data containing at least, </br> the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
 
 ### Complete configuration example :
-Here you can see a complete configuration example :
+Example with Complete configuration :
 ```
-conf = {
-    'serialPort': "/tmp/vmodem1",
-    'timeout': 60,
-    
-    'serialTest':{ 
-        'PID_test': { 
-            "typeTest": "value",
-            "key": "PID",
-            "value": "0x203"
-        },
-        'FW_test': { 
-            "typeTest": "value",
-            "key": "FW",
-            "value": "308"
-        },
-        "KeysTest": {
-            "typeTest": "columns",
-            "keys": [ "V", "I", "P", "CE", "SOC", "H18" ]
+from vedirect_m8.ve_controller import VedirectController
+
+def print_data_callback(packet):
+    print(packet)
+
+if __name__ == '__main__':
+    conf = {
+        'serialPort': "/tmp/vmodem1",
+        'timeout': 0,
+        
+        'serialTest':{ 
+            'PID_test': { 
+                "typeTest": "value",
+                "key": "PID",
+                "value": "0x203"
+            },
+            'FW_test': { 
+                "typeTest": "value",
+                "key": "FW",
+                "value": "308"
+            },
+            "KeysTest": {
+                "typeTest": "columns",
+                "keys": [ "V", "I", "P", "CE", "SOC", "H18" ]
+            }
         }
     }
-}
+    ve = VedirectController(**conf)
+    ve.read_data_callback(print_data_callback)
 ```
 In this example, we search a serial port, sending vedirect encoded data containing at least:
 - the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
