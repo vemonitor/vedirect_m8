@@ -36,11 +36,7 @@ jobs:
       - run:
           name: Install vedirect_m8
           # This assumes pytest is installed via the install-package step above
-          command: pip install vedirect_m8
-      - run:
-          name: Install coverage
-          # This assumes pytest is installed via the install-package step above
-          command: pip install coverage
+          command: pip install vedirect_m8[TEST]
       - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
@@ -50,10 +46,6 @@ jobs:
           name: is file /tmp/vmodem0
           # This assumes pytest is installed via the install-package step above
           command: ls -l /tmp/vmodem0
-      - run:
-          name: view current directory
-          # This assumes pytest is installed via the install-package step above
-          command: ls -l
       - run:
           name: run vedirectsim
           # This assumes pytest is installed via the install-package step above
