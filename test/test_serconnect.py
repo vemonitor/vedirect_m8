@@ -46,6 +46,20 @@ class TestSerialConnection:
         """Test configuration settings from SerialConnection constructor"""
         assert self.obj.is_settings()
 
+    def test_set_timeout(self):
+        """Test set_timeout method"""
+        assert self.obj.set_timeout(0)
+        assert self.obj.set_timeout(10)
+        assert not self.obj.set_timeout(-1)
+        assert not self.obj.set_timeout("hello")
+
+    def test_set_source_name(self):
+        """Test set_source_name method"""
+        assert self.obj.set_source_name("hello")
+        assert not self.obj.set_source_name("")
+        assert not self.obj.set_source_name(-1)
+        assert not self.obj.set_source_name(None)
+
     def test_get_virtual_ports_paths(self):
         """Test get_virtual_ports_paths method"""
         paths = SerialConnection.get_virtual_ports_paths()
@@ -163,6 +177,18 @@ class TestSerialConnection:
         ]
         tests = [x for x in timeouts if SerialConnection.is_timeout(x)]
         assert len(tests) == 6
+
+    def test_set_serial_conf(self):
+        """Test set_serial_conf method"""
+        conf = {
+            'serial_port': "/tmp/vmodem0",
+            'baud': 19200,
+            'timeout': 0,
+            'write_timeout': 0,
+            'exclusive': True
+        }
+        result = self.obj.set_serial_conf(**conf)
+        assert Ut.is_dict(result, eq=5)
 
     def test_connect(self):
         """Test connect method"""

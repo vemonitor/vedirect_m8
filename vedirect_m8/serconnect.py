@@ -128,7 +128,7 @@ class SerialConnection:
         :param source_name: The source_name to set.
         :return: True if is valid source_name
         """
-        if Ut.is_str(source_name):
+        if Ut.is_str(source_name, mini=2):
             self._source_name = source_name
             return True
         return False
