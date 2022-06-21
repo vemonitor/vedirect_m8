@@ -1,3 +1,6 @@
-pytest
-pyserial
-ve_utils>=2.0.0
+pyserial>=3.5
+ve_utils>=2.5.0
+
+[TEST]
+pytest>=7.1.2
+coverage
