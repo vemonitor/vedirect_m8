@@ -1,3 +1,2 @@
-pytest>=7.1.1
 pyserial>=3.5
-ve-utils>=2.0.0
+ve-utils>=2.5.0
