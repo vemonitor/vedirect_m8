@@ -32,12 +32,6 @@ class TestSerialConnection:
 
         self.obj = SerialConnection(**conf)
 
-    def teardown_method(self):
-        """ teardown any state that was previously setup with a setup_function
-        call.
-        """
-        pass
-
     def test_settings(self):
         """Test configuration settings from SerialConnection constructor"""
         assert self.obj.is_settings()

@@ -49,7 +49,7 @@ class SerialConnection:
                  ):
         """
         Constructor of SerialConnection class.
-        
+
         :Example:
             - > sc = SerialConnection(serial_port = "/dev/ttyUSB1")
             - > sc.connect() 
@@ -447,28 +447,28 @@ class SerialConnection:
                 if self.ser.isOpen():
                     logger.info(
                         '[SerialConnection::connect::%s] New Serial connection established. '
-                        'args : %s.' % 
+                        'args : %s.' %
                         (self._source_name, serial_conf)
                     )
                     return True
                 else:
                     logger.error(
                         '[SerialConnection::connect::%s] '
-                        'Unable to open serial connection. args: %s' % 
+                        'Unable to open serial connection. args: %s' %
                         (self._source_name, serial_conf)
                     )
             except (SerialException, SerialTimeoutException) as ex:
                 logger.error(
                     '[SerialConnection::connect::%s] '
                     'Exception when attempting to open serial connection. '
-                    ' args: %s - ex : %s' % 
+                    ' args: %s - ex : %s' %
                     (self._source_name, serial_conf, ex)
-                )    
+                )
         else:
             logger.error(
                 '[SerialConnection::connect::%s] '
                 'Unable to open serial connection. '
-                'Invalid settings : %s' % 
+                'Invalid settings : %s' %
                 (self._source_name, serial_conf)
             )
         
@@ -501,7 +501,7 @@ class SerialConnection:
             logger.error(
                 '[SerialConnection::get_serial_ports_list::%s] '
                 'Unable to list serial ports. '
-                'exception : %s' % 
+                'exception : %s' %
                 (self._source_name, ex)
             )
         return result

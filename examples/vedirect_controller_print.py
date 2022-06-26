@@ -17,7 +17,7 @@ def get_device_serial_tests(device):
     if Ut.is_str(device) and device in ["bmv702", "bluesolar_1.23", "smartsolar_1.39"]:
         if device == "bmv702":
             return {
-                'PID_test': { 
+                'PID_test': {
                     "typeTest": "value",
                     "key": "PID",
                     "value": "0x203"
@@ -66,11 +66,11 @@ def print_data_callback(packet):
 
 
 if __name__ == '__main__':
-    
+
     parser = parse_args(sys.argv[1:])
 
     configure_logging(parser.debug)
-    
+
     conf = {
         "serial_port": parser.port,
         "timeout": parser.timeout,

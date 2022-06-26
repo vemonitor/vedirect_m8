@@ -269,10 +269,10 @@ class VedirectController(Vedirect):
                     raise TimeoutException(
                         "[VeDirect::wait_or_search_serial_connection] "
                         "Unable to connect to any serial item. "
-                        "Timeout error : %s. Exception : %s" % 
+                        "Timeout error : %s. Exception : %s" %
                         (timeout, exception)
                     )
-                
+
                 time.sleep(2.5)
         raise VedirectException(
             "[VeDirect::wait_or_search_serial_connection] "
@@ -318,7 +318,7 @@ class VedirectController(Vedirect):
                         "Serial reader success: "
                         "packet: %s -- "
                         "state: %s -- "
-                        "bytes_sum: %s " % 
+                        "bytes_sum: %s " %
                         (packet, self.state, self.bytes_sum)
                     )
                     callback_func(packet)

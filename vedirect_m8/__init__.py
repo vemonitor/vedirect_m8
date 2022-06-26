@@ -1,4 +1,4 @@
-"""Vedirect init logger entry"""
+"""Vedirect init logger entry."""
 import logging
 # Version of realpython-reader package
 __author__ = "Janne Kario, Eli Serra"
@@ -11,7 +11,7 @@ __version__ = "1.2.2"
 
 class AppFilter(logging.Filter):
     """
-    Class used to add a custom entry into the logger
+    Class used to add a custom entry into the logger.
     """
 
     def filter(self, record):
@@ -22,7 +22,9 @@ class AppFilter(logging.Filter):
 
 def configure_logging(debug: bool = False):
     """
-    Prepare log folder in current home directory
+    Prepare log folder in current home directory.
+
+    Format logger output
     :param debug: If true, set the lof level to debug
     """
     logger = logging.getLogger("vedirect")

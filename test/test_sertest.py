@@ -37,12 +37,6 @@ class TestSerialTestHelper:
         }
         self.obj = SerialTestHelper(conf)
 
-    def teardown_method(self):
-        """ teardown any state that was previously setup with a setup_function
-        call.
-        """
-        pass
-
     def test_has_serial_tests(self):
         """"""
         assert self.obj.has_serial_tests()
@@ -90,7 +84,7 @@ class TestSerialTestHelper:
                                        "typeTest": "values",
                                        "key": "PIDs 8_fg#"
                                       }, self.dict)
-    
+
     def test_is_columns_list_test(self):
         """"""
         assert SerialTestHelper.is_columns_list_test({
@@ -109,7 +103,7 @@ class TestSerialTestHelper:
                                        "typeTest": "column",
                                        "keys": ["PIDs8_fg#"]
                                       })
-    
+
     def test_run_columns_test(self):
         """"""
         assert SerialTestHelper.is_columns_list_test({
@@ -128,7 +122,7 @@ class TestSerialTestHelper:
                                        "typeTest": "column",
                                        "keys": "PIDs8_fg#"
                                       })
-    
+
     def test_run_serial_tests(self):
         """"""
         assert self.obj.run_serial_tests(self.dict)

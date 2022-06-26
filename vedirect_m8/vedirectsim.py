@@ -138,7 +138,7 @@ class Vedirectsim:
         """Read file lines."""
         if self.is_ready():
             logger.info(
-                "Starting to read dump file lines on device %s. " 
+                "Starting to read dump file lines on device %s. "
                 "Max serial writes : %s" %
                 (self.device, max_writes)
             )
@@ -146,7 +146,7 @@ class Vedirectsim:
             with open(self.dump_file_path) as f:
                 for piece in f:
                     self.process_data(piece)
-                    
+
                     if Ut.is_int(max_writes) and self.block_counter >= max_writes:
                         logger.info(
                             "End read dump file lines on max serial writes : %s/%s" %
@@ -176,7 +176,7 @@ class Vedirectsim:
         result.append(ord('\t'))
         result.append((256 - (sum(result) % 256)) % 256)
         return result
-                      
+
     def send_packet(self):
         """Send the packet to serial port."""
         start = time.time()
@@ -201,15 +201,15 @@ class Vedirectsim:
         if sleep_time > 0:
             logger.debug("---> Sleeping %ss" % sleep_time)
             time.sleep(sleep_time)
-        
+
     def run(self, max_writes: int or None = None) -> bool:
         """Run the simulator."""
         if self.is_ready():
             running = True
             while running:
-                
+
                 running = self.read_dump_file_lines(max_writes)
-                
+
                 if Ut.is_int(max_writes) and self.block_counter >= max_writes:
                     break
             return True
@@ -219,6 +219,3 @@ class Vedirectsim:
             "Or can be path file error: %s" %
             (self.device, self.dump_file_path)
         )
-        
-                
-                

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Used to decode the Victron Energy VE.Direct text protocol.
+"""
+Used to decode the Victron Energy VE.Direct text protocol.
 
 This is a forked version of script originally created by Janne Kario.
 (https://github.com/karioja/vedirect).
@@ -314,7 +315,7 @@ class Vedirect:
         if byte == b'\x00':
             byte = self._com.ser.read(1)
         return self.input_read(byte)
-    
+
     def read_data_single(self, timeout: int = 60) -> dict or None:
         """
         Read a single block decoded from serial port and returns it as a dictionary.
@@ -334,18 +335,18 @@ class Vedirect:
         if self.is_ready():
             while bc:
                 packet, tim = None, time.time()
-                    
+
                 packet = self.get_serial_packet()
-                    
+
                 if packet is not None:
                     logger.debug("Serial reader success: dict: %s" % self.dict)
                     return packet
-                
+
                 # timeout serial read
                 Vedirect.is_timeout(tim-now, timeout)
         else:
             logger.error('[VeDirect] Unable to read serial data. Not connected to serial port...')
-        
+
         return None
 
     def read_data_callback(self,
@@ -366,9 +367,9 @@ class Vedirect:
         if self.is_ready():
             while bc:
                 tim = time.time()
-                
+
                 packet = self.get_serial_packet()
-                
+
                 if packet is not None:
                     logger.debug(
                         "Serial reader success: packet: %s "
@@ -378,7 +379,7 @@ class Vedirect:
                     now = tim
                     i = i + 1
                     packet = None
-                
+
                 # timeout serial read
                 Vedirect.is_timeout(tim-now, timeout)
                 if isinstance(max_loops, int) and 0 < max_loops <= i:

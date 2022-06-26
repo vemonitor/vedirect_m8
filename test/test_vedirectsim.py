@@ -18,12 +18,6 @@ class TestVeDirectSim:
 
         self.obj = Vedirectsim(serial_port, device)
 
-    def teardown_method(self):
-        """ teardown any state that was previously setup with a setup_function
-        call.
-        """
-        pass
-
     def test_is_ready(self):
         """"""
         assert self.obj.is_ready()

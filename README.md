@@ -152,9 +152,8 @@ if __name__ == '__main__':
     ve.read_data_callback(print_data_callback)
 ```
 In this example, we search a serial port, sending vedirect encoded data containing at least:  
-
-   - the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
-   - and the keys ```PID``` and ```FW```, whose values are respectively ```0x203``` and ```308```.
+ - the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
+ - and the keys ```PID``` and ```FW```, whose values are respectively ```0x203``` and ```308```.
 
 When the script is initialized, it first tries to connect to the ```/tmp/vmodem1``` serial port. 
 
