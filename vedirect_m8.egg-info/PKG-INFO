@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: vedirect-m8
-Version: 1.2.1
+Version: 1.2.2
 Summary: Victron VE.Direct decoder for Python
 Home-page: https://github.com/mano8/vedirect_m8
 Author: Janne Kario, Eli Serra
@@ -18,6 +18,7 @@ Classifier: Programming Language :: Python :: 3.10
 Requires-Python: >3.5.2
 Description-Content-Type: text/markdown
 Provides-Extra: TEST
+Provides-Extra: MQTT
 License-File: LICENSE
 
 # VeDirect M8
@@ -69,7 +70,7 @@ In other terminal, run the vedirectsim script with your desired device:
 ```
 python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv700
 ```
-Or if you need to see the inputs sended on serial port :
+Or if you need to see the inputs sent on serial port :
 ```
 python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv700 --debug
 ```
@@ -79,7 +80,7 @@ Then, in other terminal, attach the decoder to /tmp/vmodem1:
 ```
 python examples/vedirect_print.py --port /tmp/vmodem1
 ```
-All the inputs from the selected device file, are encoded to the vmodem0 serial port, then echoed to the vmodem1 by socat, and finnally decoded by the vedirect module.
+All the inputs from the selected device file, are encoded to the vmodem0 serial port, then echoed to the vmodem1 by socat, and finally decoded by the vedirect module.
 
 ## The Vedirect Controller
 
