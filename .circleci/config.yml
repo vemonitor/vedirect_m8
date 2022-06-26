@@ -24,14 +24,6 @@ jobs:
     steps:
       - checkout
       - run:
-            name: View home directory
-            # This assumes pytest is installed via the install-package step above
-            command: ls -l /home
-      - run:
-          name: View user home directory
-          # This assumes pytest is installed via the install-package step above
-          command: ls -l /${HOME}
-      - run:
           name: Update packages list
           # This assumes pytest is installed via the install-package step above
           command: sudo apt-get update
@@ -48,16 +40,12 @@ jobs:
       - run:
           name: run socat 
           # This assumes pytest is installed via the install-package step above
-          command: socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1
+          command: socat -d -d PTY,raw,echo=0,link=/${HOME}/vmodem0 PTY,raw,echo=0,link=/${HOME}/vmodem1
           background: true
-      - run:
-          name: is file /tmp/vmodem0
-          # This assumes pytest is installed via the install-package step above
-          command: ls -l /tmp/vmodem0
       - run:
           name: run vedirectsim
           # This assumes pytest is installed via the install-package step above
-          command: python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv702
+          command: python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv702
           background: true
       - run:
           name: Run tests
