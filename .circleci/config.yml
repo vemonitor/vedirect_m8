@@ -24,6 +24,14 @@ jobs:
     steps:
       - checkout
       - run:
+            name: View home directory
+            # This assumes pytest is installed via the install-package step above
+            command: ls -l /home
+      - run:
+          name: View user home directory
+          # This assumes pytest is installed via the install-package step above
+          command: ls -l /${HOME}
+      - run:
           name: Update packages list
           # This assumes pytest is installed via the install-package step above
           command: sudo apt-get update
