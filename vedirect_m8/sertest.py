@@ -55,18 +55,19 @@ class SerialTestHelper:
         :return: True if self._tests is a not empty dictionary.
         """
         return Ut.is_dict(self._tests, not_null=True)
-    
-    def is_value_test(self, data: dict) -> bool:
+
+    @staticmethod
+    def is_value_test(data: dict) -> bool:
         """
         Test if data is valid value test configuration settings.
 
         :Example :
-            > self.is_value_test({
+            >>> SerialTestHelper.is_value_test({
                 "typeTest": "value",\n
                 "key": "PID",\n
                 "value": "0x204"\n
                 })
-            > True
+            >>> True
         :param data: The value test configuration settings
         :return: True if data is a valid value test configuration settings.
         """
@@ -74,8 +75,9 @@ class SerialTestHelper:
             and data.get("typeTest") == "value"\
             and Ut.is_serial_key_pattern(data.get("key"))\
             and data.get("value") is not None
-    
-    def run_value_test(self, value_test: dict, serial_data: dict) -> bool:
+
+    @staticmethod
+    def run_value_test(value_test: dict, serial_data: dict) -> bool:
         """
         Run value test on serial_data.
 
@@ -84,79 +86,81 @@ class SerialTestHelper:
         Then evaluate if serial_data key value is equal to the value_test value.
 
         :Example :
-            > self.run_value_test(
+            >>> SerialTestHelper.run_value_test(
                 value_test = {
                     "typeTest": "value",\n
                     "key": "PID",\n
                     "value": "0x204"\n
                 },\n
                 serial_data = {"PID": "0x204"})
-            > True
-        :param self: Reference the class instance
+            >>> True
         :param value_test: The value test to evaluate on serial_data.
         :param serial_data: The serial data decoded from serial vedirect device.
         :return: True if value test success on serial_data.
         """
-        if self.is_value_test(value_test)\
+        if SerialTestHelper.is_value_test(value_test)\
                 and Ut.is_dict(serial_data, not_null=True)\
                 and value_test.get("key") in serial_data:
             key = value_test.get("key")
             return serial_data.get(key) == value_test.get("value")
         return False
 
-    def is_columns_list_test(self, data: dict) -> bool:
+    @staticmethod
+    def is_columns_list_test(data: dict) -> bool:
         """
         Test if data is valid columns test configuration settings.
 
         :Example :
-            > self.is_columns_list_test({
+            >>> SerialTestHelper.is_columns_list_test({
                 "typeTest": "columns",\n
                 "keys": ["PID", "V"]\n
                 })
-            > True
+            >>> True
         :param data: The columns test configuration settings
         :return: True if data is a valid columns test configuration settings.
         """
         return Ut.is_dict(data, not_null=True)\
             and data.get("typeTest") == "columns"\
             and Ut.is_list(data.get("keys"), not_null=True)
-    
-    def run_columns_test(self, columns_test: dict, serial_data: dict) -> bool:
+
+    @staticmethod
+    def run_columns_test(columns_test: dict, serial_data: dict) -> bool:
         """
         Run columns test on serial_data.
 
-        Evaluates if the columns_test is valid and 
+        Evaluates if the columns_test is valid and
         if serial_data is a dictionary.
         Then evaluate if serial_data contain all columns_test keys.
         :Example :
-            > self.run_columns_test(
+            >>> SerialTestHelper.run_columns_test(
                 columns_test = {
                     "typeTest": "columns",\n
                     "keys": ["PID", "V"]\n
                 },\n
                 serial_data = {"PID": "0x204", "V": 25})
-            > True
-        :param self: Reference the class instance
-        :param columns_test: The columns test to evaluate on serial_data.
-        :param serial_data: The serial data decoded from serial vedirect device.
+            >>> True
+        :param columns_test: The columns test to evaluate on serial_data
+        :param serial_data: The serial data decoded from serial vedirect device
         :return: True if columns test success on serial_data.
         """
-        if self.is_columns_list_test(columns_test)\
+        if SerialTestHelper.is_columns_list_test(columns_test)\
                 and Ut.is_dict(serial_data, not_null=True):
             keys = columns_test.get("keys")
             serial_data_keys = serial_data.keys()
             return all(key in serial_data_keys for key in keys)
 
-    def get_valid_type_tests(self) -> list:
+    @staticmethod
+    def get_valid_type_tests() -> list:
         """Get list of valid serialTest types"""
         return ["value", "columns"]
 
-    def validate_serial_tests(self, data: dict) -> bool:
+    @staticmethod
+    def validate_serial_tests(data: dict) -> bool:
         """
         Validate serialTest configuration settings.
 
         :Example :
-            > self.validate_serial_tests(
+            >>> SerialTestHelper.validate_serial_tests(
                     data = {
                         "PIDTest": {
                             "typeTest": "value",\n
@@ -168,7 +172,7 @@ class SerialTestHelper:
                             "keys": ['V', 'VS']
                         }
                     })
-            > True
+            >>> True
         :return: True if is valid serialTest configuration settings.
         """
         tst = False
@@ -181,17 +185,17 @@ class SerialTestHelper:
                     type_test = item.get("typeTest")
 
                     if type_test == "value"\
-                            and not self.is_value_test(item):
+                            and not SerialTestHelper.is_value_test(item):
                         tst = False
                     elif type_test == "columns"\
-                            and not self.is_columns_list_test(item):
+                            and not SerialTestHelper.is_columns_list_test(item):
                         tst = False
-                    elif type_test not in self.get_valid_type_tests():
+                    elif type_test not in SerialTestHelper.get_valid_type_tests():
                         raise SettingInvalidException(
                             "[SerialTestHelper::validate_serial_tests] "
                             "unrecognized typeTest %s, from key %s."
                             "typeTest must be in : %s" %
-                            (type_test, key, self.get_valid_type_tests())
+                            (type_test, key, SerialTestHelper.get_valid_type_tests())
                         )
                 else:
                     raise SettingInvalidException(
@@ -224,7 +228,7 @@ class SerialTestHelper:
             > True
         :return: True if is valid serialTest configuration settings.
         """
-        if self.validate_serial_tests(data):
+        if SerialTestHelper.validate_serial_tests(data):
             self._tests = data
             return True
         return False
@@ -242,10 +246,10 @@ class SerialTestHelper:
                 type_test = item.get("typeTest")
 
                 if type_test == "value"\
-                        and not self.run_value_test(item, serial_data):
+                        and not SerialTestHelper.run_value_test(item, serial_data):
                     tst = False
 
                 elif type_test == "columns"\
-                        and not self.run_columns_test(item, serial_data):
+                        and not SerialTestHelper.run_columns_test(item, serial_data):
                     tst = False
         return tst

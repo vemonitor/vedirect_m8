@@ -240,7 +240,7 @@ class Vedirect:
                                            baud=baud,
                                            timeout=timeout,
                                            source_name=source_name)
-    
+
     def init_data_read(self):
         """ Initialise reader properties """
         self.key = ''

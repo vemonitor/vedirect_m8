@@ -49,82 +49,82 @@ class TestSerialTestHelper:
 
     def test_is_value_test(self):
         """"""
-        assert self.obj.is_value_test({
+        assert SerialTestHelper.is_value_test({
                                        "typeTest": "value",
                                        "key": "PIDs8_fg#",
                                        "value": "0x203"
                                       })
-        assert not self.obj.is_value_test({
+        assert not SerialTestHelper.is_value_test({
                                        "typeTest": "values",
                                        "key": "PIDs8_fg#",
                                        "value": "0x203"
                                       })
-        assert not self.obj.is_value_test({
+        assert not SerialTestHelper.is_value_test({
                                        "typeTest": "values",
                                        "key": "PIDs 8_fg#",
                                        "value": "0x203"
                                       })
-        assert not self.obj.is_value_test({
+        assert not SerialTestHelper.is_value_test({
                                        "typeTest": "values",
                                        "key": "PIDs 8_fg#"
                                       })
 
     def test_run_value_test(self):
         """"""
-        assert self.obj.run_value_test({
+        assert SerialTestHelper.run_value_test({
                                        "typeTest": "value",
                                        "key": "PID",
                                        "value": "0x204"
                                        }, self.dict)
-        assert not self.obj.run_value_test({
+        assert not SerialTestHelper.run_value_test({
                                        "typeTest": "values",
                                        "key": "PID",
                                        "value": "0x203"
                                       }, self.dict)
-        assert not self.obj.run_value_test({
+        assert not SerialTestHelper.run_value_test({
                                        "typeTest": "values",
                                        "key": "PIDs 8_fg#",
                                        "value": "0x203"
                                       }, self.dict)
-        assert not self.obj.run_value_test({
+        assert not SerialTestHelper.run_value_test({
                                        "typeTest": "values",
                                        "key": "PIDs 8_fg#"
                                       }, self.dict)
     
     def test_is_columns_list_test(self):
         """"""
-        assert self.obj.is_columns_list_test({
+        assert SerialTestHelper.is_columns_list_test({
                                        "typeTest": "columns",
                                        "keys": ["PIDs8_fg#", "dfsdf"]
                                       })
-        assert not self.obj.is_columns_list_test({
+        assert not SerialTestHelper.is_columns_list_test({
                                        "typeTest": "columns",
                                        "key": "PIDs8_fg#"
                                       })
-        assert not self.obj.is_columns_list_test({
+        assert not SerialTestHelper.is_columns_list_test({
                                        "typeTest": "columns",
                                        "key": ["PIDs 8_fg#"]
                                       })
-        assert not self.obj.is_columns_list_test({
+        assert not SerialTestHelper.is_columns_list_test({
                                        "typeTest": "column",
                                        "keys": ["PIDs8_fg#"]
                                       })
     
     def test_run_columns_test(self):
         """"""
-        assert self.obj.is_columns_list_test({
+        assert SerialTestHelper.is_columns_list_test({
                                        "typeTest": "columns",
                                        "keys": ["V", "VS", "VS", "HSDS", "HSDS", "SER#"]
                                       })
-        assert not self.obj.is_columns_list_test({
+        assert not SerialTestHelper.is_columns_list_test({
                                        "typeTest": "columns",
                                        "key": ["V#", "VS", "VS", "HSDS", "HSDS", "SER#"]
                                       })
-        assert not self.obj.is_columns_list_test({
+        assert not SerialTestHelper.is_columns_list_test({
                                        "typeTest": "columns",
                                        "key": ["V", "VS", "VSs", "HSDS", "HSDS", "SER#"]
                                       })
-        assert not self.obj.is_columns_list_test({
+        assert not SerialTestHelper.is_columns_list_test({
                                        "typeTest": "column",
                                        "keys": "PIDs8_fg#"
                                       })

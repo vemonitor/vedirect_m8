@@ -67,6 +67,7 @@ class TestSerialConnection:
         assert paths[0] == "/tmp"
         assert paths[1] == os.path.expanduser('~')
 
+    # noinspection PyTypeChecker
     def test_get_virtual_home_serial_port(self):
         """Test get_virtual_home_serial_port method"""
         v_ports = [
@@ -81,6 +82,7 @@ class TestSerialConnection:
         tests = [x for x in v_ports if x is not None]
         assert len(tests) == 2
 
+    # noinspection PyTypeChecker
     def test_is_virtual_serial_port(self):
         """Test is_virtual_serial_port method"""
         v_ports = [

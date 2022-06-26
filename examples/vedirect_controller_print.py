@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""VedirectController class Example."""
 import logging
 import argparse
 import sys
@@ -12,6 +13,7 @@ logger = logging.getLogger("vedirect")
 
 
 def get_device_serial_tests(device):
+    """Return the serial test corresponding of the device."""
     if Ut.is_str(device) and device in ["bmv702", "bluesolar_1.23", "smartsolar_1.39"]:
         if device == "bmv702":
             return {
@@ -46,17 +48,18 @@ def parse_args(args):
     :return: return parser
     """
     # create arguments
-    parser = argparse.ArgumentParser(description='Process VE.Direct protocol')
-    parser.add_argument('--device', help='[bmv702, bluesolar_1.23, smartsolar_1.39]')
-    parser.add_argument('--port', help='Serial port')
-    parser.add_argument('--timeout', help='Serial port read timeout', type=int, default='60')
-    parser.add_argument('--debug', action='store_true', help='Show debug output')
-    
+    arg_parser = argparse.ArgumentParser(description='Process VE.Direct protocol')
+    arg_parser.add_argument('--device', help='[bmv702, bluesolar_1.23, smartsolar_1.39]')
+    arg_parser.add_argument('--port', help='Serial port')
+    arg_parser.add_argument('--timeout', help='Serial port read timeout', type=int, default='60')
+    arg_parser.add_argument('--debug', action='store_true', help='Show debug output')
+
     # parse arguments from script parameters
-    return parser.parse_args(args)
+    return arg_parser.parse_args(args)
 
 
 def print_data_callback(packet):
+    """Print received packet"""
     logger.info("%s\n" % packet)
 
 

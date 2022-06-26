@@ -75,7 +75,7 @@ class VedirectController(Vedirect):
                           source_name=source_name)
         self._ser_test = None
         self.init_serial_test(serial_test)
-    
+
     def has_serial_test(self) -> bool:
         """ Test if is valid serial test helper """
         return isinstance(self._ser_test, SerialTestHelper)\
@@ -137,12 +137,12 @@ class VedirectController(Vedirect):
         :Example :
             - >self.init_settings(serial_port="/tmp/vmodem0")
             - >True
-        :param self: Refer to the object itself,
-        :param serial_port: The serial port to connect,
+        :param self: Refer to the object itself
+        :param serial_port: The serial port to connect
         :param baud: Baud rate such as 9600 or 115200 etc.
-        :param timeout: Set a read timeout value in seconds,
-        :param source_name: This is used in logger to identify the source of call.
-        :param wait_timeout: Timeout value to search valid serial port in case of connection fails.
+        :param timeout: Set a read timeout value in seconds
+        :param source_name: This is used in logger to identify the source of call
+        :param wait_timeout: Timeout value to search valid serial port in case of connection fails
         :return: True if connection to serial port success.
 
         .. raises:: SettingInvalidException, VedirectException
@@ -183,7 +183,7 @@ class VedirectController(Vedirect):
         It takes in a list of ports and
         tests each port for the presence of a VeDirect device.
         If it finds one, it attempts to connect to that port
-        and reads data from it. It then passes this data into 
+        and reads data from it. It then passes this data into
         the SerialTestHelper class which runs some basic tests
         on the data returned by the serial connection.
         :param self: Reference the class instance
@@ -206,7 +206,7 @@ class VedirectController(Vedirect):
                                 self._com.ser.timeout = self._com._timeout
                                 logger.info(
                                     "[VeDirect::test_serial_ports] "
-                                    "New connection established to serial port %s. " % 
+                                    "New connection established to serial port %s. " %
                                     port
                                 )
                                 return True
@@ -246,10 +246,10 @@ class VedirectController(Vedirect):
         to retrieve valid serial port, and connect to him.
         Return True or False depending on whether there is an active serial connection.
         Raise a TimeoutException in case there is no active serial connection,
-        within the given timeout time.
+        within the given timeout time
         :param self: Reference the class instance
-        :param exception: Pass an exception to the function.
-        :param timeout: Set the timeout of the function.
+        :param exception: Pass an exception to the function
+        :param timeout: Set the timeout of the function
         :return: True if the serial connection was successful
 
         .. raises:: TimeoutException, VedirectException
@@ -282,7 +282,7 @@ class VedirectController(Vedirect):
             "Exception : %s" % exception
         )
 
-    def read_data_callback(self, 
+    def read_data_callback(self,
                            callback_func,
                            timeout: int = 60,
                            connection_timeout: int = 3600,

@@ -37,7 +37,7 @@ class SerialUtils (UType):
                 ).findall(data),
             not_null=True
         )
-    
+
     @staticmethod
     def is_serial_key_pattern(data: str) -> bool:
         """ Test if is valid key pattern """
@@ -78,7 +78,7 @@ class SerialUtils (UType):
                 ).findall(data),
             not_null=True
         )
-    
+
     @staticmethod
     def is_win_serial_port_pattern(data: str) -> bool:
         """ Test if is valid win serial port pattern """

@@ -7,6 +7,7 @@ from ve_utils.utype import UType as Ut
 from vedirect_m8.exceptions import SettingInvalidException, InputReadException, TimeoutException, VedirectException
 
 
+# noinspection PyTypeChecker
 class TestVedirectController:
 
     def setup_method(self):
