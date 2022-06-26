@@ -47,7 +47,7 @@ In other terminal, run the vedirectsim script with your desired device:
 ```
 python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv700
 ```
-Or if you need to see the inputs sended on serial port :
+Or if you need to see the inputs sent on serial port :
 ```
 python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv700 --debug
 ```
@@ -57,7 +57,7 @@ Then, in other terminal, attach the decoder to /tmp/vmodem1:
 ```
 python examples/vedirect_print.py --port /tmp/vmodem1
 ```
-All the inputs from the selected device file, are encoded to the vmodem0 serial port, then echoed to the vmodem1 by socat, and finnally decoded by the vedirect module.
+All the inputs from the selected device file, are encoded to the vmodem0 serial port, then echoed to the vmodem1 by socat, and finally decoded by the vedirect module.
 
 ## The Vedirect Controller
 
