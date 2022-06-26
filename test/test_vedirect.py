@@ -21,15 +21,11 @@ class TestVedirect:
         Invoked for every test function in the module.
         """
         conf = {
-            'serial_port': "/tmp/vmodem1",
+            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
             'baud': 19200,
             'timeout': 0,
         }
 
-        if not SerialConnection.is_serial_port_exists("/tmp/vmodem1"):
-            conf.update(
-                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1")}
-            )
         self.obj = Vedirect(**conf)
 
     def test_settings(self):
@@ -67,7 +63,7 @@ class TestVedirect:
 
         # test with bad serial port connection
         obj = SerialConnection(
-            serial_port="/tmp/vmodem255",
+            serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
             source_name="TestVedirect"
         )
         with pytest.raises(VedirectException):
@@ -87,7 +83,7 @@ class TestVedirect:
 
         # test with bad serial port connection
         with pytest.raises(VedirectException):
-            self.obj.init_serial_connection(serial_port="/tmp/vmodem255",
+            self.obj.init_serial_connection(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
                                             source_name="TestVedirect"
                                             )
 
@@ -105,7 +101,7 @@ class TestVedirect:
 
         # test with bad serial port connection
         with pytest.raises(VedirectException):
-            self.obj.init_settings(serial_port="/tmp/vmodem255",
+            self.obj.init_settings(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
                                    source_name="TestVedirect"
                                    )
 

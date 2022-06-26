@@ -185,7 +185,7 @@ class SerialConnection:
 
         :return: list of valid virtual serial ports paths
         """
-        return ["/tmp", os.path.expanduser('~')]
+        return [os.path.expanduser('~')]
 
     @staticmethod
     def get_virtual_home_serial_port(port: str) -> str or None:

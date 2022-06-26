@@ -25,15 +25,11 @@ class TestSerialConnection:
         Invoked for every test function in the module.
         """
         conf = {
-            'serial_port': "/tmp/vmodem1",
+            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
             'baud': 19200,
             'timeout': 0,
         }
 
-        if not SerialConnection.is_serial_port_exists("/tmp/vmodem1"):
-            conf.update(
-                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1")}
-            )
         self.obj = SerialConnection(**conf)
 
     def teardown_method(self):
@@ -63,9 +59,8 @@ class TestSerialConnection:
     def test_get_virtual_ports_paths(self):
         """Test get_virtual_ports_paths method"""
         paths = SerialConnection.get_virtual_ports_paths()
-        assert Ut.is_list(paths) and len(paths) == 2
-        assert paths[0] == "/tmp"
-        assert paths[1] == os.path.expanduser('~')
+        assert Ut.is_list(paths) and len(paths) == 1
+        assert paths[0] == os.path.expanduser('~')
 
     # noinspection PyTypeChecker
     def test_get_virtual_home_serial_port(self):
@@ -112,8 +107,6 @@ class TestSerialConnection:
     def test_is_serial_port_exists(self):
         """Test is_serial_port_exists method"""
         ports = [
-            "/tmp/vmodem0",
-            "/tmp/vmodem1",
             SerialConnection.get_virtual_home_serial_port("vmodem0"),
             SerialConnection.get_virtual_home_serial_port("vmodem1")
         ]
@@ -123,8 +116,6 @@ class TestSerialConnection:
     def test_is_serial_port(self):
         """Test is_serial_port method"""
         ports = [
-            "/tmp/vmodem0",
-            "/tmp/vmodem1",
             SerialConnection.get_virtual_home_serial_port("vmodem0"),
             SerialConnection.get_virtual_home_serial_port("vmodem1"),
             "/dev/ttyUSB1",
@@ -139,12 +130,11 @@ class TestSerialConnection:
             "/dev/1",  # false
         ]
         tests = [x for x in ports if SerialConnection.is_serial_port(x)]
-        assert len(tests) == 10
+        assert len(tests) == 8
 
     def test_is_serial_path(self):
         """Test is_serial_path method"""
         paths = [
-            "/tmp",  # true
             os.path.expanduser('~'),  # true
             "/dev",  # true
             "/dev/pts/",
@@ -157,7 +147,7 @@ class TestSerialConnection:
             None
         ]
         tests = [x for x in paths if SerialConnection.is_serial_path(x)]
-        assert len(tests) == 3
+        assert len(tests) == 2
 
     def test_is_baud(self):
         """Test is_baud method"""
@@ -183,7 +173,7 @@ class TestSerialConnection:
     def test_set_serial_conf(self):
         """Test set_serial_conf method"""
         conf = {
-            'serial_port': "/tmp/vmodem0",
+            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem0"),
             'baud': 19200,
             'timeout': 0,
             'write_timeout': 0,

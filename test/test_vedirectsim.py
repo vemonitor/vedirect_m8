@@ -13,9 +13,7 @@ class TestVeDirectSim:
 
         Invoked for every test function in the module.
         """
-        serial_port = "/tmp/vmodem0"
-        if not SerialConnection.is_serial_port_exists(serial_port):
-            serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
+        serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
         device = "bmv702"
 
         self.obj = Vedirectsim(serial_port, device)
@@ -58,7 +56,7 @@ class TestVeDirectSim:
         
         with pytest.raises(ValueError):
             self.obj.set_device_settings("hello")
-            self.obj.set_device_settings("/tmp/world.bat")
+            self.obj.set_device_settings(SerialConnection.get_virtual_home_serial_port("world.bat"))
 
     def test_read_dump_file_line(self):
         """"""

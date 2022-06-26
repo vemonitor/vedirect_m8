@@ -17,7 +17,7 @@ class TestVedirectController:
         Invoked for every test function in the module.
         """
         conf = {
-            'serial_port': "/tmp/vmodem1",
+            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
             'baud': 19200,
             'timeout': 0,
             "serial_test": {
@@ -29,10 +29,6 @@ class TestVedirectController:
             }
         }
 
-        if not SerialConnection.is_serial_port_exists("/tmp/vmodem1"):
-            conf.update(
-                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1")}
-            )
         self.obj = VedirectController(**conf)
 
     def test_settings(self):
@@ -98,7 +94,7 @@ class TestVedirectController:
 
         # test with bad serial port connection
         obj = SerialConnection(
-            serial_port="/tmp/vmodem255",
+            serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
             source_name="TestVedirect"
         )
         with pytest.raises(VedirectException):
@@ -118,7 +114,7 @@ class TestVedirectController:
 
         # test with bad serial port connection
         with pytest.raises(VedirectException):
-            self.obj.init_serial_connection(serial_port="/tmp/vmodem255",
+            self.obj.init_serial_connection(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
                                             source_name="TestVedirectController"
                                             )
 
@@ -136,10 +132,10 @@ class TestVedirectController:
                                    )
 
         # test with bad serial port connection
-        # the serial port /tmp/vmodem255 is not defined
+        # the serial port vmodem255 is not defined
         # the method search a valid serial port with serial test data
         # and return True when reached a valid serial port
-        assert self.obj.init_settings(serial_port="/tmp/vmodem255",
+        assert self.obj.init_settings(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
                                       source_name="TestVedirectController",
                                       wait_timeout=30
                                       )
@@ -148,7 +144,7 @@ class TestVedirectController:
 
         with pytest.raises(VedirectException):
             self.obj._ser_test = None
-            self.obj.init_settings(serial_port="/tmp/vmodem255",
+            self.obj.init_settings(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
                                    source_name="TestVedirectController",
                                    wait_timeout=0.5
                                    )
@@ -161,7 +157,7 @@ class TestVedirectController:
     def test_search_serial_port(self):
         """Test search_serial_port method"""
         try:
-            self.obj.init_serial_connection(serial_port="/tmp/vmodem255",
+            self.obj.init_serial_connection(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
                                             source_name="TestVedirectController"
                                             )
         except VedirectException as ex:
