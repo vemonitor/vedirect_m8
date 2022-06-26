@@ -1,3 +1,4 @@
+"""Vedirect init logger entry"""
 import logging
 # Version of realpython-reader package
 __author__ = "Janne Kario, Eli Serra"

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Used to decode the Victron Energy VE.Direct text protocol.
+"""Used to decode the Victron Energy VE.Direct text protocol.
 
 This is a forked version of script originally created by Janne Kario.
 (https://github.com/karioja/vedirect).
@@ -250,7 +249,7 @@ class Vedirect:
         self.dict = {}
 
     def input_read(self, byte) -> dict or None:
-        """ Input read from byte """
+        """Input read from byte."""
         try:
             nbyte = ord(byte)
             if byte == self.hexmarker and self.state != self.IN_CHECKSUM:

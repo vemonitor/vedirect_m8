@@ -4,9 +4,9 @@ Some tests will need a valid serial connection to be executed :
 - ``/tmp/vmodem1`` port on unix systems
 - ``COM1`` port on windows systems
 
-## Tests on unix systems :
+## Tests on unix systems.
 
-### Install socat :
+### Install socat.
 
 On Ubuntu/debian systems run the command on the terminal:
 
@@ -48,9 +48,10 @@ Activate your virtual environment if needed, and run pytest :
 
 This command will run all the unittests on this repository.
 
-Finally, you need to exit or close the terminals to stop virtual serial ports and vedirectsim python script.
+Finally, you need to exit or close the terminals to stop virtual serial ports,
+and vedirectsim python script.
 
-## Tests on other systems :
+## Tests on other systems.
 
 Sorry but I only use linux ubuntu/debian systems for that purpose.
 

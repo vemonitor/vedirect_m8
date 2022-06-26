@@ -44,6 +44,8 @@ def get_device_serial_tests(device):
 def parse_args(args):
     """
     Parsing function
+
+    Parse arguments used in example
     :param args: arguments passed from the command line
     :return: return parser
     """

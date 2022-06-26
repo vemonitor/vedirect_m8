@@ -77,16 +77,16 @@ class VedirectController(Vedirect):
         self.init_serial_test(serial_test)
 
     def has_serial_test(self) -> bool:
-        """ Test if is valid serial test helper """
+        """Test if is valid serial test helper."""
         return isinstance(self._ser_test, SerialTestHelper)\
             and self._ser_test.has_serial_tests()
 
     def is_ready(self) -> bool:
-        """Test if class Vedirect is ready"""
+        """Test if class Vedirect is ready."""
         return self.is_serial_ready() and self.has_serial_test()
 
     def is_ready_to_search_ports(self) -> bool:
-        """Test if class Vedirect is ready"""
+        """Test if class Vedirect is ready."""
         return self.has_serial_com() and self.has_serial_test()
 
     def init_serial_test(self, serial_test: dict) -> bool:
@@ -159,9 +159,7 @@ class VedirectController(Vedirect):
         return False
 
     def read_data_to_test(self) -> dict:
-        """
-        Return decoded Vedirect blocks from serial to identify the right serial port.
-        """
+        """Return decoded Vedirect blocks from serial to identify the right serial port."""
         res = None
         if self.is_ready():
             try:

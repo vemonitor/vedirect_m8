@@ -29,7 +29,7 @@ class SerialUtils (UType):
     """
     @staticmethod
     def is_key_pattern(data: str) -> bool:
-        """ Test if is valid key pattern """
+        """Test if is valid key pattern."""
         return SerialUtils.is_str(data)\
             and SerialUtils.is_list(
             re.compile(
@@ -40,7 +40,7 @@ class SerialUtils (UType):
 
     @staticmethod
     def is_serial_key_pattern(data: str) -> bool:
-        """ Test if is valid key pattern """
+        """Test if is valid key pattern."""
         return SerialUtils.is_str(data)\
             and SerialUtils.is_list(
             re.compile(
@@ -51,7 +51,7 @@ class SerialUtils (UType):
 
     @staticmethod
     def is_virtual_serial_port_pattern(data: str) -> bool:
-        """ Test if is valid unix virtual serial port pattern """
+        """Test if is valid unix virtual serial port pattern."""
         return SerialUtils.is_str(data) and SerialUtils.is_list(
             re.compile(
                 r'^(vmodem\d{1,3})$'
@@ -61,7 +61,7 @@ class SerialUtils (UType):
 
     @staticmethod
     def is_serial_port_name_pattern(data: str) -> bool:
-        """ Test if is valid serial port name pattern """
+        """Test if is valid serial port name pattern."""
         return SerialUtils.is_str(data) and SerialUtils.is_list(
             re.compile(
                 r'^((?:tty(?:USB|ACM)|vmodem|COM)\d{1,3})$'
@@ -71,7 +71,7 @@ class SerialUtils (UType):
 
     @staticmethod
     def is_unix_serial_port_pattern(data: str) -> bool:
-        """ Test if is valid unix serial port pattern """
+        """Test if is valid unix serial port pattern."""
         return SerialUtils.is_str(data) and SerialUtils.is_list(
             re.compile(
                 r'^(/dev/(tty(?:USB|ACM)\d{1,3}))$'
@@ -81,7 +81,7 @@ class SerialUtils (UType):
 
     @staticmethod
     def is_win_serial_port_pattern(data: str) -> bool:
-        """ Test if is valid win serial port pattern """
+        """Test if is valid win serial port pattern."""
         return SerialUtils.is_str(data) and SerialUtils.is_list(
             re.compile(
                 r'^(COM\d{1,3})$'

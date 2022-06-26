@@ -30,6 +30,7 @@ logger = logging.getLogger("vedirect")
 class Vedirectsim:
     """Vedirect simulator class."""
     def __init__(self, serialport: str, device: str = "bmv702"):
+        """Vedirectsim init instance."""
         self.serialport = serialport
         self.ser = None
         self.device = None
@@ -54,17 +55,17 @@ class Vedirectsim:
         self.serial_connect()
 
     def is_ready(self) -> bool:
-        """Test if is all ready to run"""
+        """Test if is all ready to run."""
         return Ut.is_str(self.device)\
             and os.path.isfile(self.dump_file_path)\
             and self.is_serial_ready()
 
     def is_serial_ready(self) -> bool:
-        """Test if is serial ready and connection opened"""
+        """Test if is serial ready and connection opened."""
         return isinstance(self.ser, serial.Serial) and self.ser.is_open
 
     def serial_connect(self) -> bool:
-        """Connect to serial port"""
+        """Connect to serial port."""
         self.ser = serial.Serial(self.serialport, 19200, timeout=10)
         self.ser.write_timeout = 2
         if self.is_serial_ready():
@@ -80,11 +81,11 @@ class Vedirectsim:
 
     @staticmethod
     def get_valid_devices() -> list:
-        """Get valid devices to simulate vedirect data"""
+        """Get valid devices to simulate vedirect data."""
         return ["bmv702", "bluesolar_1.23", "smartsolar_1.39"]
 
     def set_device(self, device: str):
-        """Set the vedirect device to simulate"""
+        """Set the vedirect device to simulate."""
         self.device = None
         if Ut.is_str(device) and device in Vedirectsim.get_valid_devices():
             self.device = device
@@ -92,7 +93,7 @@ class Vedirectsim:
         return False
 
     def set_dump_file_path(self):
-        """Set the dump file path to read"""
+        """Set the dump file path to read."""
         if Ut.is_str(self.device) and self.device in Vedirectsim.get_valid_devices():
             file = "%s.dump" % self.device
             current_path = os.path.dirname(
@@ -105,7 +106,7 @@ class Vedirectsim:
         return False
 
     def set_device_settings(self, device: str) -> bool:
-        """Set the device settings"""
+        """Set the device settings."""
         if self.set_device(device)\
                 and self.set_dump_file_path():
             logger.info(
@@ -120,7 +121,7 @@ class Vedirectsim:
         )
 
     def process_data(self, data: str):
-        """Process read data"""
+        """Process read data."""
         if Ut.is_str(data):
             value = data.replace('\n', "").replace('\r', "")
             res = value.split('\t')
@@ -134,7 +135,7 @@ class Vedirectsim:
                     self.send_packet()
 
     def read_dump_file_lines(self, max_writes: int or None = None) -> bool:
-        """Read file lines"""
+        """Read file lines."""
         if self.is_ready():
             logger.info(
                 "Starting to read dump file lines on device %s. " 
@@ -160,7 +161,7 @@ class Vedirectsim:
         return False
 
     def convert(self, data: dict) -> list:
-        """Convert data to vedirect protocol"""
+        """Convert data to vedirect protocol."""
         result = list()
         for key in self.dict:
             result.append(ord('\r'))
@@ -177,7 +178,7 @@ class Vedirectsim:
         return result
                       
     def send_packet(self):
-        """Send the packet to serial port"""
+        """Send the packet to serial port."""
         start = time.time()
         packet = self.convert(self.dict)
         try:
@@ -202,7 +203,7 @@ class Vedirectsim:
             time.sleep(sleep_time)
         
     def run(self, max_writes: int or None = None) -> bool:
-        """Run the simulator"""
+        """Run the simulator."""
         if self.is_ready():
             running = True
             while running:
