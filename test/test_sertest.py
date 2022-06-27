@@ -1,11 +1,13 @@
-import pytest
+"""SerialTestHelper unittest class."""
 from vedirect_m8.sertest import SerialTestHelper
 
 
 class TestSerialTestHelper:
 
     def setup_method(self):
-        """ setup any state tied to the execution of the given function.
+        """
+        Setup any state tied to the execution of the given function.
+
         Invoked for every test function in the module.
         """
         self.dict = {'V': '12800', 'VS': '12800', 'VM': '1280', 'DM': '120',
@@ -30,7 +32,7 @@ class TestSerialTestHelper:
                     "typeTest": "columns",
                     "keys": [
                             'V', 'VS', 'VM', 'DM', 'T', 'I', 'P', 'CE', 'SOC', 'TTG', 'Alarm', 'AR', 'Relay',
-                            'PID', 'FW', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 
+                            'PID', 'FW', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10',
                             'H11', 'H12', 'H13', 'H14', 'H15', 'H16', 'H17', 'H18'
                         ]
                 }
@@ -38,14 +40,15 @@ class TestSerialTestHelper:
         self.obj = SerialTestHelper(conf)
 
     def test_has_serial_tests(self):
-        """"""
+        """Test has_serial_tests method."""
         assert self.obj.has_serial_tests()
 
-    def test_is_value_test(self):
-        """"""
+    @staticmethod
+    def test_is_value_test():
+        """Test is_value_test method."""
         assert SerialTestHelper.is_value_test({
                                        "typeTest": "value",
-                                       "key": "PIDs8_fg#",
+                                       "key": "PIDs8_fggg#",
                                        "value": "0x203"
                                       })
         assert not SerialTestHelper.is_value_test({
@@ -60,11 +63,11 @@ class TestSerialTestHelper:
                                       })
         assert not SerialTestHelper.is_value_test({
                                        "typeTest": "values",
-                                       "key": "PIDs 8_fg#"
+                                       "key": "PIDs 8_fggg#"
                                       })
 
     def test_run_value_test(self):
-        """"""
+        """Test run_value_test method."""
         assert SerialTestHelper.run_value_test({
                                        "typeTest": "value",
                                        "key": "PID",
@@ -85,8 +88,9 @@ class TestSerialTestHelper:
                                        "key": "PIDs 8_fg#"
                                       }, self.dict)
 
-    def test_is_columns_list_test(self):
-        """"""
+    @staticmethod
+    def test_is_columns_list_test():
+        """Test is_columns_list_test method."""
         assert SerialTestHelper.is_columns_list_test({
                                        "typeTest": "columns",
                                        "keys": ["PIDs8_fg#", "dfsdf"]
@@ -104,8 +108,9 @@ class TestSerialTestHelper:
                                        "keys": ["PIDs8_fg#"]
                                       })
 
-    def test_run_columns_test(self):
-        """"""
+    @staticmethod
+    def test_run_columns_test():
+        """Test is_columns_list_test method."""
         assert SerialTestHelper.is_columns_list_test({
                                        "typeTest": "columns",
                                        "keys": ["V", "VS", "VS", "HSDS", "HSDS", "SER#"]
@@ -124,5 +129,5 @@ class TestSerialTestHelper:
                                       })
 
     def test_run_serial_tests(self):
-        """"""
+        """Test run_serial_tests method."""
         assert self.obj.run_serial_tests(self.dict)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 SerialConnection unittest class.
 
@@ -77,7 +76,7 @@ class TestSerialConnection:
     @staticmethod
     def test_is_virtual_serial_port():
         """Test is_virtual_serial_port method."""
-        v_ports = [
+        virtual_ports = [
             SerialConnection.get_virtual_home_serial_port("vmodem999"),
             SerialConnection.get_virtual_home_serial_port("vmodem0"),
             SerialConnection.get_virtual_home_serial_port("vmodem"),
@@ -86,7 +85,7 @@ class TestSerialConnection:
             SerialConnection.get_virtual_home_serial_port(1),
             SerialConnection.get_virtual_home_serial_port(dict())
         ]
-        tests = [x for x in v_ports if SerialConnection.is_virtual_serial_port(x)]
+        tests = [x for x in virtual_ports if SerialConnection.is_virtual_serial_port(x)]
         assert len(tests) == 2
 
     @staticmethod

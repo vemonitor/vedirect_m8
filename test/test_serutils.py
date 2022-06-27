@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 SerialUtils unittest class.
 
@@ -16,8 +15,9 @@ __version__ = "1.0.0"
 
 class TestSerialUtils:
 
-    def test_is_key_pattern(self):
-        """"""
+    @staticmethod
+    def test_is_key_pattern():
+        """Test is_key_pattern method."""
         datas = [
             '_hello', 'hel lo', "#hj_58Hyui#",  # false
             "hj_58Hyui"  # true
@@ -25,8 +25,9 @@ class TestSerialUtils:
         tests = [x for x in datas if Ut.is_key_pattern(x)]
         assert len(tests) == 1
 
-    def test_is_serial_key_pattern(self):
-        """"""
+    @staticmethod
+    def test_is_serial_key_pattern():
+        """Test is_serial_key_pattern method."""
         datas = [
             '_hello', 'hel lo',  # false
             "hj_58Hyui", "#hj_58Hyui#"  # true
@@ -34,8 +35,9 @@ class TestSerialUtils:
         tests = [x for x in datas if Ut.is_serial_key_pattern(x)]
         assert len(tests) == 2
 
-    def test_is_unix_serial_port_pattern(self):
-        """"""
+    @staticmethod
+    def test_is_unix_serial_port_pattern():
+        """Test is_unix_serial_port_pattern method."""
         datas = [
             '/etc/ttyUSB1', "/dev/tty", "/dev/tty1",  # false
             "/dev/ttyACM1", "/dev/ttyUSB3"  # true
@@ -43,8 +45,9 @@ class TestSerialUtils:
         tests = [x for x in datas if Ut.is_unix_serial_port_pattern(x)]
         assert len(tests) == 2
 
-    def test_is_win_serial_port_pattern(self):
-        """"""
+    @staticmethod
+    def test_is_win_serial_port_pattern():
+        """Test is_win_serial_port_pattern method."""
         datas = [
             '/etc/ttyUSB1', "/dev/COM3", "/COM3", "COM"  # false
             "COM255", "COM3", "COM0"  # true

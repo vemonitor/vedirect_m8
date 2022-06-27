@@ -1,5 +1,9 @@
-import time
+"""
+VedirectController unittest class.
 
+Use pytest package.
+"""
+import time
 import pytest
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.serconnect import SerialConnection
@@ -7,7 +11,6 @@ from ve_utils.utype import UType as Ut
 from vedirect_m8.exceptions import SettingInvalidException, InputReadException, TimeoutException, VedirectException
 
 
-# noinspection PyTypeChecker
 class TestVedirectController:
 
     def setup_method(self):
@@ -32,7 +35,7 @@ class TestVedirectController:
         self.obj = VedirectController(**conf)
 
     def test_settings(self):
-        """Test configuration settings from Vedirect constructor"""
+        """Test configuration settings from Vedirect constructor."""
         assert self.obj.is_serial_ready()
         assert self.obj.is_ready()
         assert self.obj.has_serial_com()
@@ -40,20 +43,21 @@ class TestVedirectController:
         assert self.obj.has_serial_test()
 
     def test_is_serial_com(self):
-        """Test is_serial_com method"""
+        """Test is_serial_com method."""
         assert VedirectController.is_serial_com(self.obj._com)
         assert not VedirectController.is_serial_com(dict())
         assert not VedirectController.is_serial_com(None)
 
-    def test_is_timeout(self):
-        """Test is_timeout method"""
+    @staticmethod
+    def test_is_timeout():
+        """Test is_timeout method."""
         assert VedirectController.is_timeout(elapsed=59, timeout=60)
         with pytest.raises(TimeoutException):
             VedirectController.is_timeout(elapsed=60, timeout=60)
             VedirectController.is_timeout(elapsed=102, timeout=60)
 
     def test_init_serial_test(self):
-        """Test init_serial_test method"""
+        """Test init_serial_test method."""
         assert self.obj.init_serial_test({
             'PID_test': {
                 "typeTest": "value",
@@ -80,7 +84,7 @@ class TestVedirectController:
             })
 
     def test_init_serial_connection_from_object(self):
-        """Test init_serial_connection_from_object method"""
+        """Test init_serial_connection_from_object method."""
         obj = self.obj._com
         assert self.obj.init_serial_connection_from_object(obj)
 
@@ -101,7 +105,7 @@ class TestVedirectController:
             self.obj.init_serial_connection_from_object(obj)
 
     def test_init_serial_connection(self):
-        """Test init_serial_connection method"""
+        """Test init_serial_connection method."""
         assert self.obj.init_serial_connection(serial_port=self.obj._com._serial_port,
                                                source_name="TestVedirectController"
                                                )
@@ -119,7 +123,7 @@ class TestVedirectController:
                                             )
 
     def test_init_settings(self):
-        """Test init_settings method"""
+        """Test init_settings method."""
         good_serial_port = self.obj._com._serial_port
         assert self.obj.init_settings(serial_port=good_serial_port,
                                       source_name="TestVedirectController"
@@ -150,12 +154,12 @@ class TestVedirectController:
                                    )
 
     def test_read_data_to_test(self):
-        """Test read_data_to_test method"""
+        """Test read_data_to_test method."""
         data = self.obj.read_data_to_test()
         assert Ut.is_dict(data, not_null=True)
 
     def test_search_serial_port(self):
-        """Test search_serial_port method"""
+        """Test search_serial_port method."""
         try:
             self.obj.init_serial_connection(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
                                             source_name="TestVedirectController"
@@ -170,7 +174,7 @@ class TestVedirectController:
             assert tst
 
     def test_init_data_read(self):
-        """Test init_data_read method"""
+        """Test init_data_read method."""
         self.obj.read_data_single()
         assert Ut.is_dict(self.obj.dict, not_null=True)
         self.obj.init_data_read()
@@ -193,7 +197,7 @@ class TestVedirectController:
             [self.obj.input_read(x) for x in datas]
 
     def test_read_data_single(self):
-        """Test read_data_single method"""
+        """Test read_data_single method."""
         data = self.obj.read_data_single()
         assert Ut.is_dict(data, not_null=True)
 
@@ -201,7 +205,7 @@ class TestVedirectController:
         """Test read_data_callback method"""
 
         def func_callback(data: dict or None):
-            """Callback function"""
+            """Callback function."""
             assert Ut.is_dict(data, not_null=True)
 
         self.obj.read_data_callback(callback_func=func_callback,
