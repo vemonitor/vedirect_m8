@@ -20,7 +20,6 @@ class SettingInvalidException(Exception):
 
     .. seealso:: Settings
     """
-    pass
 
 
 class InputReadException(Exception):
@@ -29,7 +28,6 @@ class InputReadException(Exception):
 
     .. seealso:: Settings
     """
-    pass
 
 
 class TimeoutException(Exception):
@@ -38,7 +36,6 @@ class TimeoutException(Exception):
 
     .. seealso:: Settings
     """
-    pass
 
 
 class VedirectException(Exception):
@@ -47,4 +44,3 @@ class VedirectException(Exception):
 
     .. seealso:: Settings
     """
-    pass
