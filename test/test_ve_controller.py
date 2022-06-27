@@ -1,8 +1,4 @@
-"""
-VedirectController unittest class.
-
-Use pytest package.
-"""
+"""VedirectController unittest class."""
 import time
 import pytest
 from vedirect_m8.ve_controller import VedirectController
@@ -164,11 +160,12 @@ class TestVedirectController:
             self.obj.init_serial_connection(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
                                             source_name="TestVedirectController"
                                             )
-        except VedirectException as ex:
+        except VedirectException:
             tst = False
             for i in range(20):
                 if self.obj.search_serial_port():
                     tst = True
+                    print("serial port retrieved at %s" % i)
                     break
                 time.sleep(0.8)
             assert tst
@@ -181,7 +178,7 @@ class TestVedirectController:
         assert not Ut.is_dict(self.obj.dict, not_null=True) and Ut.is_dict(self.obj.dict)
 
     def test_input_read(self):
-        """Test input_read method"""
+        """Test input_read method."""
         datas = [
             b'\r', b'\n', b'P', b'I', b'D', b'\t',
             b'O', b'x', b'0', b'3', b'\r',
@@ -202,7 +199,7 @@ class TestVedirectController:
         assert Ut.is_dict(data, not_null=True)
 
     def test_read_data_callback(self):
-        """Test read_data_callback method"""
+        """Test read_data_callback method."""
 
         def func_callback(data: dict or None):
             """Callback function."""

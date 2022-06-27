@@ -47,7 +47,7 @@ class TestVeDirectSim:
         assert self.obj.set_device_settings("bmv702")
         assert self.obj.set_device_settings("bluesolar_1.23")
         assert self.obj.set_device_settings("smartsolar_1.39")
-        
+
         with pytest.raises(ValueError):
             self.obj.set_device_settings("hello")
             self.obj.set_device_settings(SerialConnection.get_virtual_home_serial_port("world.bat"))
