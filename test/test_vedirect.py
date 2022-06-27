@@ -36,11 +36,13 @@ class TestVedirect:
         assert not Vedirect.is_serial_com(dict())
         assert not Vedirect.is_serial_com(None)
 
-    def test_is_timeout(self):
+    @staticmethod
+    def test_is_timeout():
         """Test is_timeout method."""
         assert Vedirect.is_timeout(elapsed=59, timeout=60)
         with pytest.raises(TimeoutException):
             Vedirect.is_timeout(elapsed=60, timeout=60)
+        with pytest.raises(TimeoutException):
             Vedirect.is_timeout(elapsed=102, timeout=60)
 
     def test_init_serial_connection_from_object(self):
@@ -79,7 +81,7 @@ class TestVedirect:
         # test with bad serial port connection
         with pytest.raises(VedirectException):
             self.obj.init_serial_connection(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
-                                            source_name="TestVedirect"
+                                            source_name="TestVedirectBadPort"
                                             )
 
     def test_init_settings(self):
