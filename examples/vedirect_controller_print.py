@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """VedirectController class Example."""
 import logging
@@ -25,7 +24,7 @@ def get_device_serial_tests(device):
             }
         elif device == "bluesolar_1.23":
             return {
-                'PID_test': { 
+                'PID_test': {
                     "typeTest": "value",
                     "key": "PID",
                     "value": "0xA042"
@@ -33,7 +32,7 @@ def get_device_serial_tests(device):
             }
         elif device == "smartsolar_1.39":
             return {
-                'PID_test': { 
+                'PID_test': {
                     "typeTest": "value",
                     "key": "PID",
                     "value": "0xA05F"
@@ -43,7 +42,7 @@ def get_device_serial_tests(device):
 
 def parse_args(args):
     """
-    Parsing function
+    Parsing function.
 
     Parse arguments used in example
     :param args: arguments passed from the command line
@@ -61,7 +60,7 @@ def parse_args(args):
 
 
 def print_data_callback(packet):
-    """Print received packet"""
+    """Print received packet."""
     logger.info("%s\n" % packet)
 
 
@@ -76,6 +75,6 @@ if __name__ == '__main__':
         "timeout": parser.timeout,
         "serial_test": get_device_serial_tests(parser.device)
     }
-    
+
     ve = VedirectController(**conf)
     ve.read_data_callback(print_data_callback)
