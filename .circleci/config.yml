@@ -55,7 +55,6 @@ jobs:
       - codecov/upload:
           token: CODECOV_TOKEN
       - coverage-reporter/send_report:
-          coverage-reports: 'report.xml,coverage.info'
           project-token: $CODACY_PROJECT_TOKEN
   
 # Invoke jobs via workflows
