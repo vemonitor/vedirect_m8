@@ -1,4 +1,3 @@
-
 # VeDirect M8
 
 [![CircleCI](https://circleci.com/gh/mano8/vedirect_m8.svg?style=svg)](https://app.circleci.com/pipelines/github/mano8/vedirect_m8)
@@ -28,43 +27,43 @@ To install from PypI :
 The sim_data directory contains a set of live recordings of the serial port data
 sent by the 3 devices that I own.
 
-  * SmartSolar MPPT 100/20 running firmware version 1.39
-  * BlueSolar MPPT 75/15 running firmware version 1.23
-  * BVM 702 battery monitor running firmware version 3.08
+*  SmartSolar MPPT 100/20 running firmware version 1.39
+*  BlueSolar MPPT 75/15 running firmware version 1.23
+*  BVM 702 battery monitor running firmware version 3.08
 
 On unix systems, these recordings can be fed to the Vedirect decoder
 using a pair of virtual serial ports.
 
 First you need install socat on your machine.
 On debian systems type on your terminal :
-```
-sudo apt-get install socat
+```plaintext
+$ sudo apt-get install socat
 ```
 
 Next install the vedirect_m8 package ``see above``.
 
 Now, to create a pair of virtual serial ports issue the following command:
-```
-$ socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1
+```plaintext
+$ socat -d -d PTY,raw,echo=0,link=/${HOME}/vmodem0 PTY,raw,echo=0,link=/${HOME}/vmodem1
 ```
 This will create 2 virtual serials ports connected to each other.
 
-Anything sent to /tmp/vmodem0 will be echoed to /tmp/vmodem1 and vice versa.
+Anything sent to /${HOME}/vmodem0 will be echoed to /${HOME}/vmodem1 and vice versa.
 
 In other terminal, run the vedirectsim script with your desired device:
 
-```
-python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv700
+```plaintext
+$ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700
 ```
 Or if you need to see the inputs sent on serial port :
-```
-python examples/vedirectsim.py --port /tmp/vmodem0 --device bmv700 --debug
+```plaintext
+$ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700 --debug
 ```
 Device option must be ``bmv700, bluesolar_1.23, or smartsolar_1.39``.
 
-Then, in other terminal, attach the decoder to /tmp/vmodem1:
-```
-python examples/vedirect_print.py --port /tmp/vmodem1
+Then, in other terminal, attach the decoder to /${HOME}/vmodem1:
+```plaintext
+$ python examples/vedirect_print.py --port /${HOME}/vmodem1
 ```
 All the inputs from the selected device file, are encoded to the vmodem0 serial port,
 then echoed to the vmodem1 by socat, and finally decoded by the vedirect module.
@@ -81,24 +80,25 @@ To do so, we need a serialTest extra configuration settings.
 
 Warning, all the test must successful for validate the serial port.
 
-### Available serialTest :
+### Available serialTest
 
 Two test types, can be used to validate a serial port.
 
-#### 1. Value Tests :
+#### 1. Value Tests
 
 This type of test evaluates whether the key value from the decoded data
 is equal to the provided value.
 
 The configuration must contain the following parameters :
-  - typeTest: must be equal to ```value``` here.
-  - key: the key of the value to tested from decoded data
-  - value: the value to test must be equal of the value of the key from decoded data
+
+*  typeTest: must be equal to ```value``` here.
+*  key: the key of the value to tested from decoded data
+*  value: the value to test must be equal of the value of the key from decoded data
 
 Must be used only on static keys values egg ```PID```, ```SER#``` or , ```FW```.
 
 Example for the bmv702 device from sim_data directory:
-```
+```plaintext
 'serialTest':{
     'PID_test': { 
         "typeTest": "value",
@@ -117,21 +117,23 @@ containing at least, </br>
 the keys ```PID``` and ```FW```, whose values are respectively
 ```0x203``` and ```308```.
 
-#### 2. Column keys Tests :
+#### 2. Column keys Tests
 
 This type of test evaluates whether the all the keys provided exists
 in the decoded data.
 
 The configuration must contain the following parameters :
-- typeTest: must be equal to ```value``` here.
-- keys: the keys that must be present in the decoded data
+
+* typeTest: must be equal to ```value``` here.
+*  keys: the keys that must be present in the decoded data
 
 Example for the bmv702 device from sim_data directory:
-```
-'serialTest':{
-    'KeysTest': { 
+
+```plaintext
+"serialTest": {
+    'KeysTest': {
         "typeTest": "value",
-        "keys": [ "V", "I", "P", "CE", "SOC", "H18" ]
+        "keys": ["V", "I", "P", "CE", "SOC", "H18"]
     }
 }
 ```
@@ -139,10 +141,10 @@ In this example, we search a serial port, sending vedirect encoded data
 containing at least, </br>
 the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
 
-### Complete configuration example :
+### Complete configuration example
 
 Example with Complete configuration :
-```
+```python
 from vedirect_m8.ve_controller import VedirectController
 
 def print_data_callback(packet):
@@ -150,7 +152,7 @@ def print_data_callback(packet):
 
 if __name__ == '__main__':
     conf = {
-        'serialPort': "/tmp/vmodem1",
+        'serialPort': "/${HOME}/vmodem1",
         'timeout': 0,
         
         'serialTest':{ 
@@ -174,19 +176,23 @@ if __name__ == '__main__':
     ve.read_data_callback(print_data_callback)
 ```
 In this example, we search a serial port,
-sending vedirect encoded data containing at least:  
-  - the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
-  - and the keys ```PID``` and ```FW```, whose values are respectively ```0x203``` and ```308```.
+sending vedirect encoded data containing at least:
 
-When the script is initialized, it first tries to connect to the ```/tmp/vmodem1``` serial port. 
+*  the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
+*  and the keys ```PID``` and ```FW```, whose values are respectively ```0x203``` and ```308```.
 
-If the connection fails, it waits for an available serial port that matches all the tests above.
+When the script is initialized, it first tries to connect to the
+```/${HOME}/vmodem1``` serial port. 
 
-Then, when a valid serial port is found, it will start to decode VeDirect data
-from that serial port normally.
+If the connection fails, it waits for an available serial port
+that matches all the tests above.
 
-Later, if you disconnect the serial USB cable and reconnect it to another USB port,
-the serial port will change and the connection will fail. 
+Then, when a valid serial port is found, it will start
+to decode VeDirect data from that serial port normally.
+
+Later, if you disconnect the serial USB cable
+and reconnect it to another USB port, the serial port
+will change and the connection will fail.
 
 This will restart the same process, it is waiting for an available serial port
 that matches all the tests above. Then, when a valid serial port is found,
