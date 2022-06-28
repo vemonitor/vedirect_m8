@@ -115,7 +115,8 @@ class TestVedirect:
             b'\r', b'\n', b'P', b'I', b'D', b'\t',
             b'O', b'x', b'0', b'3', b'\r',
         ]
-        [self.obj.input_read(x) for x in datas]
+        for x in datas:
+            self.obj.input_read(x)
         assert Ut.is_dict(self.obj.dict, not_null=True) and self.obj.dict.get('PID') == "Ox03"
         self.obj.init_data_read()
         datas = [
@@ -123,7 +124,8 @@ class TestVedirect:
             b'O', b'\r', b'\n', b'\t', 'helloWorld'
         ]
         with pytest.raises(InputReadException):
-            [self.obj.input_read(x) for x in datas]
+            for x in datas:
+                self.obj.input_read(x)
 
     def test_read_data_single(self):
         """Test read_data_single method."""

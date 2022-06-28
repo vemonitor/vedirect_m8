@@ -1,8 +1,9 @@
 # Vedirect pytest directory
 
 Some tests will need a valid serial connection to be executed :
-- ``/tmp/vmodem1`` port on unix systems
-- ``COM1`` port on windows systems
+
+* ``/${HOME}/vmodem1`` port on unix systems
+* ``COM1`` port on windows systems
 
 ## Tests on unix systems
 
@@ -12,15 +13,16 @@ On Ubuntu/debian systems run the command on the terminal:
 
 ``$ sudo apt-get install socat``
 
-You can visit this [page](https://packages.debian.org/bullseye/socat) to see dependencies, on debian systems.
+You can visit this [page](https://packages.debian.org/bullseye/socat)
+to see dependencies, on debian systems.
 
 To create a pair of virtual serial ports issue the following command:
 
 ```
-$ socat -d -d PTY,raw,echo=0,link=/tmp/vmodem0 PTY,raw,echo=0,link=/tmp/vmodem1
+$ socat -d -d PTY,raw,echo=0,link=/${HOME}/vmodem0 PTY,raw,echo=0,link=/${HOME}/vmodem1
 ```
 
-Tests will be configured to read data on serial port ``/tmp/vmodem1``.
+Tests will be configured to read data on serial port ``/${HOME}/vmodem1``.
 
 Now in other terminal, go to the current directory where you have cloned this repository, egg :
 
@@ -32,11 +34,11 @@ If you use a python virtual environment egg anaconda, you need to activate him :
 
 Replace env_name by your environment name.
 
-Then you may execute vedirectsim.py python script on port ``/tmp/vmodem0``
+Then you may execute vedirectsim.py python script on port ``/${HOME}/vmodem0``
 
-``$ python vedirectsim.py --port /tmp/vmodem0``
+``$ python vedirectsim.py --port /${HOME}/vmodem0``
 
-Now encoded data will be sent from ``/tmp/vmodem0`` to ``/tmp/vmodem1``.
+Now encoded data will be sent from ``/${HOME}/vmodem0`` to ``/${HOME}/vmodem1``.
 
 On other terminal, go to the current directory where you have cloned this repository, egg :
 

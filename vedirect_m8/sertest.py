@@ -81,7 +81,7 @@ class SerialTestHelper:
         """
         Run value test on serial_data.
 
-        Evaluates if the value_test is valid, 
+        Evaluates if the value_test is valid,
         if serial_data is a dictionary, and if serial_data contain a key value_test key value.
         Then evaluate if serial_data key value is equal to the value_test value.
 
@@ -200,8 +200,8 @@ class SerialTestHelper:
                 else:
                     raise SettingInvalidException(
                             "[SerialTestHelper::validate_serial_tests] "
-                            "invalid serialTest settings from key %s."
-                            "Key must start by char [a-zA-Z0-9], " 
+                            "invalid serialTest settings from key %s. "
+                            "Key must start by char [a-zA-Z0-9], "
                             "and must contain only chars [a-zA-Z0-9_]." %
                             key
                         )

@@ -288,7 +288,7 @@ class VedirectController(Vedirect):
                            ) -> dict or None:
         """
         Read data from the serial port and returns it to a callback function.
-        
+
         :param self: Reference the class instance
         :param callback_func:function: Pass a function to the read_data_callback function
         :param timeout:int=60: Set the timeout for the read_data_callback function
