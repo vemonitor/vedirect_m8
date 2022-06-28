@@ -52,10 +52,14 @@ jobs:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
           command: coverage run -m pytest -s
+      - run:
+          name: Copy coverage result
+          # This assumes pytest is installed via the install-package step above
+          command: cp /${HOME}/project/coverage.xml /${HOME}/project/coverage_codacy.xml
       - codecov/upload:
           token: CODECOV_TOKEN
       - coverage-reporter/send_report:
-          coverage-reports: 'report.xml,coverage.info'
+          coverage-reports: 'coverage_codacy.xml,coverage.info'
           project-token: CODACY_PROJECT_TOKEN
   
 # Invoke jobs via workflows
