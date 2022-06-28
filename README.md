@@ -27,15 +27,16 @@ To install from PypI :
 The sim_data directory contains a set of live recordings of the serial port data
 sent by the 3 devices that I own.
 
-*  SmartSolar MPPT 100/20 running firmware version 1.39
-*  BlueSolar MPPT 75/15 running firmware version 1.23
-*  BVM 702 battery monitor running firmware version 3.08
+* SmartSolar MPPT 100/20 running firmware version 1.39
+* BlueSolar MPPT 75/15 running firmware version 1.23
+* BVM 702 battery monitor running firmware version 3.08
 
 On unix systems, these recordings can be fed to the Vedirect decoder
 using a pair of virtual serial ports.
 
 First you need install socat on your machine.
 On debian systems type on your terminal :
+
 ```plaintext
 $ sudo apt-get install socat
 ```
@@ -43,9 +44,11 @@ $ sudo apt-get install socat
 Next install the vedirect_m8 package ``see above``.
 
 Now, to create a pair of virtual serial ports issue the following command:
+
 ```plaintext
 $ socat -d -d PTY,raw,echo=0,link=/${HOME}/vmodem0 PTY,raw,echo=0,link=/${HOME}/vmodem1
 ```
+
 This will create 2 virtual serials ports connected to each other.
 
 Anything sent to /${HOME}/vmodem0 will be echoed to /${HOME}/vmodem1 and vice versa.
@@ -55,16 +58,20 @@ In other terminal, run the vedirectsim script with your desired device:
 ```plaintext
 $ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700
 ```
+
 Or if you need to see the inputs sent on serial port :
+
 ```plaintext
 $ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700 --debug
 ```
 Device option must be ``bmv700, bluesolar_1.23, or smartsolar_1.39``.
 
 Then, in other terminal, attach the decoder to /${HOME}/vmodem1:
+
 ```plaintext
 $ python examples/vedirect_print.py --port /${HOME}/vmodem1
 ```
+
 All the inputs from the selected device file, are encoded to the vmodem0 serial port,
 then echoed to the vmodem1 by socat, and finally decoded by the vedirect module.
 
@@ -91,13 +98,14 @@ is equal to the provided value.
 
 The configuration must contain the following parameters :
 
-*  typeTest: must be equal to ```value``` here.
-*  key: the key of the value to tested from decoded data
-*  value: the value to test must be equal of the value of the key from decoded data
+* typeTest: must be equal to ```value``` here.
+* key: the key of the value to tested from decoded data
+* value: the value to test must be equal of the value of the key from decoded data
 
 Must be used only on static keys values egg ```PID```, ```SER#``` or , ```FW```.
 
 Example for the bmv702 device from sim_data directory:
+
 ```plaintext
 'serialTest':{
     'PID_test': { 
@@ -112,6 +120,7 @@ Example for the bmv702 device from sim_data directory:
     }
 }
 ```
+
 In this example, we search a serial port, sending vedirect encoded data
 containing at least, </br>
 the keys ```PID``` and ```FW```, whose values are respectively
@@ -125,7 +134,7 @@ in the decoded data.
 The configuration must contain the following parameters :
 
 * typeTest: must be equal to ```value``` here.
-*  keys: the keys that must be present in the decoded data
+* keys: the keys that must be present in the decoded data
 
 Example for the bmv702 device from sim_data directory:
 
@@ -137,6 +146,7 @@ Example for the bmv702 device from sim_data directory:
     }
 }
 ```
+
 In this example, we search a serial port, sending vedirect encoded data
 containing at least, </br>
 the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
@@ -144,6 +154,7 @@ the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
 ### Complete configuration example
 
 Example with Complete configuration :
+
 ```python
 from vedirect_m8.ve_controller import VedirectController
 
@@ -175,11 +186,13 @@ if __name__ == '__main__':
     ve = VedirectController(**conf)
     ve.read_data_callback(print_data_callback)
 ```
+
 In this example, we search a serial port,
 sending vedirect encoded data containing at least:
 
-*  the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
-*  and the keys ```PID``` and ```FW```, whose values are respectively ```0x203``` and ```308```.
+* the keys ```[ "V", "I", "P", "CE", "SOC", "H18" ]```
+* and the keys ```PID``` and ```FW```,
+  whose values are respectively ```0x203``` and ```308```.
 
 When the script is initialized, it first tries to connect to the
 ```/${HOME}/vmodem1``` serial port. 
