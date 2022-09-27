@@ -123,10 +123,16 @@ class Vedirect:
 
     def connect_to_serial(self) -> bool:
         """ Connect to serial port if not connected """
-        if self.has_serial_com():
-            if (not self._com.is_ready() and self._com.connect()) or self._com.is_ready():
-                return True
-        return False
+        if self.has_serial_com()\
+                and ((not self._com.is_ready() and self._com.connect())
+                     or self._com.is_ready()):
+            result = True
+        else:
+            raise VedirectException(
+                "[Vedirect::init_serial_connection] "
+                "Connection to serial port fails."
+            )
+        return result
 
     def init_serial_connection_from_object(self, serial_connection: SerialConnection) -> bool:
         """
@@ -143,15 +149,11 @@ class Vedirect:
         :return: True if connection to serial port success.
         .. raises:: SettingInvalidException, VedirectException
         """
+        result = False
         if Vedirect.is_serial_com(serial_connection) and serial_connection.is_settings():
             self._com = serial_connection
-            if not self.connect_to_serial():
-                raise VedirectException(
-                    "[Vedirect::init_serial_connection_from_object] "
-                    "Connection to serial port fails. obj : %s" %
-                    serial_connection
-                )
-            result = True
+            if self.connect_to_serial():
+                result = True
         else:
             raise SettingInvalidException(
                 "[Vedirect::init_serial_connection_from_object] "
@@ -189,6 +191,7 @@ class Vedirect:
         :return: True if connection to serial port success.
         .. raises:: SettingInvalidException, VedirectException
         """
+        result = False
         if SerialConnection.is_serial_conf(serial_port=serial_port,
                                            baud=baud,
                                            timeout=timeout
@@ -198,13 +201,8 @@ class Vedirect:
                                          timeout=timeout,
                                          source_name=source_name
                                          )
-            if not self.connect_to_serial():
-                raise VedirectException(
-                    "[Vedirect::init_serial_connection] "
-                    "Connection to serial port %s fails." %
-                    serial_port
-                )
-            result = True
+            if self.connect_to_serial():
+                result = True
         else:
             raise SettingInvalidException(
                 "[Vedirect::init_serial_connection] "
