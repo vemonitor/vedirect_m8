@@ -164,10 +164,12 @@ class VedirectController(Vedirect):
         result = None
         if self.is_ready():
             try:
-                res = dict()
-                data = self.read_data_single(timeout=1)
-                if Ut.is_dict(data, not_null=True):
-                    res.update(data)
+                result = dict()
+                for i in range(3):
+                    data = self.read_data_single(timeout=1)
+                    if Ut.is_dict(data, not_null=True):
+                        result.update(data)
+                    time.sleep(0.2)
             except Exception as ex:
                 logger.debug(
                     '[VeDirect] Unable to read serial data to test'
