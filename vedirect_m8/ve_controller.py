@@ -53,6 +53,7 @@ class VedirectController(Vedirect):
                  baud: int = 19200,
                  timeout: int or float = 0,
                  source_name: str = 'VedirectController',
+                 wait_connection: bool = True
                  ):
         """
         Constructor of VedirectController class.
@@ -67,8 +68,10 @@ class VedirectController(Vedirect):
         :param baud: Baud rate such as 9600 or 115200 etc.
         :param timeout: Set a read timeout value in seconds,
         :param source_name: This is used in logger to identify the source of call.
+        :param wait_connection: bool: Used to wait for connection on new serial port at start.
         :return: Nothing
         """
+        self._wait_connection = Ut.str_to_bool(wait_connection)
         self._ser_test = None
         self.init_serial_test(serial_test)
         Vedirect.__init__(self,
@@ -148,16 +151,23 @@ class VedirectController(Vedirect):
 
         .. raises:: SettingInvalidException, VedirectException
         """
+        result = False
         try:
-            return self.init_serial_connection(serial_port=serial_port,
-                                               baud=baud,
-                                               timeout=timeout,
-                                               source_name=source_name
-                                               )
+            result = self.init_serial_connection(serial_port=serial_port,
+                                                 baud=baud,
+                                                 timeout=timeout,
+                                                 source_name=source_name
+                                                 )
         except VedirectException as ex:
-            if self.wait_or_search_serial_connection(timeout=wait_timeout, exception=ex):
-                return True
-        return False
+            if self._wait_connection is True\
+                    and self.wait_or_search_serial_connection(
+                    timeout=wait_timeout,
+                    exception=ex
+                    ):
+                result = True
+            else:
+                raise VedirectException from VedirectException
+        return result
 
     def read_data_to_test(self) -> dict:
         """Return decoded Vedirect blocks from serial to identify the right serial port."""
