@@ -4,9 +4,11 @@ Used to decode the Victron Energy VE.Direct text protocol.
 
 This is a forked version of script originally created by Janne Kario.
 (https://github.com/karioja/vedirect).
- .. raises:: InputReadException,
-             serial.SerialException,
-             serial.SerialTimeoutException
+
+ Raise:
+    - InputReadException,
+    - serial.SerialException,
+    - serial.SerialTimeoutException
 """
 import logging
 import time
@@ -15,6 +17,7 @@ from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.exceptions import SettingInvalidException
 from vedirect_m8.exceptions import InputReadException
 from vedirect_m8.exceptions import TimeoutException, VedirectException
+
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"
 __deprecated__ = False
@@ -33,9 +36,10 @@ class Vedirect:
     This is a forked version of script originally created by Janne Kario.
     (https://github.com/karioja/vedirect).
 
-    .. raises:: InputReadException,
-                 serial.SerialException,
-                 serial.SerialTimeoutException
+    Raise:
+        - InputReadException,
+        - serial.SerialException,
+        - serial.SerialTimeoutException
     """
     def __init__(self,
                  serial_port: str or None = None,
@@ -47,9 +51,9 @@ class Vedirect:
         Constructor of Vedirect class.
 
         :Example:
-            - > sc = Vedirect(serial_port = "/dev/ttyUSB1")
-            - > sc.connect()
-            - > True # if connection opened on serial port "/dev/tyyUSB1"
+            >>> sc = Vedirect(serial_port = "/dev/ttyUSB1")
+            >>> sc.connect()
+            >>> True # if connection opened on serial port "/dev/tyyUSB1"
         :param self: Refer to the object instance itself,
         :param serial_port: The serial port to connect,
         :param baud: Baud rate such as 9600 or 115200 etc.
@@ -83,8 +87,8 @@ class Vedirect:
         Test if obj is valid SerialConnection instance.
 
         :Example :
-            - >Vedirect.is_serial_com(obj=my_object)
-            - >True
+            >>> Vedirect.is_serial_com(obj=my_object)
+            >>> True
         :param obj: The object to test.
         :return: True if obj is valid SerialConnection instance.
         """
@@ -96,8 +100,8 @@ class Vedirect:
         Test if elapsed time is greater than timeout.
 
         :Example :
-            - >Vedirect.is_timeout(elapsed=45, timeout=60)
-            - >True
+            >>> Vedirect.is_timeout(elapsed=45, timeout=60)
+            >>> True
         :param elapsed: The elapsed time to test,
         :param timeout: The timeout to evaluate.
         :return: True if elapsed time is upper than timeout.
@@ -143,12 +147,11 @@ class Vedirect:
          - SettingInvalidException if serial_port, baud or timeout are not valid.
          - VedirectException if connection to serial port fails
         :Example :
-            - >self.init_serial_connection(serial_port="/tmp/vmodem0")
-            - >True
+            >>> self.init_serial_connection(serial_port="/tmp/vmodem0")
+            >>> True
         :param self: Refer to the object itself,
         :param serial_connection: The SerialConnection object,
         :return: True if connection to serial port success.
-        .. raises:: SettingInvalidException, VedirectException
         """
         result = False
         if Vedirect.is_serial_com(serial_connection) and serial_connection.is_settings():
@@ -182,15 +185,14 @@ class Vedirect:
          - SettingInvalidException if serial_port, baud or timeout are not valid.
          - VedirectException if connection to serial port fails
         :Example :
-            - >self.init_serial_connection(serial_port="/tmp/vmodem0")
-            - >True
+            >>> self.init_serial_connection(serial_port="/tmp/vmodem0")
+            >>> True
         :param self: Refer to the object itself,
         :param serial_port: The serial port to connect,
         :param baud: Baud rate such as 9600 or 115200 etc.
         :param timeout: Set a read timeout value in seconds,
         :param source_name: This is used in logger to identify the source of call.
         :return: True if connection to serial port success.
-        .. raises:: SettingInvalidException, VedirectException
         """
         result = False
         if SerialConnection.is_serial_conf(serial_port=serial_port,
@@ -231,15 +233,14 @@ class Vedirect:
          - SettingInvalidException if serial_port, baud or timeout are not valid.
          - VedirectException if connection to serial port fails
         :Example :
-            - >self.init_settings(serial_port="/tmp/vmodem0")
-            - >True
+            >>> self.init_settings(serial_port="/tmp/vmodem0")
+            >>> True
         :param self: Refer to the object itself,
         :param serial_port: The serial port to connect,
         :param baud: Baud rate such as 9600 or 115200 etc.
         :param timeout: Set a read timeout value in seconds,
         :param source_name: This is used in logger to identify the source of call.
         :return: True if connection to serial port success.
-        .. raises:: SettingInvalidException, VedirectException
         """
         return self.init_serial_connection(serial_port=serial_port,
                                            baud=baud,
@@ -327,9 +328,9 @@ class Vedirect:
         Read a single block decoded from serial port and returns it as a dictionary.
 
         :Example :
-            - > ve = Vedirect(serial_port="/tmp/vemodem1")
-            - > ve.read_data_single(timeout=3)
-            - > {'V': '12800', 'VS': '12800', 'VM': '1280', ...}
+            >>> ve = Vedirect(serial_port="/tmp/vemodem1")
+            >>> ve.read_data_single(timeout=3)
+            >>> {'V': '12800', 'VS': '12800', 'VM': '1280', ...}
 
         :param self: Reference the class instance
         :param timeout: Set the timeout for the read_data_single function
