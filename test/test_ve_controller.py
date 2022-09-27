@@ -18,17 +18,20 @@ class TestVedirectController:
         conf = {
             'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
             'baud': 19200,
-            'timeout': 0,
-            "serial_test": {
-                'PID_test': {
-                    "typeTest": "value",
-                    "key": "PID",
-                    "value": "0x203"
-                }
+            'timeout': 0
+        }
+        serial_test = {
+            'PID_test': {
+                "typeTest": "value",
+                "key": "PID",
+                "value": "0x203"
             }
         }
 
-        self.obj = VedirectController(**conf)
+        self.obj = VedirectController(
+            serial_conf=conf,
+            serial_test=serial_test
+        )
 
     def test_settings(self):
         """Test configuration settings from Vedirect constructor."""
@@ -102,32 +105,33 @@ class TestVedirectController:
 
     def test_init_serial_connection(self):
         """Test init_serial_connection method."""
-        assert self.obj.init_serial_connection(serial_port=self.obj._com._serial_port,
+        assert self.obj.init_serial_connection({'serial_port': self.obj._com._serial_port},
                                                source_name="TestVedirectController"
                                                )
 
         # test with bad serial port format
         with pytest.raises(SettingInvalidException):
-            self.obj.init_serial_connection(serial_port="/etc/bad_port",
+            self.obj.init_serial_connection({'serial_port': "/etc/bad_port"},
                                             source_name="TestVedirectController"
                                             )
 
         # test with bad serial port connection
         with pytest.raises(VedirectException):
-            self.obj.init_serial_connection(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
-                                            source_name="TestVedirectController"
-                                            )
+            self.obj.init_serial_connection(
+                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
+                source_name="TestVedirectController"
+            )
 
     def test_init_settings(self):
         """Test init_settings method."""
         good_serial_port = self.obj._com._serial_port
-        assert self.obj.init_settings(serial_port=good_serial_port,
+        assert self.obj.init_settings({'serial_port': good_serial_port},
                                       source_name="TestVedirectController"
                                       )
 
         # test with bad serial port format
         with pytest.raises(SettingInvalidException):
-            self.obj.init_settings(serial_port="/etc/bad_port",
+            self.obj.init_settings({'serial_port': "/etc/bad_port"},
                                    source_name="TestVedirectController"
                                    )
 
@@ -135,19 +139,20 @@ class TestVedirectController:
         # the serial port vmodem255 is not defined
         # the method search a valid serial port with serial test data
         # and return True when reached a valid serial port
-        assert self.obj.init_settings(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
-                                      source_name="TestVedirectController",
-                                      wait_timeout=30
+        self.obj.set_wait_timeout(30)
+        assert self.obj.init_settings({'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
+                                      source_name="TestVedirectController"
                                       )
         # now serial port is same as start
         assert good_serial_port == self.obj._com._serial_port
 
         with pytest.raises(VedirectException):
             self.obj._ser_test = None
-            self.obj.init_settings(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
-                                   source_name="TestVedirectController",
-                                   wait_timeout=0.5
-                                   )
+            self.obj.set_wait_timeout(0.5)
+            self.obj.init_settings(
+                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
+                source_name="TestVedirectController"
+            )
 
     def test_read_data_to_test(self):
         """Test read_data_to_test method."""
@@ -157,9 +162,10 @@ class TestVedirectController:
     def test_search_serial_port(self):
         """Test search_serial_port method."""
         try:
-            self.obj.init_serial_connection(serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
-                                            source_name="TestVedirectController"
-                                            )
+            self.obj.init_serial_connection(
+                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
+                source_name="TestVedirectController"
+            )
         except VedirectException:
             tst = False
             for i in range(20):
@@ -207,15 +213,15 @@ class TestVedirectController:
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
 
-        self.obj.read_data_callback(callback_func=func_callback,
+        self.obj.set_wait_timeout(3600)
+        self.obj.read_data_callback(callback_function=func_callback,
                                     timeout=20,
-                                    connection_timeout=3600,
                                     max_loops=1
                                     )
 
         with pytest.raises(TimeoutException):
-            self.obj.read_data_callback(callback_func=func_callback,
+            self.obj.set_wait_timeout(3600)
+            self.obj.read_data_callback(callback_function=func_callback,
                                         timeout=0.1,
-                                        connection_timeout=3600,
                                         max_loops=1
                                         )

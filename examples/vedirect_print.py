@@ -18,5 +18,5 @@ if __name__ == '__main__':
         "serial_port": args.port,
         "timeout": args.timeout
     }
-    ve = Vedirect(**conf)
+    ve = Vedirect(serial_conf=conf)
     print(ve.read_data_callback(print_data_callback))

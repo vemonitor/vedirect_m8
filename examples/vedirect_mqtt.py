@@ -20,7 +20,7 @@ if __name__ == '__main__':
         "timeout": args.timeout
     }
 
-    ve = Vedirect(**conf)
+    ve = Vedirect(serial_conf=conf)
 
     client = mqtt.Client()
     client.connect(args.mqttbroker, args.mqttbrokerport, 60)
