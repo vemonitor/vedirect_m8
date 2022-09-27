@@ -9,10 +9,9 @@ Contain method to scan all available ports.
              SerialTimeoutException
 """
 import logging
+import os
 from serial import Serial, SerialException, SerialTimeoutException
 import serial.tools.list_ports as serial_list_ports
-
-import os
 from ve_utils.usys import USys
 from vedirect_m8.serutils import SerialUtils as Ut
 
@@ -28,7 +27,7 @@ logger = logging.getLogger("vedirect")
 
 
 class SerialConnection:
-    """ 
+    """
         Serial connection tool. Set up connection to serial port.
 
         Able to scan serial ports available on system.
@@ -52,7 +51,7 @@ class SerialConnection:
 
         :Example:
             - > sc = SerialConnection(serial_port = "/dev/ttyUSB1")
-            - > sc.connect() 
+            - > sc.connect()
             - > True # if connection opened on serial port "/dev/tyyUSB1"
         :param self: Refer to the object instance itself,
         :param serial_port: The serial port to connect,
@@ -258,6 +257,7 @@ class SerialConnection:
         :param exclusive: The exclusive.
         :return: True if success to open a serial connection.
         """
+        result = False
         serial_conf = self.set_serial_conf(serial_port=serial_port,
                                            baud=baud,
                                            timeout=timeout,
@@ -266,8 +266,8 @@ class SerialConnection:
                                            )
         logger.debug(
             '[SerialConnection::connect::%s] '
-            'settings : %s' %
-            (self._source_name, serial_conf)
+            'settings : %s',
+            self._source_name, serial_conf
         )
         if self.is_settings():
             try:
@@ -275,32 +275,32 @@ class SerialConnection:
                 if self.ser.isOpen():
                     logger.info(
                         '[SerialConnection::connect::%s] New Serial connection established. '
-                        'args : %s.' %
-                        (self._source_name, serial_conf)
+                        'args : %s.',
+                        self._source_name, serial_conf
                     )
-                    return True
+                    result = True
                 else:
                     logger.error(
                         '[SerialConnection::connect::%s] '
-                        'Unable to open serial connection. args: %s' %
-                        (self._source_name, serial_conf)
+                        'Unable to open serial connection. args: %s',
+                        self._source_name, serial_conf
                     )
             except (SerialException, SerialTimeoutException) as ex:
                 logger.error(
                     '[SerialConnection::connect::%s] '
                     'Exception when attempting to open serial connection. '
-                    ' args: %s - ex : %s' %
-                    (self._source_name, serial_conf, ex)
+                    ' args: %s - ex : %s',
+                    self._source_name, serial_conf, ex
                 )
         else:
             logger.error(
                 '[SerialConnection::connect::%s] '
                 'Unable to open serial connection. '
-                'Invalid settings : %s' %
-                (self._source_name, serial_conf)
+                'Invalid settings : %s',
+                self._source_name, serial_conf
             )
 
-        return False
+        return result
 
     def get_serial_ports_list(self) -> list:
         """
@@ -323,14 +323,15 @@ class SerialConnection:
                     result.append(port)
                     logger.debug(
                         "Serial port found : "
-                        "{}: {} [{}]".format(port, desc, hwid)
+                        "%s: %s [%s]",
+                        port, desc, hwid
                     )
         except Exception as ex:
             logger.error(
                 '[SerialConnection::get_serial_ports_list::%s] '
                 'Unable to list serial ports. '
-                'exception : %s' %
-                (self._source_name, ex)
+                'exception : %s',
+                self._source_name, ex
             )
         return result
 
@@ -356,7 +357,8 @@ class SerialConnection:
                     if path != "/dev" and os.path.exists(path):
                         # get list files from path
                         for entry in os.scandir(path):
-                            if not os.path.isdir(entry.path) and Ut.is_serial_port_name_pattern(entry.name):
+                            if not os.path.isdir(entry.path)\
+                                    and Ut.is_serial_port_name_pattern(entry.name):
                                 if os.path.exists(entry.path):
                                     result.append(entry.path)
 
@@ -364,8 +366,8 @@ class SerialConnection:
             logger.error(
                 '[SerialConnection::get_unix_virtual_serial_ports_list::%s] '
                 'Unable to list serial ports. '
-                'exception : %s' %
-                (self._source_name, ex)
+                'exception : %s',
+                self._source_name, ex
             )
         return result
 
@@ -507,7 +509,8 @@ class SerialConnection:
            returning zero or more, up to the requested number of bytes
          - timeout = x: set timeout to x seconds (float allowed)
            returns immediately when the requested number of bytes are available,
-           otherwise wait until the timeout expires and return all bytes that were received until then.
+           otherwise wait until the timeout expires
+           and return all bytes that were received until then.
 
         :Example :
             - >SerialConnection.is_timeout(timeout=0)
