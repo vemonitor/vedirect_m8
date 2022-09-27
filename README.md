@@ -51,7 +51,7 @@ $ socat -d -d PTY,raw,echo=0,link=/${HOME}/vmodem0 PTY,raw,echo=0,link=/${HOME}/
 
 This will create 2 virtual serials ports connected to each other.
 
-Anything sent to /${HOME}/vmodem0 will be echoed to /${HOME}/vmodem1 and vice versa.
+Anything sent to ```/${HOME}/vmodem0``` will be echoed to ```/${HOME}/vmodem1``` and vice versa.
 
 In other terminal, run the vedirectsim script with your desired device:
 
