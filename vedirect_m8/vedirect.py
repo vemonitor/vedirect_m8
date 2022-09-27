@@ -10,6 +10,7 @@ This is a forked version of script originally created by Janne Kario.
 """
 import logging
 import time
+from serial import SerialException
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.exceptions import SettingInvalidException
 from vedirect_m8.exceptions import InputReadException
@@ -351,8 +352,13 @@ class Vedirect:
                         )
                         return packet
 
-                # timeout serial read
-                Vedirect.is_timeout(tim-now, timeout)
+                    # timeout serial read
+                    Vedirect.is_timeout(tim-now, timeout)
+            except SerialException as ex:
+                raise VedirectException(
+                    "[VeDirect:read_data_single] "
+                    "Unable to read vedirect data : %s."
+                ) from ex
         else:
             logger.error('[VeDirect] Unable to read serial data. Not connected to serial port...')
 
@@ -375,7 +381,6 @@ class Vedirect:
         if self.is_ready():
             while run:
                 tim = time.time()
-
                 packet = self.get_serial_packet()
 
                 if packet is not None:
