@@ -101,6 +101,10 @@ class SerialConnection:
             return True
         return False
 
+    def get_timeout(self) -> int or float:
+        """Return timeout value from instance."""
+        return self._timeout
+
     def set_timeout(self, timeout: int or float or None = None) -> bool:
         """
         Set timeout value.
