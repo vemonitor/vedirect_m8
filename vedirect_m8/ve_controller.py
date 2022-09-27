@@ -69,13 +69,13 @@ class VedirectController(Vedirect):
         :param source_name: This is used in logger to identify the source of call.
         :return: Nothing
         """
+        self._ser_test = None
+        self.init_serial_test(serial_test)
         Vedirect.__init__(self,
                           serial_port=serial_port,
                           baud=baud,
                           timeout=timeout,
                           source_name=source_name)
-        self._ser_test = None
-        self.init_serial_test(serial_test)
 
     def has_serial_test(self) -> bool:
         """Test if is valid serial test helper."""
