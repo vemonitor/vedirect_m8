@@ -176,7 +176,26 @@ class VedirectController(Vedirect):
                     'ex : %s',
                     ex
                 )
-        return res
+        return result
+
+    def _test_serial_port(self, port: str) -> bool:
+        """Attempt serial connection on specified port."""
+        result = False
+        if SerialConnection.is_serial_port(port):
+            if self._com.connect(**{"serial_port": port, 'timeout': 0}):
+                time.sleep(0.5)
+                data = self.read_data_to_test()
+                if self._ser_test.run_serial_tests(data):
+                    self._com.ser.timeout = self._com.get_timeout()
+                    logger.info(
+                        "[VeDirect::_test_serial_port] "
+                        "New connection established to serial port %s. ",
+                        port
+                    )
+                    result = True
+                else:
+                    self._com.ser.close()
+        return result
 
     def test_serial_ports(self, ports: list) -> bool:
         """
@@ -200,23 +219,9 @@ class VedirectController(Vedirect):
         if self.is_ready_to_search_ports():
             if Ut.is_list(ports, not_null=True):
                 for port in ports:
-                    if SerialConnection.is_serial_port(port):
-
-                        if self._com.connect(**{"serial_port": port, 'timeout': 0}):
-                            time.sleep(0.5)
-                            data = self.read_data_to_test()
-                            if self._ser_test.run_serial_tests(data):
-                                self._com.ser.timeout = self._com._timeout
-                                logger.info(
-                                    "[VeDirect::test_serial_ports] "
-                                    "New connection established to serial port %s. " %
-                                    port
-                                )
-                                return True
-                            else:
-                                self._com.ser.close()
-
-                return False
+                    if self._test_serial_port(port):
+                        result = True
+                        break
         else:
             raise VedirectException(
                 "[VeDirect::test_serial_ports] "
