@@ -13,6 +13,7 @@ This is a forked version of script originally created by Janne Kario.
 import logging
 import time
 from serial import SerialException
+from ve_utils.utype import UType as Ut
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.exceptions import SettingInvalidException
 from vedirect_m8.exceptions import InputReadException
@@ -36,29 +37,32 @@ class Vedirect:
     This is a forked version of script originally created by Janne Kario.
     (https://github.com/karioja/vedirect).
 
+    :Example:
+            >>> sc = Vedirect({"serial_port": "/dev/ttyUSB1"})
+            >>> sc.read_data_single()
+            >>> {"ser_key1": "ser_value1", ...}
+
     Raise:
         - InputReadException,
         - serial.SerialException,
         - serial.SerialTimeoutException
     """
     def __init__(self,
-                 serial_port: str or None = None,
-                 baud: int = 19200,
-                 timeout: int or float = 0,
-                 source_name: str = 'Vedirect'
+                 serial_conf: dict,
+                 source_name: str = 'Vedirect',
+                 auto_start: bool = True
                  ):
         """
         Constructor of Vedirect class.
 
         :Example:
-            >>> sc = Vedirect(serial_port = "/dev/ttyUSB1")
-            >>> sc.connect()
-            >>> True # if connection opened on serial port "/dev/tyyUSB1"
+            >>> sc = Vedirect({"serial_port": "/dev/ttyUSB1"})
+            >>> sc.read_data_single()
+            >>> {"ser_key1": "ser_value1", ...}
         :param self: Refer to the object instance itself,
-        :param serial_port: The serial port to connect,
-        :param baud: Baud rate such as 9600 or 115200 etc.
-        :param timeout: Set a read timeout value in seconds,
-        :param source_name: This is used in logger to identify the source of call.
+        :param serial_conf: dict: The serial connection configuration,
+        :param source_name: This is used in logger to identify the source of call,
+        :param auto_start: bool: Define if serial connection must be established automatically.
         :return: Nothing
         """
         self._com = None
@@ -73,46 +77,13 @@ class Vedirect:
         self.bytes_sum = 0
         self.state = self.WAIT_HEADER
         self.dict = {}
-        self.init_settings(serial_port=serial_port,
-                           baud=baud,
-                           timeout=timeout,
-                           source_name=source_name
+
+        self.init_settings(serial_conf=serial_conf,
+                           source_name=source_name,
+                           auto_start=auto_start
                            )
 
     (HEX, WAIT_HEADER, IN_KEY, IN_VALUE, IN_CHECKSUM) = range(5)
-
-    @staticmethod
-    def is_serial_com(obj: SerialConnection) -> bool:
-        """
-        Test if obj is valid SerialConnection instance.
-
-        :Example :
-            >>> Vedirect.is_serial_com(obj=my_object)
-            >>> True
-        :param obj: The object to test.
-        :return: True if obj is valid SerialConnection instance.
-        """
-        return isinstance(obj, SerialConnection)
-
-    @staticmethod
-    def is_timeout(elapsed: float or int, timeout: float or int = 60) -> bool:
-        """
-        Test if elapsed time is greater than timeout.
-
-        :Example :
-            >>> Vedirect.is_timeout(elapsed=45, timeout=60)
-            >>> True
-        :param elapsed: The elapsed time to test,
-        :param timeout: The timeout to evaluate.
-        :return: True if elapsed time is upper than timeout.
-        """
-        if elapsed >= timeout:
-            raise TimeoutException(
-                '[VeDirect::is_timeout] '
-                'Unable to read serial data. '
-                'Timeout error.'
-            )
-        return True
 
     def has_serial_com(self) -> bool:
         """Test if self._com is a valid SerialConnection instance."""
@@ -139,7 +110,10 @@ class Vedirect:
             )
         return result
 
-    def init_serial_connection_from_object(self, serial_connection: SerialConnection) -> bool:
+    def init_serial_connection_from_object(self,
+                                           serial_connection: SerialConnection,
+                                           auto_start: bool = True
+                                           ) -> bool:
         """
         Initialise serial connection from SerialConnection object.
 
@@ -147,16 +121,19 @@ class Vedirect:
          - SettingInvalidException if serial_port, baud or timeout are not valid.
          - VedirectException if connection to serial port fails
         :Example :
-            >>> self.init_serial_connection(serial_port="/tmp/vmodem0")
+            >>> self.init_serial_connection_from_object(serial_connection)
             >>> True
         :param self: Refer to the object itself,
         :param serial_connection: The SerialConnection object,
+        :param auto_start: bool: Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
         """
         result = False
         if Vedirect.is_serial_com(serial_connection) and serial_connection.is_settings():
             self._com = serial_connection
-            if self.connect_to_serial():
+            if auto_start is False \
+                    or (auto_start is True
+                        and self.connect_to_serial()):
                 result = True
         else:
             raise SettingInvalidException(
@@ -168,10 +145,9 @@ class Vedirect:
         return result
 
     def init_serial_connection(self,
-                               serial_port: str or None = None,
-                               baud: int = 19200,
-                               timeout: int or float = 0,
-                               source_name: str = 'Vedirect'
+                               serial_conf: dict,
+                               source_name: str = 'Vedirect',
+                               auto_start: bool = True
                                ) -> bool:
         """
         Initialise serial connection from parameters.
@@ -185,41 +161,37 @@ class Vedirect:
          - SettingInvalidException if serial_port, baud or timeout are not valid.
          - VedirectException if connection to serial port fails
         :Example :
-            >>> self.init_serial_connection(serial_port="/tmp/vmodem0")
+            >>> self.init_serial_connection({"serial_port": "/dev/ttyUSB1"})
             >>> True
         :param self: Refer to the object itself,
-        :param serial_port: The serial port to connect,
-        :param baud: Baud rate such as 9600 or 115200 etc.
-        :param timeout: Set a read timeout value in seconds,
-        :param source_name: This is used in logger to identify the source of call.
+        :param serial_conf: dict: dict: The serial connection configuration,
+        :param source_name: str: This is used in logger to identify the source of call,
+        :param auto_start: bool: Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
         """
         result = False
-        if SerialConnection.is_serial_conf(serial_port=serial_port,
-                                           baud=baud,
-                                           timeout=timeout
-                                           ):
-            self._com = SerialConnection(serial_port=serial_port,
-                                         baud=baud,
-                                         timeout=timeout,
-                                         source_name=source_name
-                                         )
-            if self.connect_to_serial():
+        serial_conf = SerialConnection.get_default_serial_conf(serial_conf)
+        if SerialConnection.is_serial_conf(**serial_conf):
+            serial_conf.update({"source_name": source_name})
+            auto_start = Ut.str_to_bool(auto_start)
+            self._com = SerialConnection(**serial_conf)
+            if auto_start is False\
+                    or (auto_start is True
+                        and self.connect_to_serial()):
                 result = True
         else:
             raise SettingInvalidException(
                 "[Vedirect::init_serial_connection] "
                 "Unable to init SerialConnection, "
-                "bad parameters. serial_port : %s - baud : %s - timeout : %s." %
-                (serial_port, baud, timeout)
+                "bad parameters. serial_conf : %s" %
+                serial_conf
             )
         return result
 
     def init_settings(self,
-                      serial_port: str or None = None,
-                      baud: int = 19200,
-                      timeout: int or float = 0,
-                      source_name: str = 'Vedirect'
+                      serial_conf: dict,
+                      source_name: str = 'Vedirect',
+                      auto_start: bool = True
                       ) -> bool:
         """
         Initialise the settings for the class.
@@ -233,19 +205,18 @@ class Vedirect:
          - SettingInvalidException if serial_port, baud or timeout are not valid.
          - VedirectException if connection to serial port fails
         :Example :
-            >>> self.init_settings(serial_port="/tmp/vmodem0")
+            >>> self.init_settings({"serial_port": "/dev/ttyUSB1"})
             >>> True
         :param self: Refer to the object itself,
-        :param serial_port: The serial port to connect,
-        :param baud: Baud rate such as 9600 or 115200 etc.
-        :param timeout: Set a read timeout value in seconds,
-        :param source_name: This is used in logger to identify the source of call.
+        :param serial_conf: dict: The serial connection configuration,
+        :param source_name: This is used in logger to identify the source of call,
+        :param auto_start: bool: Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
         """
-        return self.init_serial_connection(serial_port=serial_port,
-                                           baud=baud,
-                                           timeout=timeout,
-                                           source_name=source_name)
+        return self.init_serial_connection(serial_conf=serial_conf,
+                                           source_name=source_name,
+                                           auto_start=auto_start
+                                           )
 
     def init_data_read(self):
         """ Initialise reader properties """
@@ -328,7 +299,7 @@ class Vedirect:
         Read a single block decoded from serial port and returns it as a dictionary.
 
         :Example :
-            >>> ve = Vedirect(serial_port="/tmp/vemodem1")
+            >>> ve = Vedirect({"serial_port": "/dev/ttyUSB1"})
             >>> ve.read_data_single(timeout=3)
             >>> {'V': '12800', 'VS': '12800', 'VM': '1280', ...}
 
@@ -403,3 +374,36 @@ class Vedirect:
                 '[VeDirect::read_data_callback] '
                 'Unable to read serial data. '
                 'Not connected to serial port...')
+
+    @staticmethod
+    def is_serial_com(obj: SerialConnection) -> bool:
+        """
+        Test if obj is valid SerialConnection instance.
+
+        :Example :
+            >>> Vedirect.is_serial_com(obj)
+            >>> True
+        :param obj: The object to test.
+        :return: True if obj is valid SerialConnection instance.
+        """
+        return isinstance(obj, SerialConnection)
+
+    @staticmethod
+    def is_timeout(elapsed: float or int, timeout: float or int = 60) -> bool:
+        """
+        Test if elapsed time is greater than timeout.
+
+        :Example :
+            >>> Vedirect.is_timeout(elapsed=45, timeout=60)
+            >>> True
+        :param elapsed: The elapsed time to test,
+        :param timeout: The timeout to evaluate.
+        :return: True if elapsed time is upper than timeout.
+        """
+        if elapsed >= timeout:
+            raise TimeoutException(
+                '[VeDirect::is_timeout] '
+                'Unable to read serial data. '
+                'Timeout error.'
+            )
+        return True

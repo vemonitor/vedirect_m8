@@ -48,12 +48,12 @@ class VedirectController(Vedirect):
                  VedirectException
     """
     def __init__(self,
+                 serial_conf: dict,
                  serial_test: dict,
-                 serial_port: str or None = None,
-                 baud: int = 19200,
-                 timeout: int or float = 0,
                  source_name: str = 'VedirectController',
-                 wait_connection: bool = True
+                 auto_start: bool = True,
+                 wait_connection: bool = True,
+                 wait_timeout: int or float = 3600,
                  ):
         """
         Constructor of VedirectController class.
@@ -63,22 +63,22 @@ class VedirectController(Vedirect):
             - > sc.connect()
             - > True # if connection opened on serial port "/dev/tyyUSB1"
         :param self: Refer to the object instance itself,
+        :param serial_conf: dict: The serial connection configuration,
         :param serial_test: The serial_test to execute to retrieve the serial port,
-        :param serial_port: The serial port to connect,
-        :param baud: Baud rate such as 9600 or 115200 etc.
-        :param timeout: Set a read timeout value in seconds,
-        :param source_name: This is used in logger to identify the source of call.
-        :param wait_connection: bool: Used to wait for connection on new serial port at start.
+        :param source_name: This is used in logger to identify the source of call,
+        :param auto_start: bool: Define if serial connection must be established automatically,
+        :param wait_connection: bool: Used to wait for connection on new serial port at start,
+        :param wait_timeout: Timeout value to search valid serial port in case of connection fails
         :return: Nothing
         """
         self._wait_connection = Ut.str_to_bool(wait_connection)
+        self._wait_timeout = Ut.get_float(wait_timeout)
         self._ser_test = None
         self.init_serial_test(serial_test)
         Vedirect.__init__(self,
-                          serial_port=serial_port,
-                          baud=baud,
-                          timeout=timeout,
-                          source_name=source_name)
+                          serial_conf=serial_conf,
+                          source_name=source_name,
+                          auto_start=auto_start)
 
     def has_serial_test(self) -> bool:
         """Test if is valid serial test helper."""
@@ -92,6 +92,14 @@ class VedirectController(Vedirect):
     def is_ready_to_search_ports(self) -> bool:
         """Test if class Vedirect is ready."""
         return self.has_serial_com() and self.has_serial_test()
+
+    def set_wait_timeout(self, wait_timeout: int or float):
+        """Test if class Vedirect is ready."""
+        self._wait_timeout = Ut.get_float(wait_timeout, 3600)
+
+    def get_wait_timeout(self) -> bool:
+        """Test if class Vedirect is ready."""
+        return self._wait_timeout
 
     def init_serial_test(self, serial_test: dict) -> bool:
         """
@@ -121,11 +129,9 @@ class VedirectController(Vedirect):
         )
 
     def init_settings(self,
-                      serial_port: str or None = None,
-                      baud: int = 19200,
-                      timeout: int or float = 0,
+                      serial_conf: dict,
                       source_name: str = 'VedirectController',
-                      wait_timeout: int or float = 3600
+                      auto_start: bool = True
                       ) -> bool:
         """
         Initialise the settings for the class.
@@ -142,27 +148,23 @@ class VedirectController(Vedirect):
             - >self.init_settings(serial_port="/tmp/vmodem0")
             - >True
         :param self: Refer to the object itself
-        :param serial_port: The serial port to connect
-        :param baud: Baud rate such as 9600 or 115200 etc.
-        :param timeout: Set a read timeout value in seconds
+        :param serial_conf: dict: The serial connection configuration,
         :param source_name: This is used in logger to identify the source of call
-        :param wait_timeout: Timeout value to search valid serial port in case of connection fails
+        :param auto_start: bool: Define if serial connection must be established automatically
         :return: True if connection to serial port success.
 
         .. raises:: SettingInvalidException, VedirectException
         """
-        result = False
         try:
-            result = self.init_serial_connection(serial_port=serial_port,
-                                                 baud=baud,
-                                                 timeout=timeout,
-                                                 source_name=source_name
+            result = self.init_serial_connection(serial_conf=serial_conf,
+                                                 source_name=source_name,
+                                                 auto_start=auto_start
                                                  )
         except VedirectException as ex:
             if self._wait_connection is True\
                     and self.wait_or_search_serial_connection(
-                    timeout=wait_timeout,
-                    exception=ex
+                        timeout=self._wait_timeout,
+                        exception=ex
                     ):
                 result = True
             else:
@@ -179,7 +181,7 @@ class VedirectController(Vedirect):
                     data = self.read_data_single(timeout=1)
                     if Ut.is_dict(data, not_null=True):
                         result.update(data)
-                    time.sleep(0.2)
+                    time.sleep(i * 0.1)
             except Exception as ex:
                 logger.debug(
                     '[VeDirect] Unable to read serial data to test'
@@ -303,18 +305,16 @@ class VedirectController(Vedirect):
         )
 
     def read_data_callback(self,
-                           callback_func,
-                           timeout: int = 60,
-                           connection_timeout: int = 3600,
+                           callback_function,
+                           timeout: int or float = 60,
                            max_loops: int or None = None
                            ) -> dict or None:
         """
         Read data from the serial port and returns it to a callback function.
 
         :param self: Reference the class instance
-        :param callback_func:function: Pass a function to the read_data_callback function
+        :param callback_function:function: Pass a function to the read_data_callback function
         :param timeout:int=60: Set the timeout for the read_data_callback function
-        :param connection_timeout:int=18400: Set the timeout for the connection
         :param max_loops:int or None=None: Limit the number of loops
         :return: A dictionary
         :doc-author: Trelent
@@ -331,7 +331,11 @@ class VedirectController(Vedirect):
                         serial.SerialException,
                         serial.SerialTimeoutException
                         ) as ex:
-                    if self.wait_or_search_serial_connection(ex, connection_timeout):
+                    if self._wait_connection is True\
+                            and self.wait_or_search_serial_connection(
+                                exception=ex,
+                                timeout=self._wait_timeout
+                            ):
                         now = tim = time.time()
                         packet = self.get_serial_packet()
 
@@ -343,7 +347,7 @@ class VedirectController(Vedirect):
                         "bytes_sum: %s ",
                         packet, self.state, self.bytes_sum
                     )
-                    callback_func(packet)
+                    callback_function(packet)
                     now = tim
                     i = i+1
                     packet = None
@@ -360,4 +364,5 @@ class VedirectController(Vedirect):
                 'Unable to read serial data. '
                 'Not connected to serial port...')
 
-        callback_func(None)
+        callback_function(None)
+        return None

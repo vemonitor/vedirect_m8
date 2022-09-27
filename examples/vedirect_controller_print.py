@@ -72,9 +72,11 @@ if __name__ == '__main__':
 
     conf = {
         "serial_port": parser.port,
-        "timeout": parser.timeout,
-        "serial_test": get_device_serial_tests(parser.device)
+        "timeout": parser.timeout
     }
 
-    ve = VedirectController(**conf)
+    ve = VedirectController(
+        serial_conf=conf,
+        serial_test=get_device_serial_tests(parser.device)
+    )
     ve.read_data_callback(print_data_callback)
