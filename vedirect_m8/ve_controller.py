@@ -20,7 +20,8 @@ from ve_utils.utype import UType as Ut
 from vedirect_m8.sertest import SerialTestHelper
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import InputReadException, TimeoutException, VedirectException, SettingInvalidException
+from vedirect_m8.exceptions import InputReadException, TimeoutException
+from vedirect_m8.exceptions import VedirectException, SettingInvalidException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
@@ -160,7 +161,7 @@ class VedirectController(Vedirect):
 
     def read_data_to_test(self) -> dict:
         """Return decoded Vedirect blocks from serial to identify the right serial port."""
-        res = None
+        result = None
         if self.is_ready():
             try:
                 res = dict()
@@ -170,7 +171,8 @@ class VedirectController(Vedirect):
             except Exception as ex:
                 logger.debug(
                     '[VeDirect] Unable to read serial data to test'
-                    'ex : %s' % ex
+                    'ex : %s',
+                    ex
                 )
         return res
 
@@ -184,14 +186,15 @@ class VedirectController(Vedirect):
         and reads data from it. It then passes this data into
         the SerialTestHelper class which runs some basic tests
         on the data returned by the serial connection.
+
+        Raise:
+            - VedirectException
         :param self: Reference the class instance
-        :param ports:list: Specify the serial ports to test
+        :param ports: list: Specify the serial ports to test
         :return: True if the serial port is open and
                  connected to a device that returns valid data
-
-        .. raises:: VedirectException,
-        :doc-author: Trelent
         """
+        result = False
         if self.is_ready_to_search_ports():
             if Ut.is_list(ports, not_null=True):
                 for port in ports:
@@ -219,6 +222,7 @@ class VedirectController(Vedirect):
                 "SerialConnection and/or SerialTestHelper, "
                 "are not ready."
             )
+        return result
 
     def search_serial_port(self) -> bool:
         """Search the serial port from serial tests."""
@@ -257,10 +261,11 @@ class VedirectController(Vedirect):
             logger.info(
                 "[VeDirect::wait_or_search_serial_connection] "
                 "Lost serial connection, attempting to reconnect. "
-                "reconnection timeout is set to %ss" % timeout
+                "reconnection timeout is set to %ss",
+                timeout
             )
-            bc, now, tim = True, time.time(), 0
-            while bc:
+            run, now, tim = True, time.time(), 0
+            while run:
                 tim = time.time()
                 if self.search_serial_port():
                     return True
@@ -297,10 +302,10 @@ class VedirectController(Vedirect):
         :return: A dictionary
         :doc-author: Trelent
         """
-        bc, now, tim, i = True, time.time(), 0, 0
+        run, now, tim, i = True, time.time(), 0, 0
         packet = None
         if self.is_ready():
-            while bc:
+            while run:
                 tim = time.time()
                 try:
                     packet = self.get_serial_packet()
@@ -318,8 +323,8 @@ class VedirectController(Vedirect):
                         "Serial reader success: "
                         "packet: %s -- "
                         "state: %s -- "
-                        "bytes_sum: %s " %
-                        (packet, self.state, self.bytes_sum)
+                        "bytes_sum: %s ",
+                        packet, self.state, self.bytes_sum
                     )
                     callback_func(packet)
                     now = tim
@@ -337,5 +342,5 @@ class VedirectController(Vedirect):
                 '[VeDirect::read_data_callback] '
                 'Unable to read serial data. '
                 'Not connected to serial port...')
-        
+
         callback_func(None)
