@@ -57,10 +57,12 @@ class Vedirect:
         :return: Nothing
         """
         self._com = None
-        self.header1 = ord('\r')
-        self.header2 = ord('\n')
-        self.hexmarker = ord(':')
-        self.delimiter = ord('\t')
+        self._delimiters = {
+            "header1": ord('\r'),
+            "header2": ord('\n'),
+            "hexmarker": ord(':'),
+            "delimiter": ord('\t')
+        }
         self.key = ''
         self.value = ''
         self.bytes_sum = 0
@@ -257,18 +259,19 @@ class Vedirect:
         """Input read from byte."""
         try:
             nbyte = ord(byte)
-            if byte == self.hexmarker and self.state != self.IN_CHECKSUM:
+            if byte == self._delimiters.get("hexmarker")\
+                    and self.state != self.IN_CHECKSUM:
                 self.state = self.HEX
             if self.state == self.WAIT_HEADER:
                 self.bytes_sum += nbyte
-                if nbyte == self.header1:
+                if nbyte == self._delimiters.get("header1"):
                     self.state = self.WAIT_HEADER
-                elif nbyte == self.header2:
+                elif nbyte == self._delimiters.get("header2"):
                     self.state = self.IN_KEY
                 return None
             elif self.state == self.IN_KEY:
                 self.bytes_sum += nbyte
-                if nbyte == self.delimiter:
+                if nbyte == self._delimiters.get("delimiter"):
                     if self.key == 'Checksum':
                         self.state = self.IN_CHECKSUM
                     else:
@@ -278,7 +281,7 @@ class Vedirect:
                 return None
             elif self.state == self.IN_VALUE:
                 self.bytes_sum += nbyte
-                if nbyte == self.header1:
+                if nbyte == self._delimiters.get("header1"):
                     self.state = self.WAIT_HEADER
                     self.dict[self.key] = self.value
                     self.key = ''
@@ -298,7 +301,7 @@ class Vedirect:
                     self.bytes_sum = 0
             elif self.state == self.HEX:
                 self.bytes_sum = 0
-                if nbyte == self.header2:
+                if nbyte == self._delimiters.get("header2"):
                     self.state = self.WAIT_HEADER
             else:
                 raise AssertionError()
