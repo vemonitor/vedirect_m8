@@ -62,7 +62,7 @@ class Vedirect:
         :param self: Refer to the object instance itself,
         :param serial_conf: dict: The serial connection configuration,
         :param source_name: This is used in logger to identify the source of call,
-        :param auto_start: bool: Define if serial connection must be established automaticaly.
+        :param auto_start: bool: Define if serial connection must be established automatically.
         :return: Nothing
         """
         self._com = None
@@ -125,7 +125,7 @@ class Vedirect:
             >>> True
         :param self: Refer to the object itself,
         :param serial_connection: The SerialConnection object,
-        :param auto_start: bool: Define if serial connection must be established automaticaly.
+        :param auto_start: bool: Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
         """
         result = False
@@ -166,7 +166,7 @@ class Vedirect:
         :param self: Refer to the object itself,
         :param serial_conf: dict: dict: The serial connection configuration,
         :param source_name: str: This is used in logger to identify the source of call,
-        :param auto_start: bool: Define if serial connection must be established automaticaly.
+        :param auto_start: bool: Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
         """
         result = False
@@ -210,7 +210,7 @@ class Vedirect:
         :param self: Refer to the object itself,
         :param serial_conf: dict: The serial connection configuration,
         :param source_name: This is used in logger to identify the source of call,
-        :param auto_start: bool: Define if serial connection must be established automaticaly.
+        :param auto_start: bool: Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
         """
         return self.init_serial_connection(serial_conf=serial_conf,
