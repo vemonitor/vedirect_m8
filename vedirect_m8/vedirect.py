@@ -11,8 +11,9 @@ This is a forked version of script originally created by Janne Kario.
 import logging
 import time
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import SettingInvalidException, InputReadException, TimeoutException, VedirectException
-
+from vedirect_m8.exceptions import SettingInvalidException
+from vedirect_m8.exceptions import InputReadException
+from vedirect_m8.exceptions import TimeoutException, VedirectException
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"
 __deprecated__ = False
@@ -127,7 +128,8 @@ class Vedirect:
 
     def init_serial_connection_from_object(self, serial_connection: SerialConnection) -> bool:
         """
-        Initialise serial connection from SerialConnection object
+        Initialise serial connection from SerialConnection object.
+
         Raise:
          - SettingInvalidException if serial_port, baud or timeout are not valid.
          - VedirectException if connection to serial port fails
@@ -147,7 +149,7 @@ class Vedirect:
                     "Connection to serial port fails. obj : %s" %
                     serial_connection
                 )
-            return True
+            result = True
         else:
             raise SettingInvalidException(
                 "[Vedirect::init_serial_connection_from_object] "
@@ -155,6 +157,7 @@ class Vedirect:
                 "bad parameters : %s" %
                 serial_connection
             )
+        return result
 
     def init_serial_connection(self,
                                serial_port: str or None = None,
@@ -199,7 +202,7 @@ class Vedirect:
                     "Connection to serial port %s fails." %
                     serial_port
                 )
-            return True
+            result = True
         else:
             raise SettingInvalidException(
                 "[Vedirect::init_serial_connection] "
@@ -207,6 +210,7 @@ class Vedirect:
                 "bad parameters. serial_port : %s - baud : %s - timeout : %s." %
                 (serial_port, baud, timeout)
             )
+        return result
 
     def init_settings(self,
                       serial_port: str or None = None,
@@ -301,8 +305,8 @@ class Vedirect:
         except Exception as ex:
             raise InputReadException(
                 "[Vedirect::input_read] "
-                "Serial input read error %s " % ex
-            )
+                "Serial input read error"
+            ) from ex
 
     def get_serial_packet(self) -> dict or None:
         """
@@ -330,17 +334,21 @@ class Vedirect:
         :return: A dictionary of the data
         :doc-author: Trelent
         """
-        bc, now, tim = True, time.time(), 0
+        run, now, tim = True, time.time(), 0
 
         if self.is_ready():
-            while bc:
-                packet, tim = None, time.time()
+            try:
+                while run:
+                    packet, tim = None, time.time()
 
-                packet = self.get_serial_packet()
+                    packet = self.get_serial_packet()
 
-                if packet is not None:
-                    logger.debug("Serial reader success: dict: %s" % self.dict)
-                    return packet
+                    if packet is not None:
+                        logger.debug(
+                            "Serial reader success: dict: %s",
+                            self.dict
+                        )
+                        return packet
 
                 # timeout serial read
                 Vedirect.is_timeout(tim-now, timeout)
@@ -362,10 +370,9 @@ class Vedirect:
         :param timeout:int=60: Set the timeout for the read_data_callback function
         :param max_loops:int or None=None: Limit the number of loops
         """
-        bc, now, tim, i = True, time.time(), 0, 0
-        packet = None
+        run, now, tim, i = True, time.time(), 0, 0
         if self.is_ready():
-            while bc:
+            while run:
                 tim = time.time()
 
                 packet = self.get_serial_packet()
@@ -373,12 +380,12 @@ class Vedirect:
                 if packet is not None:
                     logger.debug(
                         "Serial reader success: packet: %s "
-                        "-- state: %s -- bytes_sum: %s " %
-                        (packet, self.state, self.bytes_sum))
+                        "-- state: %s -- bytes_sum: %s ",
+                        packet, self.state, self.bytes_sum
+                    )
                     callback_function(packet)
                     now = tim
                     i = i + 1
-                    packet = None
 
                 # timeout serial read
                 Vedirect.is_timeout(tim-now, timeout)
