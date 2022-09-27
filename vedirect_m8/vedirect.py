@@ -335,7 +335,6 @@ class Vedirect:
         :param self: Reference the class instance
         :param timeout: Set the timeout for the read_data_single function
         :return: A dictionary of the data
-        :doc-author: Trelent
         """
         run, now, tim = True, time.time(), 0
 
