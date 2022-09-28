@@ -194,11 +194,12 @@ class VedirectController(Vedirect):
         """Attempt serial connection on specified port."""
         result = False
         if SerialConnection.is_serial_port(port):
+            timeout, serial_port = self._com.get_timeout(), self._com.get_serial_port()
             if self._com.connect(**{"serial_port": port, 'timeout': 0}):
                 time.sleep(0.5)
                 data = self.read_data_to_test()
                 if self._ser_test.run_serial_tests(data):
-                    self._com.ser.timeout = self._com.get_timeout()
+                    self._com.ser.timeout = timeout
                     logger.info(
                         "[VeDirect::_test_serial_port] "
                         "New connection established to serial port %s. ",
@@ -206,6 +207,8 @@ class VedirectController(Vedirect):
                     )
                     result = True
                 else:
+                    self._com.set_timeout(timeout)
+                    self._com.set_serial_port(serial_port)
                     self._com.ser.close()
         return result
 
