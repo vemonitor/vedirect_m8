@@ -67,7 +67,7 @@ class Vedirectsim:
     def serial_connect(self) -> bool:
         """Connect to serial port."""
         self.ser = serial.Serial(self.serialport, 19200, timeout=10)
-        self.ser.write_timeout = 2
+        self.ser.write_timeout = 0
         if self.is_serial_ready():
             logger.info(
                 "Connected to serial port %s" %
