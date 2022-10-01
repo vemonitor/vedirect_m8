@@ -14,6 +14,7 @@ from serial import Serial, SerialException, SerialTimeoutException
 import serial.tools.list_ports as serial_list_ports
 from ve_utils.usys import USys
 from vedirect_m8.serutils import SerialUtils as Ut
+from vedirect_m8.exceptions import VedirectException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
@@ -261,7 +262,6 @@ class SerialConnection:
         :param exclusive: The exclusive.
         :return: True if success to open a serial connection.
         """
-        result = False
         serial_conf = self.set_serial_conf(serial_port=serial_port,
                                            baud=baud,
                                            timeout=timeout,
@@ -284,24 +284,32 @@ class SerialConnection:
                     )
                     result = True
                 else:
-                    logger.error(
+                    raise VedirectException(
                         '[SerialConnection::connect::%s] '
-                        'Unable to open serial connection. args: %s',
-                        self._source_name, serial_conf
+                        'Unable to open serial connection. args: %s' %
+                        (self._source_name, serial_conf)
                     )
-            except (SerialException, SerialTimeoutException) as ex:
-                logger.error(
+            except SerialTimeoutException as ex:
+                raise VedirectException(
                     '[SerialConnection::connect::%s] '
                     'Exception when attempting to open serial connection. '
-                    ' args: %s - ex : %s',
-                    self._source_name, serial_conf, ex
-                )
+                    ' args: %s - ex : %s' %
+                    (self._source_name, serial_conf, ex)
+                ) from SerialTimeoutException
+
+            except SerialException as ex:
+                raise VedirectException(
+                    '[SerialConnection::connect::%s] '
+                    'Exception when attempting to open serial connection. '
+                    ' args: %s - ex : %s' %
+                    (self._source_name, serial_conf, ex)
+                ) from SerialException
         else:
-            logger.error(
+            raise VedirectException(
                 '[SerialConnection::connect::%s] '
                 'Unable to open serial connection. '
-                'Invalid settings : %s',
-                self._source_name, serial_conf
+                'Invalid settings : %s' %
+                (self._source_name, serial_conf)
             )
 
         return result

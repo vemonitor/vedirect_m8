@@ -4,8 +4,10 @@ SerialConnection unittest class.
 Use pytest package.
 """
 import os
+import pytest
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.serutils import SerialUtils as Ut
+from vedirect_m8.exceptions import VedirectException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
@@ -189,6 +191,9 @@ class TestSerialConnection:
         assert self.obj.connect()
         assert self.obj.is_serial_ready()
         assert self.obj.is_ready()
+
+        with pytest.raises(VedirectException):
+            self.obj.connect(serial_port="/dev/ttyUSB99")
 
     def test_get_serial_ports_list(self):
         """Test get_serial_ports_list method."""
