@@ -190,7 +190,7 @@ class VedirectController(Vedirect):
                 )
         return result
 
-    def _test_serial_port(self, port: str) -> bool:
+    def test_serial_port(self, port: str) -> bool:
         """Attempt serial connection on specified port."""
         result = False
         if SerialConnection.is_serial_port(port):
@@ -234,7 +234,7 @@ class VedirectController(Vedirect):
         if self.is_ready_to_search_ports():
             if Ut.is_list(ports, not_null=True):
                 for port in ports:
-                    if self._test_serial_port(port):
+                    if self.test_serial_port(port):
                         result = True
                         break
         else:
