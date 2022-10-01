@@ -12,8 +12,8 @@ This is a forked version of script originally created by Janne Kario.
 import logging
 import inspect
 import os
-import serial
 import time
+import serial
 from ve_utils.utype import UType as Ut
 
 __author__ = "Janne Kario, Eli Serra"
@@ -70,7 +70,7 @@ class Vedirectsim:
         self.ser.write_timeout = 0
         if self.is_serial_ready():
             logger.info(
-                "Connected to serial port %s" %
+                "Connected to serial port %s",
                 self.serialport
             )
             return True
@@ -110,7 +110,7 @@ class Vedirectsim:
         if self.set_device(device)\
                 and self.set_dump_file_path():
             logger.info(
-                "Device %s fully configured." %
+                "Device %s fully configured.",
                 device
             )
             return True
@@ -139,8 +139,8 @@ class Vedirectsim:
         if self.is_ready():
             logger.info(
                 "Starting to read dump file lines on device %s. "
-                "Max serial writes : %s" %
-                (self.device, max_writes)
+                "Max serial writes : %s",
+                self.device, max_writes
             )
             self.dict = dict()
             with open(self.dump_file_path) as f:
@@ -149,12 +149,12 @@ class Vedirectsim:
 
                     if Ut.is_int(max_writes) and self.block_counter >= max_writes:
                         logger.info(
-                            "End read dump file lines on max serial writes : %s/%s" %
-                            (self.block_counter, max_writes)
+                            "End read dump file lines on max serial writes : %s/%s",
+                            self.block_counter, max_writes
                         )
                         return True
             logger.info(
-                "End read dump file lines. Write packets : %s" %
+                "End read dump file lines. Write packets : %s",
                 self.block_counter
             )
             return True
@@ -185,13 +185,14 @@ class Vedirectsim:
             self.ser.write(bytes(packet))
             self.block_counter += 1
             logger.debug(
-                "Sending packet %s on serial : %s. \n" %
-                (self.block_counter, self.dict)
+                "Sending packet %s on serial : %s. \n",
+                self.block_counter, self.dict
             )
         except serial.SerialTimeoutException as ex:
             logger.error(
-                "Error : SerialTimeoutException on writing on serial : packet nb : %s - packet %s - ex %s. \n" %
-                (self.block_counter, self.dict, ex)
+                "Error : SerialTimeoutException on writing on serial :"
+                "packet nb : %s - packet %s - ex %s. \n",
+                self.block_counter, self.dict, ex
             )
             self.ser.cancel_write()
             self.ser.reset_output_buffer()
@@ -199,7 +200,7 @@ class Vedirectsim:
         now = time.time()
         sleep_time = 0.5 - (now - start)
         if sleep_time > 0:
-            logger.debug("---> Sleeping %ss" % sleep_time)
+            logger.debug("---> Sleeping %ss", sleep_time)
             time.sleep(sleep_time)
 
     def run(self, max_writes: int or None = None) -> bool:

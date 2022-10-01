@@ -143,11 +143,13 @@ class SerialTestHelper:
         :param serial_data: The serial data decoded from serial vedirect device
         :return: True if columns test success on serial_data.
         """
+        result = False
         if SerialTestHelper.is_columns_list_test(columns_test)\
                 and Ut.is_dict(serial_data, not_null=True):
             keys = columns_test.get("keys")
             serial_data_keys = serial_data.keys()
-            return all(key in serial_data_keys for key in keys)
+            result = all(key in serial_data_keys for key in keys)
+        return result
 
     @staticmethod
     def get_valid_type_tests() -> list:
@@ -242,7 +244,7 @@ class SerialTestHelper:
         tst = False
         if self.has_serial_tests():
             tst = True
-            for key, item in self._tests.items():
+            for item in self._tests.values():
                 type_test = item.get("typeTest")
 
                 if type_test == "value"\

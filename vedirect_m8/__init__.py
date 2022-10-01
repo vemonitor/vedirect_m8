@@ -33,7 +33,9 @@ def configure_logging(debug: bool = False):
     syslog = logging.StreamHandler()
     syslog.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter('%(asctime)s :: %(app_version)s :: %(message)s', "%Y-%m-%d %H:%M:%S")
+    formatter = logging.Formatter(
+        '%(asctime)s :: %(app_version)s :: %(message)s', "%Y-%m-%d %H:%M:%S"
+    )
     syslog.setFormatter(formatter)
 
     if debug:
@@ -44,4 +46,4 @@ def configure_logging(debug: bool = False):
     # add the handlers to logger
     logger.addHandler(syslog)
 
-    logger.debug("Logger ready. debug : %s" % debug)
+    logger.debug("Logger ready. debug : %s", debug)
