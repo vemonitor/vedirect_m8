@@ -66,10 +66,10 @@ class SerialConnection:
         self._baud = 19200
         self._timeout = 0
         self.ser = None
-        self.init_settings(serial_port=serial_port,
-                           baud=baud,
-                           timeout=timeout,
-                           source_name=source_name)
+        self._init_settings(serial_port=serial_port,
+                            baud=baud,
+                            timeout=timeout,
+                            source_name=source_name)
 
     def get_serial_port(self) -> int or float:
         """Return serial_port value from instance."""
@@ -167,12 +167,12 @@ class SerialConnection:
                                                baud=self._baud,
                                                timeout=self._timeout)
 
-    def init_settings(self,
-                      serial_port: str or None = None,
-                      baud: int = 19200,
-                      timeout: int or float or None = 0,
-                      source_name: str = 'void'
-                      ) -> bool:
+    def _init_settings(self,
+                       serial_port: str or None = None,
+                       baud: int = 19200,
+                       timeout: int or float or None = 0,
+                       source_name: str = 'void'
+                       ) -> bool:
         """
         Initialise configuration settings.
 
@@ -196,13 +196,13 @@ class SerialConnection:
         self.set_source_name(source_name)
         return self.is_settings()
 
-    def set_serial_conf(self,
-                        serial_port: str or None = None,
-                        baud: int or None = None,
-                        timeout: int or float or None = -1,
-                        write_timeout: int or float or None = -1,
-                        exclusive: bool = False
-                        ) -> dict:
+    def _set_serial_conf(self,
+                         serial_port: str or None = None,
+                         baud: int or None = None,
+                         timeout: int or float or None = -1,
+                         write_timeout: int or float or None = -1,
+                         exclusive: bool = False
+                         ) -> dict:
         """
         Return the serial configuration settings to open serial connection.
 
@@ -262,12 +262,13 @@ class SerialConnection:
         :param exclusive: The exclusive.
         :return: True if success to open a serial connection.
         """
-        serial_conf = self.set_serial_conf(serial_port=serial_port,
-                                           baud=baud,
-                                           timeout=timeout,
-                                           write_timeout=write_timeout,
-                                           exclusive=exclusive
-                                           )
+        serial_conf = self._set_serial_conf(
+            serial_port=serial_port,
+            baud=baud,
+            timeout=timeout,
+            write_timeout=write_timeout,
+            exclusive=exclusive
+        )
         logger.debug(
             '[SerialConnection::connect::%s] '
             'settings : %s',
@@ -365,15 +366,10 @@ class SerialConnection:
         result = list()
         try:
             if USys.is_op_sys_type('unix'):
-                for path in SerialConnection.get_virtual_ports_paths():
-                    if path != "/dev" and os.path.exists(path):
-                        # get list files from path
-                        for entry in os.scandir(path):
-                            if not os.path.isdir(entry.path)\
-                                    and Ut.is_serial_port_name_pattern(entry.name):
-                                if os.path.exists(entry.path):
-                                    result.append(entry.path)
-
+                for path in SerialConnection._get_virtual_ports_paths():
+                    tmp = SerialConnection._scan_path(path)
+                    if Ut.is_list(tmp, not_null=True):
+                        result = result + tmp
         except Exception as ex:
             logger.error(
                 '[SerialConnection::get_unix_virtual_serial_ports_list::%s] '
@@ -381,6 +377,20 @@ class SerialConnection:
                 'exception : %s',
                 self._source_name, ex
             )
+        return result
+
+    @staticmethod
+    def _scan_path(path: str) -> list:
+        """Scan path and get serial ports from it."""
+        result = None
+        if path != "/dev" and os.path.exists(path):
+            # get list files from path
+            result = list()
+            for entry in os.scandir(path):
+                if not os.path.isdir(entry.path) \
+                        and Ut.is_serial_port_name_pattern(entry.name):
+                    if os.path.exists(entry.path):
+                        result.append(entry.path)
         return result
 
     @staticmethod
@@ -417,7 +427,7 @@ class SerialConnection:
             and SerialConnection.is_timeout(timeout)
 
     @staticmethod
-    def get_virtual_ports_paths() -> list:
+    def _get_virtual_ports_paths() -> list:
         """
         Return valid virtual serial ports paths.
 
@@ -443,7 +453,7 @@ class SerialConnection:
         return path
 
     @staticmethod
-    def is_virtual_serial_port(serial_port: str) -> bool:
+    def _is_virtual_serial_port(serial_port: str) -> bool:
         """
         Test if is valid virtual serial port.
 
@@ -457,13 +467,13 @@ class SerialConnection:
         :param serial_port: The serial port to test.
         :return: True if the virtual serial port is valid.
         """
-        name, path = SerialConnection.split_serial_port(serial_port)
+        name, path = SerialConnection._split_serial_port(serial_port)
         return Ut.is_str(serial_port)\
-            and path in SerialConnection.get_virtual_ports_paths()\
+            and path in SerialConnection._get_virtual_ports_paths()\
             and Ut.is_virtual_serial_port_pattern(name)
 
     @staticmethod
-    def split_serial_port(serial_port: str) -> tuple:
+    def _split_serial_port(serial_port: str) -> tuple:
         """
         Return serial port split in name and path.
 
@@ -547,7 +557,7 @@ class SerialConnection:
         :param serial_port: The serial_port to test.
         :return: True if the serial port is valid.
         """
-        name, path = SerialConnection.split_serial_port(serial_port)
+        name, path = SerialConnection._split_serial_port(serial_port)
         return Ut.is_str(serial_port)\
             and SerialConnection.is_serial_path(path)\
             and Ut.is_serial_port_name_pattern(name)
@@ -571,5 +581,5 @@ class SerialConnection:
                 and path is None or path == "")\
             or (USys.is_op_sys_type('unix')
                 and Ut.is_str(path)
-                and (path in SerialConnection.get_virtual_ports_paths()
+                and (path in SerialConnection._get_virtual_ports_paths()
                      or path == "/dev"))
