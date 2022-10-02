@@ -29,6 +29,10 @@ class TestVedirect:
         assert self.obj.is_ready()
         assert self.obj.has_serial_com()
         assert self.obj.connect_to_serial()
+        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port("vmodem1")
+        self.obj._com = None
+        with pytest.raises(VedirectException):
+            self.obj.connect_to_serial()
 
     def test_is_serial_com(self):
         """Test is_serial_com method."""
