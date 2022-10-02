@@ -30,7 +30,7 @@ setup(name='vedirect_m8',
       include_package_data=True,
       install_requires=[
           'pyserial>=3.5',
-          've_utils>=2.5.1',
+          've_utils>=2.5.2',
       ],
       extras_require={
               "TEST": [
