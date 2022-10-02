@@ -6,7 +6,7 @@ __copyright__ = "Copyright 2015, Janne Kario"
 __deprecated__ = False
 __license__ = "MIT"
 __status__ = "Production"
-__version__ = "1.2.6"
+__version__ = "1.2.7"
 
 
 class AppFilter(logging.Filter):
@@ -33,7 +33,9 @@ def configure_logging(debug: bool = False):
     syslog = logging.StreamHandler()
     syslog.setLevel(logging.DEBUG)
 
-    formatter = logging.Formatter('%(asctime)s :: %(app_version)s :: %(message)s', "%Y-%m-%d %H:%M:%S")
+    formatter = logging.Formatter(
+        '%(asctime)s :: %(app_version)s :: %(message)s', "%Y-%m-%d %H:%M:%S"
+    )
     syslog.setFormatter(formatter)
 
     if debug:
@@ -44,4 +46,4 @@ def configure_logging(debug: bool = False):
     # add the handlers to logger
     logger.addHandler(syslog)
 
-    logger.debug("Logger ready. debug : %s" % debug)
+    logger.debug("Logger ready. debug : %s", debug)

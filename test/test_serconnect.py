@@ -4,8 +4,10 @@ SerialConnection unittest class.
 Use pytest package.
 """
 import os
+import pytest
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.serutils import SerialUtils as Ut
+from vedirect_m8.exceptions import VedirectException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
@@ -52,7 +54,7 @@ class TestSerialConnection:
     @staticmethod
     def test_get_virtual_ports_paths():
         """Test get_virtual_ports_paths method."""
-        paths = SerialConnection.get_virtual_ports_paths()
+        paths = SerialConnection._get_virtual_ports_paths()
         assert Ut.is_list(paths) and len(paths) == 1
         assert paths[0] == os.path.expanduser('~')
 
@@ -85,7 +87,7 @@ class TestSerialConnection:
             SerialConnection.get_virtual_home_serial_port(1),
             SerialConnection.get_virtual_home_serial_port(dict())
         ]
-        tests = [x for x in virtual_ports if SerialConnection.is_virtual_serial_port(x)]
+        tests = [x for x in virtual_ports if SerialConnection._is_virtual_serial_port(x)]
         assert len(tests) == 2
 
     @staticmethod
@@ -98,7 +100,7 @@ class TestSerialConnection:
             "/r/",
             "\\r"
         ]
-        tests = [x for x in ports if SerialConnection.split_serial_port(x)[0] == 'r']
+        tests = [x for x in ports if SerialConnection._split_serial_port(x)[0] == 'r']
         assert len(tests) == 3
 
     @staticmethod
@@ -181,7 +183,7 @@ class TestSerialConnection:
             'write_timeout': 0,
             'exclusive': True
         }
-        result = self.obj.set_serial_conf(**conf)
+        result = self.obj._set_serial_conf(**conf)
         assert Ut.is_dict(result, eq=5)
 
     def test_connect(self):
@@ -189,6 +191,9 @@ class TestSerialConnection:
         assert self.obj.connect()
         assert self.obj.is_serial_ready()
         assert self.obj.is_ready()
+
+        with pytest.raises(VedirectException):
+            self.obj.connect(serial_port="/dev/ttyUSB99")
 
     def test_get_serial_ports_list(self):
         """Test get_serial_ports_list method."""

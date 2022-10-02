@@ -1,2 +1,2 @@
 pyserial>=3.5
-ve-utils>=2.5.1
+ve-utils>=2.5.2

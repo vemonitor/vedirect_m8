@@ -12,9 +12,10 @@ This is a forked version of script originally created by Janne Kario.
 import logging
 import inspect
 import os
-import serial
 import time
+import serial
 from ve_utils.utype import UType as Ut
+from ve_utils.utime import PerfStats
 
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"
@@ -33,6 +34,7 @@ class Vedirectsim:
         """Vedirectsim init instance."""
         self.serialport = serialport
         self.ser = None
+        self.perf = PerfStats()
         self.device = None
         self.dump_file_path = None
         self.block_counter = 0
@@ -67,10 +69,10 @@ class Vedirectsim:
     def serial_connect(self) -> bool:
         """Connect to serial port."""
         self.ser = serial.Serial(self.serialport, 19200, timeout=10)
-        self.ser.write_timeout = 2
+        self.ser.write_timeout = 0
         if self.is_serial_ready():
             logger.info(
-                "Connected to serial port %s" %
+                "Connected to serial port %s",
                 self.serialport
             )
             return True
@@ -78,11 +80,6 @@ class Vedirectsim:
             "Fatal error, unable to connect on serial port %s." %
             self.serialport
         )
-
-    @staticmethod
-    def get_valid_devices() -> list:
-        """Get valid devices to simulate vedirect data."""
-        return ["bmv702", "bluesolar_1.23", "smartsolar_1.39"]
 
     def set_device(self, device: str):
         """Set the vedirect device to simulate."""
@@ -110,7 +107,7 @@ class Vedirectsim:
         if self.set_device(device)\
                 and self.set_dump_file_path():
             logger.info(
-                "Device %s fully configured." %
+                "Device %s fully configured.",
                 device
             )
             return True
@@ -119,46 +116,6 @@ class Vedirectsim:
             "Valid devices are : (bmv702, bluesolar_1.23, smartsolar_1.39) " %
             device
         )
-
-    def process_data(self, data: str):
-        """Process read data."""
-        if Ut.is_str(data):
-            value = data.replace('\n', "").replace('\r', "")
-            res = value.split('\t')
-            if Ut.is_list(res) and len(res) == 2:
-                if res[0] != 'Checksum':
-                    key, value = res
-                    self.dict.update({key: value})
-                    if len(self.dict) == 18:
-                        self.send_packet()
-                elif Ut.is_dict(self.dict, not_null=True):
-                    self.send_packet()
-
-    def read_dump_file_lines(self, max_writes: int or None = None) -> bool:
-        """Read file lines."""
-        if self.is_ready():
-            logger.info(
-                "Starting to read dump file lines on device %s. "
-                "Max serial writes : %s" %
-                (self.device, max_writes)
-            )
-            self.dict = dict()
-            with open(self.dump_file_path) as f:
-                for piece in f:
-                    self.process_data(piece)
-
-                    if Ut.is_int(max_writes) and self.block_counter >= max_writes:
-                        logger.info(
-                            "End read dump file lines on max serial writes : %s/%s" %
-                            (self.block_counter, max_writes)
-                        )
-                        return True
-            logger.info(
-                "End read dump file lines. Write packets : %s" %
-                self.block_counter
-            )
-            return True
-        return False
 
     def convert(self, data: dict) -> list:
         """Convert data to vedirect protocol."""
@@ -179,43 +136,131 @@ class Vedirectsim:
 
     def send_packet(self):
         """Send the packet to serial port."""
-        start = time.time()
         packet = self.convert(self.dict)
         try:
             self.ser.write(bytes(packet))
             self.block_counter += 1
-            logger.debug(
-                "Sending packet %s on serial : %s. \n" %
-                (self.block_counter, self.dict)
-            )
+            write_time = self.perf.end_perf_key("writes")
+            sleep_time = 0
+            if 0 < write_time < 0.5:
+                sleep_time = 0.5 - write_time
+                time.sleep(sleep_time)
+
+            if logger.level == 10:
+                logger.debug(
+                    "Sending packet %s on serial in %s s."
+                    "Stats: %s - sleep before next: %s. \n %s",
+                    self.block_counter,
+                    write_time,
+                    self.perf.serialize_perf_key("writes"),
+                    sleep_time,
+                    self.dict
+                )
+            elif self.block_counter % 20:
+                logger.info(
+                    "Sending packet %s on serial in %s s. Stats : %s.\n",
+                    self.block_counter, write_time, self.perf.serialize_perf_key("writes")
+                )
+
         except serial.SerialTimeoutException as ex:
             logger.error(
-                "Error : SerialTimeoutException on writing on serial : packet nb : %s - packet %s - ex %s. \n" %
-                (self.block_counter, self.dict, ex)
+                "Error : SerialTimeoutException on writing on serial :"
+                "packet nb : %s - packet %s - ex %s. \n",
+                self.block_counter, self.dict, ex
             )
             self.ser.cancel_write()
             self.ser.reset_output_buffer()
         self.dict = dict()
-        now = time.time()
-        sleep_time = 0.5 - (now - start)
-        if sleep_time > 0:
-            logger.debug("---> Sleeping %ss" % sleep_time)
-            time.sleep(sleep_time)
+
+        self.perf.start_perf_key("writes")
+
+    def process_data(self, key: str, value: str):
+        """Process read data."""
+        if Ut.is_str(key, not_null=True):
+            if key != 'Checksum':
+                self.dict.update({key: value})
+                if len(self.dict) == 18:
+                    self.send_packet()
+            elif Ut.is_dict(self.dict, not_null=True):
+                self.send_packet()
+
+    def is_max_writes(self, max_writes: int or None = None):
+        """Test if max serial writes."""
+        return Ut.is_int(max_writes) and self.block_counter >= max_writes
+
+    def read_dump_file(self):
+        """Read dump file."""
+        if self.is_ready():
+            with open(self.dump_file_path) as lines:
+                for line in lines:
+                    values = Vedirectsim.get_key_value_from_line(line)
+                    if Ut.is_tuple(values, eq=2):
+                        yield values
+
+    def read_dump_file_lines(self, max_writes: int or None = None) -> bool:
+        """Read file lines."""
+        result = False
+        if self.is_ready():
+            self.perf.start_perf_key("writes")
+            for key, value in self.read_dump_file():
+                time.sleep(0.01)
+                if self.is_max_writes(max_writes):
+                    logger.info(
+                        "End read dump file lines on max serial writes : %s/%s",
+                        self.block_counter, max_writes
+                    )
+                    result = True
+                    break
+
+                self.process_data(key, value)
+
+        return result
 
     def run(self, max_writes: int or None = None) -> bool:
         """Run the simulator."""
         if self.is_ready():
             running = True
             while running:
+                self.dict = dict()
+                self.perf.start_perf_key("dump")
 
+                start_writes = self.block_counter
+                logger.info(
+                    "Starting to read dump file lines on device %s. "
+                    "Max serial writes : %s",
+                    self.device, max_writes
+                )
                 running = self.read_dump_file_lines(max_writes)
-
+                time_dump = self.perf.end_perf_key("dump")
+                logger.info(
+                    "End read dump file lines. Write %s/%s packets in % s. Stats dump: %s",
+                    self.block_counter - start_writes,
+                    self.block_counter,
+                    time_dump,
+                    self.perf.serialize_perf_key("dump")
+                )
                 if Ut.is_int(max_writes) and self.block_counter >= max_writes:
                     break
-            return True
+            return running
         raise ValueError(
             "Fatal error, unable to set device settings on %s."
             "Valid devices are : (bmv702, bluesolar_1.23, smartsolar_1.39). "
             "Or can be path file error: %s" %
             (self.device, self.dump_file_path)
         )
+
+    @staticmethod
+    def get_valid_devices() -> list:
+        """Get valid devices to simulate vedirect data."""
+        return ["bmv702", "bluesolar_1.23", "smartsolar_1.39"]
+
+    @staticmethod
+    def get_key_value_from_line(line):
+        """Get key value from dump file line."""
+        result = None
+        if Ut.is_str(line):
+            value = line.replace('\n', "").replace('\r', "")
+            values = value.split('\t')
+            if Ut.is_list(values, eq=2):
+                result = tuple(values)
+        return result
