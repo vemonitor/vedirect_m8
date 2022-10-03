@@ -31,17 +31,17 @@ def configure_logging(debug: bool = False):
     logger.addFilter(AppFilter())
     logger.propagate = False
     syslog = logging.StreamHandler()
-    syslog.setLevel(logging.DEBUG)
+    syslog.setLevel(logging.INFO)
+    logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
-        '%(asctime)s :: %(app_version)s :: %(message)s', "%Y-%m-%d %H:%M:%S"
+        '%(asctime)s.%(msecs)03d :: %(app_version)s :: %(message)s', "%Y-%m-%d %H:%M:%S"
     )
     syslog.setFormatter(formatter)
 
     if debug:
         logger.setLevel(logging.DEBUG)
-    else:
-        logger.setLevel(logging.INFO)
+        syslog.setLevel(logging.DEBUG)
 
     # add the handlers to logger
     logger.addHandler(syslog)
