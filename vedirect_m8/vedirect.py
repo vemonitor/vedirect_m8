@@ -332,8 +332,9 @@ class Vedirect:
             except SerialException as ex:
                 raise VedirectException(
                     "[VeDirect:read_data_single] "
-                    "Unable to read vedirect data : %s."
-                ) from ex
+                    "Unable to read vedirect data : %s.",
+                    ex
+                ) from SerialException
         else:
             logger.error('[VeDirect] Unable to read serial data. Not connected to serial port...')
 
