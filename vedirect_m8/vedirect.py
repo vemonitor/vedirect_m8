@@ -97,7 +97,7 @@ class Vedirect:
         """Test if class Vedirect is ready"""
         return self.is_serial_ready()
 
-    def get_serial_port(self) -> bool:
+    def get_serial_port(self) -> str or None:
         """Test if class Vedirect is ready"""
         return self._com.get_serial_port()
 
