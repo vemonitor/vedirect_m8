@@ -68,7 +68,13 @@ class Vedirectsim:
 
     def serial_connect(self) -> bool:
         """Connect to serial port."""
-        self.ser = serial.Serial(self.serialport, 19200, timeout=10)
+        self.ser = serial.Serial(
+            port=self.serialport,
+            baudrate=19200,
+            timeout=0,
+            rtscts=False,
+            dsrdtr=False
+        )
         self.ser.write_timeout = 0
         if self.is_serial_ready():
             logger.info(
@@ -136,32 +142,12 @@ class Vedirectsim:
 
     def send_packet(self):
         """Send the packet to serial port."""
+        packet_write = False
         packet = self.convert(self.dict)
         try:
             self.ser.write(bytes(packet))
             self.block_counter += 1
-            write_time = self.perf.end_perf_key("writes")
-            sleep_time = 0
-            if 0 < write_time < 0.5:
-                sleep_time = 0.5 - write_time
-                time.sleep(sleep_time)
-
-            if logger.level == 10:
-                logger.debug(
-                    "Sending packet %s on serial in %s s."
-                    "Stats: %s - sleep before next: %s. \n %s",
-                    self.block_counter,
-                    write_time,
-                    self.perf.serialize_perf_key("writes"),
-                    sleep_time,
-                    self.dict
-                )
-            elif self.block_counter % 20:
-                logger.info(
-                    "Sending packet %s on serial in %s s. Stats : %s.\n",
-                    self.block_counter, write_time, self.perf.serialize_perf_key("writes")
-                )
-
+            packet_write = True
         except serial.SerialTimeoutException as ex:
             logger.error(
                 "Error : SerialTimeoutException on writing on serial :"
@@ -170,19 +156,45 @@ class Vedirectsim:
             )
             self.ser.cancel_write()
             self.ser.reset_output_buffer()
-        self.dict = dict()
 
-        self.perf.start_perf_key("writes")
+        write_time = self.perf.get_elapsed(
+            self.perf.get_perf_key_stat("writes", "start")
+        )
+        sleep_time = 0
+        if 0 < write_time < 0.5:
+            sleep_time = round(0.5 - round(write_time, 3) - 0.0025, 3)
+            time.sleep(sleep_time)
+
+        if logger.level <= 10:
+            write_time = self.perf.get_elapsed(
+                self.perf.get_perf_key_stat("writes", "start")
+            )
+
+            logger.debug(
+                "Sending packet %s %s on serial in %s s."
+                "Sleep before next: %s.\n"
+                "Write Stats: %s.\n %s\n",
+                self.block_counter,
+                packet_write,
+                write_time,
+                sleep_time,
+                self.perf.serialize_perf_key("writes"),
+                self.dict
+            )
+
+        self.dict = dict()
 
     def process_data(self, key: str, value: str):
         """Process read data."""
+        result = False
         if Ut.is_str(key, not_null=True):
             if key != 'Checksum':
                 self.dict.update({key: value})
                 if len(self.dict) == 18:
-                    self.send_packet()
+                    result = True
             elif Ut.is_dict(self.dict, not_null=True):
-                self.send_packet()
+                result = True
+        return result
 
     def is_max_writes(self, max_writes: int or None = None):
         """Test if max serial writes."""
@@ -202,6 +214,7 @@ class Vedirectsim:
         result = False
         if self.is_ready():
             self.perf.start_perf_key("writes")
+            result = True
             for key, value in self.read_dump_file():
                 time.sleep(0.01)
                 if self.is_max_writes(max_writes):
@@ -212,7 +225,10 @@ class Vedirectsim:
                     result = True
                     break
 
-                self.process_data(key, value)
+                if self.process_data(key, value):
+                    self.send_packet()
+                    self.perf.end_perf_key("writes")
+                    self.perf.start_perf_key("writes")
 
         return result
 
@@ -233,12 +249,16 @@ class Vedirectsim:
                 running = self.read_dump_file_lines(max_writes)
                 time_dump = self.perf.end_perf_key("dump")
                 logger.info(
-                    "End read dump file lines. Write %s/%s packets in % s. Stats dump: %s",
+                    "End read dump file lines. Write %s/%s packets in % s.\n"
+                    "Write Stats : %s.\n"
+                    "Stats dump: %s\n",
                     self.block_counter - start_writes,
                     self.block_counter,
                     time_dump,
+                    self.perf.serialize_perf_key("writes"),
                     self.perf.serialize_perf_key("dump")
                 )
+                self.perf.init_perf_key("writes", reset=True)
                 if Ut.is_int(max_writes) and self.block_counter >= max_writes:
                     break
             return running
