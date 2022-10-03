@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: vedirect-m8
-Version: 1.2.7
+Version: 1.2.8
 Summary: Victron VE.Direct decoder for Python
 Home-page: https://github.com/mano8/vedirect_m8
 Author: Janne Kario, Eli Serra

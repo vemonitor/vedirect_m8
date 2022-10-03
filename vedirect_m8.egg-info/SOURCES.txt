@@ -22,6 +22,7 @@ vedirect_m8/sertest.py
 vedirect_m8/serutils.py
 vedirect_m8/ve_controller.py
 vedirect_m8/vedirect.py
+vedirect_m8/vedirect_sim.py
 vedirect_m8/vedirectsim.py
 vedirect_m8.egg-info/PKG-INFO
 vedirect_m8.egg-info/SOURCES.txt
