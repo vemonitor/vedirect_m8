@@ -8,7 +8,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(name='vedirect_m8',
-      version='1.2.9',
+      version='1.2.9.1',
       description='Victron VE.Direct decoder for Python',
       long_description=README,
       long_description_content_type="text/markdown",
@@ -30,7 +30,7 @@ setup(name='vedirect_m8',
       include_package_data=True,
       install_requires=[
           'pyserial>=3.5',
-          've_utils>=2.5.2',
+          've_utils>=2.5.3',
       ],
       extras_require={
               "TEST": [
