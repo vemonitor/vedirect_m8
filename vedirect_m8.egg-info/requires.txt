@@ -1,5 +1,5 @@
 pyserial>=3.5
-ve_utils>=2.5.2
+ve_utils>=2.5.3
 
 [MQTT]
 paho-mqtt>=1.6
