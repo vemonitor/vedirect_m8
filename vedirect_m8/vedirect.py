@@ -77,7 +77,7 @@ class Vedirect:
         self.bytes_sum = 0
         self.state = self.WAIT_HEADER
         self.dict = {}
-
+        self.time_packet = 0
         self.init_settings(serial_conf=serial_conf,
                            source_name=source_name,
                            auto_start=auto_start
@@ -312,7 +312,7 @@ class Vedirect:
         :return: A dictionary of the data
         """
         run, now, tim = True, time.time(), 0
-
+        self.time_packet = 0
         if self.is_ready():
             try:
                 while run:
@@ -321,6 +321,7 @@ class Vedirect:
                     packet = self.get_serial_packet()
 
                     if packet is not None:
+                        self.time_packet = tim
                         logger.debug(
                             "Serial reader success: dict: %s",
                             self.dict
