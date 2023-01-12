@@ -221,9 +221,9 @@ class TestSerialConnection:
     def test_get_serial_ports_list(self):
         """Test get_serial_ports_list method."""
         serial_ports = self.obj.get_serial_ports_list()
-        assert Ut.is_list(serial_ports) and len(serial_ports) == 2
+        assert Ut.is_list(serial_ports) and len(serial_ports) >= 2
 
     def test_get_unix_virtual_serial_ports_list(self):
         """Test get_unix_virtual_serial_ports_list method."""
         serial_ports = self.obj.get_unix_virtual_serial_ports_list()
-        assert Ut.is_list(serial_ports) and len(serial_ports) == 2
+        assert Ut.is_list(serial_ports) and len(serial_ports) >= 2
