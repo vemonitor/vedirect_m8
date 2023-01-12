@@ -12,7 +12,7 @@ Contain method to scan all available ports.
 """
 import logging
 import os
-from serial import Serial, SerialException, SerialTimeoutException
+from serial import Serial, SerialException
 import serial.tools.list_ports as serial_list_ports
 from ve_utils.usys import USys
 from vedirect_m8.serutils import SerialUtils as Ut
@@ -182,7 +182,7 @@ class SerialConnection:
         Initialise configuration settings.
 
         :Example :
-            >>> self.init_settings(
+            >>> self._init_settings(
             >>>     serial_port="/tmp/vmodem0",
             >>>     baud=19200,
             >>>     timeout=0,
@@ -251,8 +251,6 @@ class SerialConnection:
             }
             if SerialConnection.is_timeout(write_timeout):
                 result.update({'write_timeout': write_timeout})
-            elif write_timeout is not None:
-                conf_test = False
             if Ut.str_to_bool(exclusive) is True:
                 result.update({'exclusive': True})
         return result
@@ -450,7 +448,7 @@ class SerialConnection:
         Test if valid serial configuration settings.
 
         :Example :
-            >>> self.is_serial_conf(
+            >>> SerialConnection.is_serial_conf(
             >>>     serial_port="/tmp/vmodem0",
             >>>     baud=19200,
             >>>     timeout=0
@@ -471,7 +469,7 @@ class SerialConnection:
         Test if valid serial configuration settings.
 
         :Example :
-            >>> self.is_serial_conf(
+            >>> SerialConnection.is_serial_conf(
             >>>     serial_port="/tmp/vmodem0",
             >>>     baud=19200,
             >>>     timeout=0
@@ -524,11 +522,11 @@ class SerialConnection:
         First split the serial port in path and port name.
         Then test if serial port is a string, if path and port name are valid.
         :Example :
-            >>> SerialConnection.is_virtual_serial_port(
+            >>> SerialConnection._is_virtual_serial_port(
             >>>     serial_port="/tmp/vmodem0"
             >>> )
             >>> True
-            >>> SerialConnection.is_virtual_serial_port(
+            >>> SerialConnection._is_virtual_serial_port(
             >>>     serial_port="/run/vmodem0"
             >>> )
             >>> False
@@ -546,7 +544,7 @@ class SerialConnection:
         Return serial port split in name and path.
 
         :Example :
-            >>> SerialConnection.split_serial_port(
+            >>> SerialConnection._split_serial_port(
             >>>     serial_port="/tmp/vmodem0"
             >>> )
             >>> ('vmodem0', '/tmp')
@@ -582,7 +580,7 @@ class SerialConnection:
             >>> SerialConnection.is_baud(baud=1200)
             >>> True
         :param baud: The baudrate value to test.
-        :return: True if the baudrate value is valid and is a integer instance.
+        :return: True if the baudrate value is valid and is an integer instance.
         """
         return Ut.is_int(baud)\
             and baud in [
