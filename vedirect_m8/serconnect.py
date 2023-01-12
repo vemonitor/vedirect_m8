@@ -207,9 +207,9 @@ class SerialConnection:
                          timeout: int or float or None = -1,
                          write_timeout: int or float or None = -1,
                          exclusive: bool = False
-                         ) -> dict:
+                         ) -> dict or None:
         """
-        Return the serial configuration settings to open serial connection.
+        Set serial configuration settings to open serial connection.
 
         :Example :
             >>> self._set_serial_conf(
@@ -228,19 +228,33 @@ class SerialConnection:
             A port cannot be opened in exclusive access mode
             if it is already open in exclusive access mode.
         :return: a dictionary with the configuration to open a serial connection.
+            Or None if a parameter is invalid.
         """
-        self.set_serial_port(serial_port)
-        self.set_baud(baud)
-        self.set_timeout(timeout)
-        result = {
-            'port': self._serial_port,
-            'baudrate': self._baud,
-            'timeout': self._timeout
-        }
-        if SerialConnection.is_timeout(write_timeout):
-            result.update({'write_timeout': write_timeout})
-        if Ut.str_to_bool(exclusive) is True:
-            result.update({'exclusive': True})
+        if (not serial_port == "default"
+                and not SerialConnection.is_serial_port(serial_port))\
+                or (baud is not None
+                    and not SerialConnection.is_baud(baud))\
+                or (not timeout == -1
+                    and not SerialConnection.is_timeout(timeout))\
+                or (not write_timeout == -1
+                    and not SerialConnection.is_timeout(write_timeout)):
+            result = None
+        else:
+            self.set_serial_port(serial_port)
+            self.set_baud(baud)
+            self.set_timeout(timeout)
+
+            result = {
+                'port': self._serial_port,
+                'baudrate': self._baud,
+                'timeout': self._timeout
+            }
+            if SerialConnection.is_timeout(write_timeout):
+                result.update({'write_timeout': write_timeout})
+            elif write_timeout is not None:
+                conf_test = False
+            if Ut.str_to_bool(exclusive) is True:
+                result.update({'exclusive': True})
         return result
 
     def connect(self,
