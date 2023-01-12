@@ -311,7 +311,7 @@ class SerialConnection:
                     )
 
             except SerialException as ex:
-                raise VedirectException(
+                raise SerialVeException(
                     '[SerialConnection::connect::%s] '
                     'Exception when attempting to open serial connection. '
                     ' args: %s - ex : %s' %
