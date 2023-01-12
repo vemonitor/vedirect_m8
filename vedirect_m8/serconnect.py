@@ -307,7 +307,7 @@ class SerialConnection:
             'settings : %s',
             self._source_name, serial_conf
         )
-        if self.is_settings():
+        if SerialConnection.is_serial_conf_data(serial_conf):
             try:
                 self.ser = Serial(**serial_conf)
                 if self.ser.isOpen():
