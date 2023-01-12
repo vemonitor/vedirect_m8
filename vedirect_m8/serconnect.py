@@ -357,12 +357,13 @@ class SerialConnection:
         Then use serial.tools.list_ports.comports() to get available serial ports.
 
         :Example :
-            >>> self.get_unix_virtual_serial_ports_list()
+            >>> self.get_serial_ports_list()
             >>> ['/tmp/vmodem0', '/tmp/vmodem1', '/dev/ttyUSB1']
         :return: List of serial ports and virtual serial ports available.
         """
         result = list()
         try:
+            # scan unix virtual serial ports ports
             result = self.get_unix_virtual_serial_ports_list()
             ports = serial_list_ports.comports()
             for port, desc, hwid in sorted(ports):
@@ -442,7 +443,7 @@ class SerialConnection:
         return result
 
     @staticmethod
-    def is_serial_conf(serial_port: str,
+    def is_serial_conf(serial_port: str or None,
                        baud: int,
                        timeout: int or float) -> bool:
         """
@@ -569,7 +570,7 @@ class SerialConnection:
            ]
 
     @staticmethod
-    def is_timeout(timeout: int or float) -> bool:
+    def is_timeout(timeout: int or float or None) -> bool:
         """
         Test if is valid serial read timeout.
 
@@ -591,7 +592,7 @@ class SerialConnection:
         return (Ut.is_numeric(timeout) and timeout >= 0) or timeout is None
 
     @staticmethod
-    def is_serial_port(serial_port: str) -> bool:
+    def is_serial_port(serial_port: str or None) -> bool:
         """
         Test if is valid serial port.
 
@@ -607,7 +608,7 @@ class SerialConnection:
             >>> )
             >>> False
         :param serial_port: The serial_port to test.
-        :return: True if the serial port is valid.
+        :return: True if the serial port is valid or None.
         """
         name, path = SerialConnection._split_serial_port(serial_port)
         return Ut.is_str(serial_port)\
