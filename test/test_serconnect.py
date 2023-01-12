@@ -53,6 +53,48 @@ class TestSerialConnection:
         assert not self.obj.set_source_name(-1)
         assert not self.obj.set_source_name(None)
 
+    def test_set_serial_conf(self):
+        """Test set_serial_conf method."""
+        conf = {
+            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem0"),
+            'baud': 19200,
+            'timeout': 0,
+            'write_timeout': 0,
+            'exclusive': True
+        }
+        result = self.obj._set_serial_conf(**conf)
+        assert Ut.is_dict(result, eq=5)
+        # test bad conf
+        conf.update({'serial_port': 32})
+        result = self.obj._set_serial_conf(**conf)
+        assert result is None
+
+    def test_connect(self):
+        """Test connect method."""
+        assert self.obj.connect()
+        assert self.obj.is_serial_ready()
+        assert self.obj.is_ready()
+        # test valid but unavailable port.
+        with pytest.raises(SerialVeException):
+            self.obj.connect(serial_port="/dev/ttyUSB99")
+        # test valid serial device configuration,
+        # Serial is initialized but port is not open.
+        with pytest.raises(OpenSerialVeException):
+            self.obj.connect(serial_port=None)
+        # test invalid configuration parameter
+        with pytest.raises(SerialConfException):
+            self.obj.connect(serial_port=32)
+
+    def test_get_serial_ports_list(self):
+        """Test get_serial_ports_list method."""
+        serial_ports = self.obj.get_serial_ports_list()
+        assert Ut.is_list(serial_ports) and len(serial_ports) >= 2
+
+    def test_get_unix_virtual_serial_ports_list(self):
+        """Test get_unix_virtual_serial_ports_list method."""
+        serial_ports = self.obj.get_unix_virtual_serial_ports_list()
+        assert Ut.is_list(serial_ports) and len(serial_ports) >= 2
+
     @staticmethod
     def test_get_virtual_ports_paths():
         """Test get_virtual_ports_paths method."""
@@ -185,45 +227,3 @@ class TestSerialConnection:
         assert result.get('serial_port') is None
         assert result.get('baud') == 19200
         assert result.get('timeout') == 6
-
-    def test_set_serial_conf(self):
-        """Test set_serial_conf method."""
-        conf = {
-            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem0"),
-            'baud': 19200,
-            'timeout': 0,
-            'write_timeout': 0,
-            'exclusive': True
-        }
-        result = self.obj._set_serial_conf(**conf)
-        assert Ut.is_dict(result, eq=5)
-        # test bad conf
-        conf.update({'serial_port': 32})
-        result = self.obj._set_serial_conf(**conf)
-        assert result is None
-
-    def test_connect(self):
-        """Test connect method."""
-        assert self.obj.connect()
-        assert self.obj.is_serial_ready()
-        assert self.obj.is_ready()
-        # test valid but unavailable port.
-        with pytest.raises(SerialVeException):
-            self.obj.connect(serial_port="/dev/ttyUSB99")
-        # test valid serial device configuration,
-        # Serial is initialized but port is not open.
-        with pytest.raises(OpenSerialVeException):
-            self.obj.connect(serial_port=None)
-        # test invalid configuration parameter
-        with pytest.raises(SerialConfException):
-            self.obj.connect(serial_port=32)
-
-    def test_get_serial_ports_list(self):
-        """Test get_serial_ports_list method."""
-        serial_ports = self.obj.get_serial_ports_list()
-        assert Ut.is_list(serial_ports) and len(serial_ports) >= 2
-
-    def test_get_unix_virtual_serial_ports_list(self):
-        """Test get_unix_virtual_serial_ports_list method."""
-        serial_ports = self.obj.get_unix_virtual_serial_ports_list()
-        assert Ut.is_list(serial_ports) and len(serial_ports) >= 2
