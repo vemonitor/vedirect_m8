@@ -304,7 +304,7 @@ class SerialConnection:
                     )
                     result = True
                 else:
-                    raise VedirectException(
+                    raise OpenSerialVeException(
                         '[SerialConnection::connect::%s] '
                         'Unable to open serial connection. args: %s' %
                         (self._source_name, serial_conf)
