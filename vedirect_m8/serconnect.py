@@ -298,11 +298,19 @@ class SerialConnection:
                     ' args: %s - ex : %s' %
                     (self._source_name, serial_conf, ex)
                 ) from SerialException
+            except ValueError as ex:
+                raise SerialConfException(
+                    '[SerialConnection::connect::%s] '
+                    'Parameter are out of range, e.g. baud rate, data bits. '
+                    ' args: %s - ex : %s' %
+                    (self._source_name, serial_conf, ex)
+                ) from ValueError
+
         else:
-            raise VedirectException(
+            raise SerialConfException(
                 '[SerialConnection::connect::%s] '
                 'Unable to open serial connection. '
-                'Invalid settings : %s' %
+                'Invalid configuration : %s' %
                 (self._source_name, serial_conf)
             )
 
