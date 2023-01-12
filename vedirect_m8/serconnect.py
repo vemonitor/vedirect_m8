@@ -290,13 +290,6 @@ class SerialConnection:
                         'Unable to open serial connection. args: %s' %
                         (self._source_name, serial_conf)
                     )
-            except SerialTimeoutException as ex:
-                raise VedirectException(
-                    '[SerialConnection::connect::%s] '
-                    'Exception when attempting to open serial connection. '
-                    ' args: %s - ex : %s' %
-                    (self._source_name, serial_conf, ex)
-                ) from SerialTimeoutException
 
             except SerialException as ex:
                 raise VedirectException(
