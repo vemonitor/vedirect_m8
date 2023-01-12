@@ -466,6 +466,29 @@ class SerialConnection:
             and SerialConnection.is_timeout(timeout)
 
     @staticmethod
+    def is_serial_conf_data(conf: dict or None) -> bool:
+        """
+        Test if valid serial configuration settings.
+
+        :Example :
+            >>> self.is_serial_conf(
+            >>>     serial_port="/tmp/vmodem0",
+            >>>     baud=19200,
+            >>>     timeout=0
+            >>> )
+            >>> True
+        :param conf: The Configuration data
+        :return: True if configuration settings are valid
+        """
+        return Ut.is_dict(conf)\
+            and SerialConnection.is_serial_port(
+                conf.get('serial_port')) \
+            and SerialConnection.is_baud(
+                conf.get('baudrate')) \
+            and SerialConnection.is_timeout(
+                conf.get('timeout'))
+
+    @staticmethod
     def _get_virtual_ports_paths() -> list:
         """
         Return valid virtual serial ports paths.
