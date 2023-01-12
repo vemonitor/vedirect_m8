@@ -260,8 +260,8 @@ class SerialConnection:
     def connect(self,
                 serial_port: str or None = "default",
                 baud: int or None = None,
-                timeout: int or float or None = None,
-                write_timeout: int or float or None = None,
+                timeout: int or float or None = -1,
+                write_timeout: int or float or None = -1,
                 exclusive: bool = False
                 ) -> bool:
         """
