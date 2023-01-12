@@ -197,6 +197,10 @@ class TestSerialConnection:
         }
         result = self.obj._set_serial_conf(**conf)
         assert Ut.is_dict(result, eq=5)
+        # test bad conf
+        conf.update({'serial_port': 32})
+        result = self.obj._set_serial_conf(**conf)
+        assert result is None
 
     def test_connect(self):
         """Test connect method."""
