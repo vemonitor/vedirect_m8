@@ -80,7 +80,7 @@ class SerialConnection:
         """Return serial_port value from instance."""
         return self._serial_port
 
-    def set_serial_port(self, serial_port: str or None = None) -> bool:
+    def set_serial_port(self, serial_port: str or None) -> bool:
         """
         Set serial_port value.
 
@@ -95,7 +95,7 @@ class SerialConnection:
             return True
         return False
 
-    def set_baud(self, baud: int or None = None) -> bool:
+    def set_baud(self, baud: int or None) -> bool:
         """
         Set baud value.
 
@@ -114,7 +114,7 @@ class SerialConnection:
         """Return timeout value from instance."""
         return self._timeout
 
-    def set_timeout(self, timeout: int or float or None = None) -> bool:
+    def set_timeout(self, timeout: int or float or None) -> bool:
         """
         Set timeout value.
 
@@ -129,7 +129,7 @@ class SerialConnection:
             return True
         return False
 
-    def set_source_name(self, source_name: str or None = None) -> bool:
+    def set_source_name(self, source_name: str or None) -> bool:
         """
         Set source_name value.
 
