@@ -76,7 +76,7 @@ class SerialConnection:
                             timeout=timeout,
                             source_name=source_name)
 
-    def get_serial_port(self) -> int or float:
+    def get_serial_port(self) -> str or None:
         """Return serial_port value from instance."""
         return self._serial_port
 
