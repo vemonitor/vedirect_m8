@@ -4,9 +4,11 @@ Connect to serial port.
 
 Contain method to scan all available ports.
 
- .. seealso: Vedirect, VedirectController
- .. raises: SerialException,
-             SerialTimeoutException
+ .. see also: Vedirect, VedirectController
+ Raise:
+  - SerialConfException,
+  - OpenSerialVeException
+  - SerialVeException
 """
 import logging
 import os
@@ -53,14 +55,15 @@ class SerialConnection:
         Constructor of SerialConnection class.
 
         :Example:
-            - > sc = SerialConnection(serial_port = "/dev/ttyUSB1")
-            - > sc.connect()
-            - > True # if connection opened on serial port "/dev/tyyUSB1"
+            >>> sc = SerialConnection(serial_port = "/dev/ttyUSB1")
+            >>> sc.connect()
+            >>> True # if connection opened on serial port "/dev/tyyUSB1"
         :param self: Refer to the object instance itself,
         :param serial_port: The serial port to connect,
         :param baud: Baud rate such as 9600 or 115200 etc.
         :param timeout: Set a read timeout value in seconds,
-        :param source_name: This is used in logger to identify the source of call.
+        :param source_name: This is used in logger
+         to identify the source of call.
         :return: Nothing
         """
         self._source_name = 'void'
@@ -82,8 +85,8 @@ class SerialConnection:
         Set serial_port value.
 
         :Example :
-            - >self.set_serial_port(serial_port="/tmp/vmodem0")
-            - >True
+            >>> self.set_serial_port(serial_port="/tmp/vmodem0")
+            >>> True
         :param serial_port: The serial port to set.
         :return: True if is valid serial_port
         """
@@ -97,8 +100,8 @@ class SerialConnection:
         Set baud value.
 
         :Example :
-            - >self.set_baud(baud=19200)
-            - >True
+            >>> self.set_baud(baud=19200)
+            >>> True
         :param baud: The baud to set.
         :return: True if is valid baud
         """
@@ -116,8 +119,8 @@ class SerialConnection:
         Set timeout value.
 
         :Example :
-            - >self.set_timeout(timeout=0)
-            - >True
+            >>> self.set_timeout(timeout=0)
+            >>> True
         :param timeout: The timeout to set.
         :return: True if is valid timeout
         """
@@ -133,8 +136,8 @@ class SerialConnection:
         This is used in logger to identify the source of call.
         When multiple serial connections are defined.
         :Example :
-            - >self.set_source_name(source_name='BMV700')
-            - >True
+            >>> self.set_source_name(source_name='BMV700')
+            >>> True
         :param source_name: The source_name to set.
         :return: True if is valid source_name
         """
@@ -179,18 +182,18 @@ class SerialConnection:
         Initialise configuration settings.
 
         :Example :
-            - > self.init_settings( \r
-                                  serial_port="/tmp/vmodem0", \r
-                                  baud=19200, \r
-                                  timeout=0, \r
-                                  source_name="BMV700" \r
-                                  ) \r
-            - > True
-        :param serial_port: The serial port,
-        :param baud: The baudrate.
-        :param timeout: The timeout.
+            >>> self.init_settings(
+            >>>     serial_port="/tmp/vmodem0",
+            >>>     baud=19200,
+            >>>     timeout=0,
+            >>>     source_name="BMV700"
+            >>> )
+            >>> True
+        :param serial_port: The serial port
+        :param baud: The serial baud rate
+        :param timeout: The serial timeout
         :param source_name: The source_name.
-        :return: True if configuration settings are valid
+        :return: True if configuration settings are valid.
         """
         self.set_serial_port(serial_port)
         self.set_baud(baud)
@@ -209,19 +212,21 @@ class SerialConnection:
         Return the serial configuration settings to open serial connection.
 
         :Example :
-            - > self.set_serial_conf( \r
-                                  serial_port="/tmp/vmodem0", \r
-                                  baud=19200, \r
-                                  timeout=0, \r
-                                  write_timeout=0, \r
-                                  exclusive=True \r
-                                  ) \r
-            - > True
-        :param serial_port: The serial port,
-        :param baud: The baudrate.
-        :param timeout: The timeout.
-        :param write_timeout: The write_timeout,
-        :param exclusive: The exclusive.
+            >>> self._set_serial_conf(
+            >>>     serial_port="/tmp/vmodem0",
+            >>>     baud=19200,
+            >>>     timeout=0,
+            >>>     write_timeout=0,
+            >>>     exclusive=True
+            >>> )
+            >>> True
+        :param serial_port: The serial port
+        :param baud: The serial baud rate
+        :param timeout: The serial timeout
+        :param write_timeout: The serial write timeout
+        :param exclusive: Set exclusive access mode (POSIX only).
+            A port cannot be opened in exclusive access mode
+            if it is already open in exclusive access mode.
         :return: a dictionary with the configuration to open a serial connection.
         """
         self.set_serial_port(serial_port)
@@ -249,20 +254,32 @@ class SerialConnection:
         Start serial connection from parameters.
 
         :Example :
-            - > self.connect( \r
-                                  serial_port="/tmp/vmodem0", \r
-                                  baud=19200, \r
-                                  timeout=0, \r
-                                  write_timeout=0, \r
-                                  exclusive=True \r
-                                  ) \r
-            - > True
-        :param serial_port: The serial port,
-        :param baud: The baudrate.
-        :param timeout: The timeout.
-        :param write_timeout: The write_timeout,
-        :param exclusive: The exclusive.
+            >>> self.connect(
+            >>>     serial_port="/tmp/vmodem0",
+            >>>     baud=19200,
+            >>>     timeout=0,
+            >>>     write_timeout=0,
+            >>>     exclusive=True
+            >>> )
+            >>> True
+
+        :param serial_port: The serial port
+        :param baud: The serial baud rate
+        :param timeout: The serial timeout
+        :param write_timeout: The serial write timeout
+        :param exclusive: Set exclusive access mode (POSIX only).
+            A port cannot be opened in exclusive access mode
+            if it is already open in exclusive access mode.
         :return: True if success to open a serial connection.
+        Raise:
+         - SerialConfException:
+           Will be raised when parameter
+           are out of range or invalid,
+           e.g. serial_port, baud rate, data bits
+         - SerialVeException:
+           In case the device can not be found or can not be configured.
+         - OpenSerialVeException:
+           Will be raised when the device is configured but port is not openned.
         """
         serial_conf = self._set_serial_conf(
             serial_port=serial_port,
@@ -326,8 +343,8 @@ class SerialConnection:
         Then use serial.tools.list_ports.comports() to get available serial ports.
 
         :Example :
-            - >self.get_unix_virtual_serial_ports_list()
-            - >['/tmp/vmodem0', '/tmp/vmodem1', '/dev/ttyUSB1']
+            >>> self.get_unix_virtual_serial_ports_list()
+            >>> ['/tmp/vmodem0', '/tmp/vmodem1', '/dev/ttyUSB1']
         :return: List of serial ports and virtual serial ports available.
         """
         result = list()
@@ -361,8 +378,8 @@ class SerialConnection:
             - vmodem[0-999]
 
         :Example :
-            - >self.get_unix_virtual_serial_ports_list()
-            - >['/tmp/vmodem0', '/tmp/vmodem1']
+            >>> self.get_unix_virtual_serial_ports_list()
+            >>> ['/tmp/vmodem0', '/tmp/vmodem1']
 
         :return: List of virtual serial ports available.
         """
@@ -418,8 +435,12 @@ class SerialConnection:
         Test if valid serial configuration settings.
 
         :Example :
-            - >self.is_serial_conf(serial_port="/tmp/vmodem0", baud=19200, timeout=0)
-            - >True
+            >>> self.is_serial_conf(
+            >>>     serial_port="/tmp/vmodem0",
+            >>>     baud=19200,
+            >>>     timeout=0
+            >>> )
+            >>> True
         :param serial_port: The serial port,
         :param baud: The baudrate.
         :param timeout: The timeout.
@@ -444,8 +465,10 @@ class SerialConnection:
         Return the virtual serial port path from user home directory.
 
         :Example :
-            - >SerialConnection.get_virtual_home_serial_port(port="vmodem0")
-            - >/home/${USER}/vmodem0
+            >>> SerialConnection.get_virtual_home_serial_port(
+            >>>     port="vmodem0"
+            >>> )
+            >>> "/home/${USER}/vmodem0"
         :param port: The port name to join at user home directory.
         :return: the virtual serial port path from user home directory.
                  Or None if port is invalid virtual port name.
@@ -463,10 +486,14 @@ class SerialConnection:
         First split the serial port in path and port name.
         Then test if serial port is a string, if path and port name are valid.
         :Example :
-            - >SerialConnection.is_virtual_serial_port(serial_port="/tmp/vmodem0")
-            - >True
-            - >SerialConnection.is_virtual_serial_port(serial_port="/run/vmodem0")
-            - >False
+            >>> SerialConnection.is_virtual_serial_port(
+            >>>     serial_port="/tmp/vmodem0"
+            >>> )
+            >>> True
+            >>> SerialConnection.is_virtual_serial_port(
+            >>>     serial_port="/run/vmodem0"
+            >>> )
+            >>> False
         :param serial_port: The serial port to test.
         :return: True if the virtual serial port is valid.
         """
@@ -481,8 +508,10 @@ class SerialConnection:
         Return serial port split in name and path.
 
         :Example :
-            - >SerialConnection.split_serial_port(serial_port="/tmp/vmodem0")
-            - >('vmodem0', '/tmp')
+            >>> SerialConnection.split_serial_port(
+            >>>     serial_port="/tmp/vmodem0"
+            >>> )
+            >>> ('vmodem0', '/tmp')
         :param serial_port: The serial port to split.
         :return: Tuple of name and path.
         """
@@ -497,8 +526,10 @@ class SerialConnection:
         Test serial_port path exists.
 
         :Example :
-            - >SerialConnection.is_serial_port_exists(serial_port="/tmp/vmodem0")
-            - >True
+            >>> SerialConnection.is_serial_port_exists(
+            >>>     serial_port="/tmp/vmodem0"
+            >>> )
+            >>> True
         :param serial_port: The serial port to test.
         :return: True if the serial port path exists and is a string instance.
         """
@@ -510,8 +541,8 @@ class SerialConnection:
         Test if is valid baud rate.
 
         :Example :
-            - >SerialConnection.is_baud(baud=1200)
-            - >True
+            >>> SerialConnection.is_baud(baud=1200)
+            >>> True
         :param baud: The baudrate value to test.
         :return: True if the baudrate value is valid and is a integer instance.
         """
@@ -538,8 +569,8 @@ class SerialConnection:
            and return all bytes that were received until then.
 
         :Example :
-            - >SerialConnection.is_timeout(timeout=0)
-            - >True
+            >>> SerialConnection.is_timeout(timeout=0)
+            >>> True
         :param timeout: The timeout value to test.
         :return: True if is valid read timeout value.
         """
@@ -553,10 +584,14 @@ class SerialConnection:
         First split the serial port in path and port name.
         Then test if serial port is a string, if path and port name are valid.
         :Example :
-            - >SerialConnection.is_serial_port(serial_port="/tmp/vmodem0")
-            - >True
-            - >SerialConnection.is_serial_port(serial_port="/run/vmodem0")
-            - >False
+            >>> SerialConnection.is_serial_port(
+            >>>     serial_port="/tmp/vmodem0"
+            >>> )
+            >>> True
+            >>> SerialConnection.is_serial_port(
+            >>>     serial_port="/run/vmodem0"
+            >>> )
+            >>> False
         :param serial_port: The serial_port to test.
         :return: True if the serial port is valid.
         """
@@ -573,10 +608,10 @@ class SerialConnection:
         For win32 systems path must be null (None or "").
         For unix systems path must be /dev or in get_virtual_ports_paths() method.
         :Example :
-            - >SerialConnection.is_serial_path(serial_port="/tmp")
-            - >True
-            - >SerialConnection.is_serial_path(serial_port="/run")
-            - >False
+            >>> SerialConnection.is_serial_path(serial_port="/tmp")
+            >>> True
+            >>> SerialConnection.is_serial_path(serial_port="/run")
+            >>> False
         :param path: The serial port path to test.
         :return: True if the serial port path is valid.
         """
