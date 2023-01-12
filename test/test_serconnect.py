@@ -207,9 +207,16 @@ class TestSerialConnection:
         assert self.obj.connect()
         assert self.obj.is_serial_ready()
         assert self.obj.is_ready()
-
-        with pytest.raises(VedirectException):
+        # test valid but unavailable port.
+        with pytest.raises(SerialVeException):
             self.obj.connect(serial_port="/dev/ttyUSB99")
+        # test valid serial device configuration,
+        # Serial is initialized but port is not open.
+        with pytest.raises(OpenSerialVeException):
+            self.obj.connect(serial_port=None)
+        # test invalid configuration parameter
+        with pytest.raises(SerialConfException):
+            self.obj.connect(serial_port=32)
 
     def test_get_serial_ports_list(self):
         """Test get_serial_ports_list method."""
