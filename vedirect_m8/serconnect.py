@@ -634,9 +634,10 @@ class SerialConnection:
         :return: True if the serial port is valid or None.
         """
         name, path = SerialConnection._split_serial_port(serial_port)
-        return Ut.is_str(serial_port)\
-            and SerialConnection.is_serial_path(path)\
-            and Ut.is_serial_port_name_pattern(name)
+        return (Ut.is_str(serial_port, not_null=True)
+                and SerialConnection.is_serial_path(path)
+                and Ut.is_serial_port_name_pattern(name)) \
+            or serial_port is None
 
     @staticmethod
     def is_serial_path(path: str) -> bool:
