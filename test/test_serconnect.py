@@ -176,6 +176,16 @@ class TestSerialConnection:
         tests = [x for x in timeouts if SerialConnection.is_timeout(x)]
         assert len(tests) == 6
 
+    @staticmethod
+    def test_get_default_serial_conf():
+        """Test get_default_serial_conf method."""
+        data = {"timeout": 6}
+        result = SerialConnection.get_default_serial_conf(data)
+        assert Ut.is_dict(result)
+        assert result.get('serial_port') is None
+        assert result.get('baud') == 19200
+        assert result.get('timeout') == 6
+
     def test_set_serial_conf(self):
         """Test set_serial_conf method."""
         conf = {
