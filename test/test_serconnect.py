@@ -7,7 +7,9 @@ import os
 import pytest
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.serutils import SerialUtils as Ut
-from vedirect_m8.exceptions import VedirectException
+from vedirect_m8.exceptions import SerialConfException
+from vedirect_m8.exceptions import OpenSerialVeException
+from vedirect_m8.exceptions import SerialVeException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
