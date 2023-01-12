@@ -95,6 +95,12 @@ class TestSerialConnection:
         serial_ports = self.obj.get_unix_virtual_serial_ports_list()
         assert Ut.is_list(serial_ports) and len(serial_ports) >= 2
 
+    def test_serialize(self):
+        """Test serialize method."""
+        obj = self.obj.serialize()
+        assert Ut.is_dict(obj) and len(obj) == 4
+        assert obj.get('source_name') == self.obj._source_name
+
     @staticmethod
     def test_get_virtual_ports_paths():
         """Test get_virtual_ports_paths method."""

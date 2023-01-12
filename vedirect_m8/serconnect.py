@@ -412,6 +412,21 @@ class SerialConnection:
             )
         return result
 
+    def serialize(self):
+        """
+        This method allows to serialize in a proper way this object
+
+        :return: A dict of order
+        :rtype: Dict
+        """
+
+        return {
+            'source_name': self._source_name,
+            'serial_port': self._serial_port,
+            'baud': self._baud,
+            'timeout': self._timeout
+        }
+
     @staticmethod
     def _scan_path(path: str) -> list:
         """Scan path and get serial ports from it."""
