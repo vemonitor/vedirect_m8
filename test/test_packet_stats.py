@@ -38,7 +38,7 @@ class TestPacketStats:
         packets = TestPacketStats.get_dummy_packets_1()
         assert self.obj.add_stats(packets[0])
         assert Ut.is_int(self.obj.get_nb_packets())
-        assert Ut.is_int(self.obj.set_nb_packets(32))
+        assert Ut.is_int(self.obj._set_nb_packets(32))
         assert Ut.is_int(self.obj.init_nb_packets())
 
     def test_add_stats(self):
