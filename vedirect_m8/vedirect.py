@@ -6,9 +6,14 @@ This is a forked version of script originally created by Janne Kario.
 (https://github.com/karioja/vedirect).
 
  Raise:
-    - InputReadException,
-    - serial.SerialException,
-    - serial.SerialTimeoutException
+        - SettingInvalidException
+        - InputReadException
+        - PacketReadException
+        - ReadTimeoutException
+        - SerialConnectionException
+        - SerialConfException
+        - SerialVeException
+        - OpenSerialVeException
 """
 import logging
 import time
@@ -42,14 +47,21 @@ class Vedirect:
     (https://github.com/karioja/vedirect).
 
     :Example:
-            >>> sc = Vedirect({"serial_port": "/dev/ttyUSB1"})
-            >>> sc.read_data_single()
-            >>> {"ser_key1": "ser_value1", ...}
+        >>> sc = Vedirect(
+        >>>     serial_conf={"serial_port": "/dev/ttyUSB1"}
+        >>> )
+        >>> sc.read_data_single()
+        >>> {"ser_key1": "ser_value1", ...}
 
     Raise:
-        - InputReadException,
-        - serial.SerialException,
-        - serial.SerialTimeoutException
+        - SettingInvalidException
+        - InputReadException
+        - PacketReadException
+        - ReadTimeoutException
+        - SerialConnectionException
+        - SerialConfException
+        - SerialVeException
+        - OpenSerialVeException
     """
     def __init__(self,
                  serial_conf: dict,
@@ -61,7 +73,9 @@ class Vedirect:
         Constructor of Vedirect class.
 
         :Example:
-            >>> sc = Vedirect({"serial_port": "/dev/ttyUSB1"})
+            >>> sc = Vedirect(
+            >>>     serial_conf={"serial_port": "/dev/ttyUSB1"}
+            >>> )
             >>> sc.read_data_single()
             >>> {"ser_key1": "ser_value1", ...}
         :param self: Refer to the object instance itself,
@@ -130,7 +144,7 @@ class Vedirect:
         return result
 
     def has_serial_com(self) -> bool:
-        """Test if self._com is a valid SerialConnection instance."""
+        """Test if _com is a valid SerialConnection instance."""
         return Vedirect.is_serial_com(self._com)
 
     def is_serial_ready(self) -> bool:
@@ -146,7 +160,16 @@ class Vedirect:
         return self._com.get_serial_port()
 
     def connect_to_serial(self) -> bool:
-        """ Connect to serial port if not connected """
+        """
+        Connect to serial port if not connected.
+
+        Raise:
+         - SerialConfException: when invalid parameter is set.
+         - OpenSerialVeException: when serial device configured,
+           but connection not opened.
+         - SerialVeException: on raise serial.SerialException
+         - SerialConnectionException: on connection fails
+        """
         if self.has_serial_com()\
                 and ((not self._com.is_ready() and self._com.connect())
                      or self._com.is_ready()):
@@ -167,8 +190,11 @@ class Vedirect:
         Initialise serial connection from SerialConnection object.
 
         Raise:
-         - SettingInvalidException if serial_port, baud or timeout are not valid.
-         - VedirectException if connection to serial port fails
+         - SerialConfException: if serial_port, baud or timeout are not valid.
+         - OpenSerialVeException: when serial device configured,
+           but connection not opened.
+         - SerialVeException: on raise serial.SerialException
+         - SerialConnectionException: on connection fails
         :Example :
             >>> self.init_serial_connection_from_object(serial_connection)
             >>> True
@@ -207,8 +233,11 @@ class Vedirect:
          - timeout = 0 (non blocking mode)
          - source_name = 'Vedirect'
         Raise:
-         - SettingInvalidException if serial_port, baud or timeout are not valid.
-         - VedirectException if connection to serial port fails
+         - SerialConfException: if serial_port, baud or timeout are not valid.
+         - OpenSerialVeException: when serial device configured,
+           but connection not opened.
+         - SerialVeException: on raise serial.SerialException
+         - SerialConnectionException: on connection fails
         :Example :
             >>> self.init_serial_connection({"serial_port": "/dev/ttyUSB1"})
             >>> True
@@ -246,13 +275,12 @@ class Vedirect:
         Initialise the settings for the class.
 
         At least serial_port must be provided.
+
         Default :
          - baud rate = 19200,
          - timeout = 0 (non blocking mode)
          - source_name = 'Vedirect'
-        Raise:
-         - SettingInvalidException if serial_port, baud or timeout are not valid.
-         - VedirectException if connection to serial port fails
+
         :Example :
             >>> self.init_settings({"serial_port": "/dev/ttyUSB1"})
             >>> True
@@ -261,6 +289,13 @@ class Vedirect:
         :param source_name: This is used in logger to identify the source of call,
         :param auto_start: bool: Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
+
+        Raise:
+         - SerialConfException: if serial_port, baud or timeout are not valid.
+         - OpenSerialVeException: when serial device configured,
+           but connection not opened.
+         - SerialVeException: on raise serial.SerialException
+         - SerialConnectionException: on connection fails
         """
         return self.init_serial_connection(serial_conf=serial_conf,
                                            source_name=source_name,
@@ -355,6 +390,14 @@ class Vedirect:
         :param self: Reference the class instance
         :param timeout: Set the timeout for the read_data_single function
         :return: A dictionary of the data
+        - SerialConfException:
+           Will be raised when parameter
+           are out of range or invalid,
+           e.g. serial_port, baud rate, data bits
+         - SerialVeException:
+           In case the device can not be found or can not be configured.
+         - OpenSerialVeException:
+           Will be raised when the device is configured but port is not openned.
         """
         run, now, tim = True, time.time(), 0
         self.time_packet = 0
@@ -449,7 +492,7 @@ class Vedirect:
             >>> True
         :param elapsed: The elapsed time to test,
         :param timeout: The timeout to evaluate.
-        :return: True if elapsed time is upper than timeout.
+        :return: True if elapsed time is uppermore than timeout.
         """
         if elapsed >= timeout:
             raise TimeoutException(
