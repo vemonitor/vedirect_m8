@@ -171,7 +171,7 @@ class VedirectController(Vedirect):
                                                  source_name=source_name,
                                                  auto_start=auto_start
                                                  )
-        except VedirectException as ex:
+        except SerialConnectionException as ex:
             if self._wait_connection is True\
                     and self.wait_or_search_serial_connection(
                         timeout=self._wait_timeout,
@@ -179,7 +179,11 @@ class VedirectController(Vedirect):
                     ):
                 result = True
             else:
-                raise VedirectException from VedirectException
+                raise SerialConnectionException(
+                    "[VedirectController::init_settings] "
+                    "Unable to retrieve valid serial port to read. "
+                    "waiting: %ss." % self._wait_timeout
+                )
         return result
 
     def read_data_to_test(self) -> dict:
@@ -249,11 +253,9 @@ class VedirectController(Vedirect):
                         result = True
                         break
         else:
-            raise VedirectException(
+            raise SerialConnectionException(
                 "[VeDirect::test_serial_ports] "
                 "Unable to test to any serial port. "
-                "SerialConnection and/or SerialTestHelper, "
-                "are not ready."
             )
         return result
 
@@ -304,15 +306,14 @@ class VedirectController(Vedirect):
                     return True
 
                 if tim-now > timeout:
-                    raise TimeoutException(
+                    raise ReadTimeoutException(
                         "[VeDirect::wait_or_search_serial_connection] "
                         "Unable to connect to any serial item. "
                         "Timeout error : %s. Exception : %s" %
                         (timeout, exception)
                     )
-
-                time.sleep(2.5)
-        raise VedirectException(
+                time.sleep(5)
+        raise SerialConnectionException(
             "[VeDirect::wait_or_search_serial_connection] "
             "Unable to connect to any serial item. "
             "Exception : %s" % exception
