@@ -33,24 +33,24 @@ class PacketStats:
         return self._nb_packets
 
     def _set_nb_packets(self, value: int) -> int:
-        """Set """
+        """Set number of packets available on serial reader."""
         value = Ut.get_int(value, 0)
         if self.MAX_STAT_PACKETS > value > 0:
             self._nb_packets = value
         return self._nb_packets
 
     def init_nb_packets(self) -> int:
-        """"""
+        """Initialise number of packets available on serial reader."""
         if self.has_stats():
             self._set_nb_packets(len(self._stats))
         return self._nb_packets
 
     def has_stats(self) -> bool:
-        """"""
+        """Test if instance has available stats registered."""
         return Ut.is_list(self._stats, not_null=True)
 
     def can_add_stats(self) -> bool:
-        """Test if _stats is not full."""
+        """Test if stats is not full."""
         return Ut.is_list(self._stats)\
             and len(self._stats) + 1 < self.MAX_STAT_PACKETS
 
@@ -60,7 +60,7 @@ class PacketStats:
 
     def add_stats(self, packet: dict) -> bool:
         """
-        Add packet _stats class property.
+        Add packet stats class property.
         """
         result = False
         packet_stats = PacketStats.get_stats_from_packet(packet)

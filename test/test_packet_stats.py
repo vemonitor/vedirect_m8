@@ -1,6 +1,4 @@
 """PacketStats unittest class."""
-import time
-import pytest
 from vedirect_m8.packet_stats import PacketStats
 from ve_utils.utype import UType as Ut
 
