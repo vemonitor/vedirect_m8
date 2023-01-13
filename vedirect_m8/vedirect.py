@@ -410,7 +410,6 @@ class Vedirect:
            Will be raised when the device is configured but port is not openned.
         """
         run, now, tim = True, time.time(), 0
-        self.time_packet = 0
         if self.is_ready():
             try:
                 while run:
@@ -419,11 +418,11 @@ class Vedirect:
                     packet = self.get_serial_packet()
 
                     if packet is not None:
-                        self.time_packet = tim
                         logger.debug(
                             "Serial reader success: dict: %s",
-                            self.dict
+                            packet
                         )
+                        self.init_data_read()
                         return packet
 
                     # timeout serial read
@@ -464,9 +463,10 @@ class Vedirect:
                         "-- state: %s -- bytes_sum: %s ",
                         packet, self.state, self.bytes_sum
                     )
-                    callback_function(packet)
                     now = tim
                     i = i + 1
+                    self.init_data_read()
+                    callback_function(packet)
 
                 # timeout serial read
                 Vedirect.is_timeout(tim-now, timeout)
