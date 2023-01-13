@@ -108,7 +108,7 @@ class VedirectController(Vedirect):
         """Test if class Vedirect is ready."""
         self._wait_timeout = Ut.get_float(wait_timeout, 3600)
 
-    def get_wait_timeout(self) -> bool:
+    def get_wait_timeout(self) -> float or int:
         """Test if class Vedirect is ready."""
         return self._wait_timeout
 
