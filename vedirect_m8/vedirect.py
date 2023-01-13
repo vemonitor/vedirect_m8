@@ -151,8 +151,9 @@ class Vedirect:
                 and ((not self._com.is_ready() and self._com.connect())
                      or self._com.is_ready()):
             result = True
+            time.sleep(0.5)
         else:
-            raise VedirectException(
+            raise SerialConnectionException(
                 "[Vedirect::init_serial_connection] "
                 "Connection to serial port fails."
             )
@@ -184,7 +185,7 @@ class Vedirect:
                         and self.connect_to_serial()):
                 result = True
         else:
-            raise SettingInvalidException(
+            raise SerialConfException(
                 "[Vedirect::init_serial_connection_from_object] "
                 "Unable to init init_serial_connection_from_object, "
                 "bad parameters : %s" %
@@ -228,7 +229,7 @@ class Vedirect:
                         and self.connect_to_serial()):
                 result = True
         else:
-            raise SettingInvalidException(
+            raise SerialConfException(
                 "[Vedirect::init_serial_connection] "
                 "Unable to init SerialConnection, "
                 "bad parameters. serial_conf : %s" %
