@@ -163,8 +163,6 @@ class VedirectController(Vedirect):
         :param source_name: This is used in logger to identify the source of call
         :param auto_start: bool: Define if serial connection must be established automatically
         :return: True if connection to serial port success.
-
-        .. raises:: SettingInvalidException, VedirectException
         """
         try:
             result = self.init_serial_connection(serial_conf=serial_conf,
@@ -239,7 +237,7 @@ class VedirectController(Vedirect):
         on the data returned by the serial connection.
 
         Raise:
-            - VedirectException
+            - SerialConnectionException
         :param self: Reference the class instance
         :param ports: list: Specify the serial ports to test
         :return: True if the serial port is open and
