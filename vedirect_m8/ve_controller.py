@@ -60,6 +60,7 @@ class VedirectController(Vedirect):
                  auto_start: bool = True,
                  wait_connection: bool = True,
                  wait_timeout: int or float = 3600,
+                 max_packet_blocks: int or None = 18
                  ):
         """
         Constructor of VedirectController class.
@@ -75,16 +76,20 @@ class VedirectController(Vedirect):
         :param auto_start: bool: Define if serial connection must be established automatically,
         :param wait_connection: bool: Used to wait for connection on new serial port at start,
         :param wait_timeout: Timeout value to search valid serial port in case of connection fails
+        :param max_packet_blocks: Max blocks per packet value
         :return: Nothing
         """
         self._wait_connection = Ut.str_to_bool(wait_connection)
         self._wait_timeout = Ut.get_float(wait_timeout)
         self._ser_test = None
         self.init_serial_test(serial_test)
-        Vedirect.__init__(self,
-                          serial_conf=serial_conf,
-                          source_name=source_name,
-                          auto_start=auto_start)
+        Vedirect.__init__(
+            self,
+            serial_conf=serial_conf,
+            source_name=source_name,
+            auto_start=auto_start,
+            max_packet_blocks=max_packet_blocks
+        )
 
     def has_serial_test(self) -> bool:
         """Test if is valid serial test helper."""
