@@ -362,6 +362,15 @@ class Vedirect:
                     self.state = self.WAIT_HEADER
             else:
                 raise AssertionError()
+        except PacketReadException:
+            raise PacketReadException(
+                "[Vedirect::input_read] "
+                "Serial input read error: "
+                "Packet has limit of %s/%s blocks" % (
+                    len(self.dict),
+                    self.max_blocks
+                )
+            )
         except Exception as ex:
             raise InputReadException(
                 "[Vedirect::input_read] "
