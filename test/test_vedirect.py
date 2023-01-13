@@ -129,7 +129,7 @@ class TestVedirect:
                                    source_name="TestVedirect"
                                    )
 
-        # test with bad serial port format
+        # test with bad serial port type
         with pytest.raises(SerialConfException):
             self.obj.init_settings({"serial_port": 32},
                                    source_name="TestVedirect"
