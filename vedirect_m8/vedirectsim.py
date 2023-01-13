@@ -161,10 +161,9 @@ class Vedirectsim:
             self.perf.get_perf_key_stat("writes", "start")
         )
         sleep_time = 0
-        if 0 < write_time < 0.5:
-            sleep_time = round(0.5 - round(write_time, 3) - 0.0025, 3)
+        if 0 < write_time < 0.05:
+            sleep_time = round(0.05 - round(write_time, 3) - 0.0025, 3)
             time.sleep(sleep_time)
-
         if logger.level <= 10:
             write_time = self.perf.get_elapsed(
                 self.perf.get_perf_key_stat("writes", "start")
