@@ -25,7 +25,7 @@ class TestVedirectController:
         conf = {
             'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
             'baud': 19200,
-            'timeout': 0
+            'timeout': 2
         }
         serial_test = {
             'PID_test': {
