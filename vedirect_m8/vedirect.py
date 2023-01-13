@@ -313,20 +313,20 @@ class Vedirect:
     def input_read(self, byte) -> dict or None:
         """Input read from byte."""
         try:
-            nbyte = ord(byte)
-            if byte == self._delimiters.get("hexmarker")\
+            ord_byte = ord(byte)
+            if ord_byte == self._delimiters.get("hexmarker")\
                     and self.state != self.IN_CHECKSUM:
                 self.state = self.HEX
             if self.state == self.WAIT_HEADER:
-                self.bytes_sum += nbyte
-                if nbyte == self._delimiters.get("header1"):
+                self.bytes_sum += ord_byte
+                if ord_byte == self._delimiters.get("header1"):
                     self.state = self.WAIT_HEADER
-                elif nbyte == self._delimiters.get("header2"):
+                elif ord_byte == self._delimiters.get("header2"):
                     self.state = self.IN_KEY
                 return None
             elif self.state == self.IN_KEY:
-                self.bytes_sum += nbyte
-                if nbyte == self._delimiters.get("delimiter"):
+                self.bytes_sum += ord_byte
+                if ord_byte == self._delimiters.get("delimiter"):
                     if self.key == 'Checksum':
                         self.state = self.IN_CHECKSUM
                     else:
@@ -335,8 +335,10 @@ class Vedirect:
                     self.key += byte.decode('ascii')
                 return None
             elif self.state == self.IN_VALUE:
-                self.bytes_sum += nbyte
-                if nbyte == self._delimiters.get("header1"):
+                self.bytes_sum += ord_byte
+                if ord_byte == self._delimiters.get("header1"):
+                    if not self.has_free_block():
+                        raise PacketReadException
                     self.state = self.WAIT_HEADER
                     self.dict[self.key] = self.value
                     self.key = ''
@@ -345,7 +347,7 @@ class Vedirect:
                     self.value += byte.decode('ascii')
                 return None
             elif self.state == self.IN_CHECKSUM:
-                self.bytes_sum += nbyte
+                self.bytes_sum += ord_byte
                 self.key = ''
                 self.value = ''
                 self.state = self.WAIT_HEADER
@@ -356,7 +358,7 @@ class Vedirect:
                     self.bytes_sum = 0
             elif self.state == self.HEX:
                 self.bytes_sum = 0
-                if nbyte == self._delimiters.get("header2"):
+                if ord_byte == self._delimiters.get("header1"):
                     self.state = self.WAIT_HEADER
             else:
                 raise AssertionError()
