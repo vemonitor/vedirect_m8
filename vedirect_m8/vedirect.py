@@ -84,7 +84,6 @@ class Vedirect:
         self.bytes_sum = 0
         self.state = self.WAIT_HEADER
         self.dict = {}
-        self.time_packet = 0
         self.init_settings(serial_conf=serial_conf,
                            source_name=source_name,
                            auto_start=auto_start
