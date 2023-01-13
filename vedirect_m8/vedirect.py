@@ -365,7 +365,8 @@ class Vedirect:
         except Exception as ex:
             raise InputReadException(
                 "[Vedirect::input_read] "
-                "Serial input read error"
+                "Serial input read error on byte : %s" %
+                byte
             ) from ex
 
     def get_serial_packet(self) -> dict or None:
