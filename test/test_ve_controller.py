@@ -5,11 +5,8 @@ from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.serconnect import SerialConnection
 from ve_utils.utype import UType as Ut
 from vedirect_m8.exceptions import SettingInvalidException
-from vedirect_m8.exceptions import InputReadException
-from vedirect_m8.exceptions import PacketReadException
 from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
-from vedirect_m8.exceptions import SerialConfException
 from vedirect_m8.exceptions import SerialVeException
 from vedirect_m8.exceptions import VedirectException
 
