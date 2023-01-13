@@ -54,7 +54,8 @@ class Vedirect:
     def __init__(self,
                  serial_conf: dict,
                  source_name: str = 'Vedirect',
-                 auto_start: bool = True
+                 auto_start: bool = True,
+                 max_packet_blocks: int or None = 18
                  ):
         """
         Constructor of Vedirect class.
@@ -76,6 +77,8 @@ class Vedirect:
             "hexmarker": ord(':'),
             "delimiter": ord('\t')
         }
+        self.max_blocks = 18
+        self.set_max_packet_blocks(max_packet_blocks)
         self.key = ''
         self.value = ''
         self.bytes_sum = 0
@@ -88,6 +91,44 @@ class Vedirect:
                            )
 
     (HEX, WAIT_HEADER, IN_KEY, IN_VALUE, IN_CHECKSUM) = range(5)
+
+    def has_free_block(self) -> bool:
+        """Test if block of key value can be added to dict packet."""
+        return self.max_blocks is None\
+            or len(self.dict) <= self.max_blocks
+
+    def set_max_packet_blocks(self, value: int or None) -> bool:
+        """
+        Set max blocks by packet value.
+
+        If input packet in dict has more key that max_blocks,
+        raise a PacketReadException on reading serial.
+        To disable this limitation, set the value to None.
+        By default, the value is 18 blocks per packet.
+        (See VeDirect protocol)
+
+        Example :
+            >>> self.set_max_packet_blocks(22)
+            >>> True
+        :param value: max blocks by packet value
+        :return: True if max blocks by packet value is updated.
+
+        Raise:
+         - SettingInvalidException: if the value is invalid.
+        """
+        result = True
+        self.max_blocks = 18
+        if Ut.is_int(value, positive=True):
+            self.max_blocks = value
+        elif value is None:
+            self.max_blocks = None
+        else:
+            raise SettingInvalidException(
+                "[Vedirect:set_max_packet_blocks] "
+                "Max blocks by packet value is not valid. "
+                "Value must be integer or null. "
+            )
+        return result
 
     def has_serial_com(self) -> bool:
         """Test if self._com is a valid SerialConnection instance."""
