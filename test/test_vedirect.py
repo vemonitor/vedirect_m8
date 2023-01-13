@@ -3,7 +3,14 @@ import pytest
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
 from ve_utils.utype import UType as Ut
-from vedirect_m8.exceptions import SettingInvalidException, InputReadException, TimeoutException, VedirectException
+from vedirect_m8.exceptions import SettingInvalidException
+from vedirect_m8.exceptions import InputReadException
+from vedirect_m8.exceptions import PacketReadException
+from vedirect_m8.exceptions import ReadTimeoutException
+from vedirect_m8.exceptions import SerialConnectionException
+from vedirect_m8.exceptions import SerialConfException
+from vedirect_m8.exceptions import SerialVeException
+from vedirect_m8.exceptions import VeReadException
 
 
 # noinspection PyTypeChecker
@@ -31,8 +38,16 @@ class TestVedirect:
         assert self.obj.connect_to_serial()
         assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port("vmodem1")
         self.obj._com = None
-        with pytest.raises(VedirectException):
+        with pytest.raises(SerialConnectionException):
             self.obj.connect_to_serial()
+
+    def test_set_max_packet_blocks(self):
+        """Test set_max_packet_blocks method."""
+        assert self.obj.has_free_block()
+        assert self.obj.set_max_packet_blocks(2)
+        assert self.obj.set_max_packet_blocks(None)
+        with pytest.raises(SettingInvalidException):
+            self.obj.set_max_packet_blocks("error")
 
     def test_is_serial_com(self):
         """Test is_serial_com method."""
@@ -44,14 +59,15 @@ class TestVedirect:
     def test_is_timeout():
         """Test is_timeout method."""
         assert Vedirect.is_timeout(elapsed=59, timeout=60)
-        with pytest.raises(TimeoutException):
+        with pytest.raises(ReadTimeoutException):
             Vedirect.is_timeout(elapsed=60, timeout=60)
-        with pytest.raises(TimeoutException):
+        with pytest.raises(ReadTimeoutException):
             Vedirect.is_timeout(elapsed=102, timeout=60)
 
     def test_init_serial_connection_from_object(self):
-        """Test init_serial_connection_from_object method."""
-        obj = self.obj._com
+        """Test init_serial_connection_from_object method base."""
+        obj = self.obj._com.serialize()
+        obj = SerialConnection(**obj)
         assert self.obj.init_serial_connection_from_object(obj)
 
         # test with bad serial port format
@@ -59,7 +75,15 @@ class TestVedirect:
             serial_port="/etc/bad_port",
             source_name="TestVedirect"
         )
-        with pytest.raises(SettingInvalidException):
+        with pytest.raises(SerialConfException):
+            self.obj.init_serial_connection_from_object(obj)
+
+        # test with bad serial port type
+        obj = SerialConnection(
+            serial_port=32,
+            source_name="TestVedirect"
+        )
+        with pytest.raises(SerialConfException):
             self.obj.init_serial_connection_from_object(obj)
 
         # test with bad serial port connection
@@ -67,7 +91,7 @@ class TestVedirect:
             serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
             source_name="TestVedirect"
         )
-        with pytest.raises(VedirectException):
+        with pytest.raises(SerialVeException):
             self.obj.init_serial_connection_from_object(obj)
 
     def test_init_serial_connection(self):
@@ -77,13 +101,19 @@ class TestVedirect:
                                                )
 
         # test with bad serial port format
-        with pytest.raises(SettingInvalidException):
+        with pytest.raises(SerialConfException):
             self.obj.init_serial_connection({"serial_port": "/etc/bad_port"},
                                             source_name="TestVedirect"
                                             )
 
+        # test with bad serial port type
+        with pytest.raises(SerialConfException):
+            self.obj.init_serial_connection({"serial_port":32},
+                                            source_name="TestVedirect"
+                                            )
+
         # test with bad serial port connection
-        with pytest.raises(VedirectException):
+        with pytest.raises(SerialVeException):
             self.obj.init_serial_connection({"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")},
                                             source_name="TestVedirectBadPort"
                                             )
@@ -95,46 +125,78 @@ class TestVedirect:
                                       )
 
         # test with bad serial port format
-        with pytest.raises(SettingInvalidException):
+        with pytest.raises(SerialConfException):
             self.obj.init_settings({"serial_port": "/etc/bad_port"},
                                    source_name="TestVedirect"
                                    )
 
+        # test with bad serial port format
+        with pytest.raises(SerialConfException):
+            self.obj.init_settings({"serial_port": 32},
+                                   source_name="TestVedirect"
+                                   )
+
         # test with bad serial port connection
-        with pytest.raises(VedirectException):
+        with pytest.raises(SerialVeException):
             self.obj.init_settings({"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")},
                                    source_name="TestVedirect"
                                    )
 
     def test_init_data_read(self):
         """Test init_data_read method."""
-        self.obj.read_data_single()
-        assert Ut.is_dict(self.obj.dict, not_null=True)
+        packet = self.obj.read_data_single()
+        assert Ut.is_dict(packet, not_null=True)
         self.obj.init_data_read()
-        assert not Ut.is_dict(self.obj.dict, not_null=True) and Ut.is_dict(self.obj.dict)
+        assert not Ut.is_dict(self.obj.dict, not_null=True)
 
     def test_input_read(self):
         """Test input_read method."""
         datas = [
             b'\r', b'\n', b'P', b'I', b'D', b'\t',
-            b'O', b'x', b'0', b'3', b'\r',
+            b'O', b'x', b'0', b'3', b'\r'
         ]
-        for x in datas:
+        for x in [b':', b'a', b'1'] + datas:
             self.obj.input_read(x)
         assert Ut.is_dict(self.obj.dict, not_null=True) and self.obj.dict.get('PID') == "Ox03"
         self.obj.init_data_read()
-        datas = [
+        bad_datas = [
             b'\r', b'\n', b'C', b'h', b'e', b'c', b'k', b's', b'u', b'm', b'\t',
             b'O', b'\r', b'\n', b'\t', 'helloWorld'
         ]
         with pytest.raises(InputReadException):
+            for x in bad_datas:
+                self.obj.input_read(x)
+
+        # Test max input blocks
+        # if serial never has checksum
+        with pytest.raises(PacketReadException):
+            z, t = 0, 2
+            reset = False
+            for i in range(22):
+                for x in datas:
+                    if 0 <= z < 10 and x == datas[t]:
+                        x = '%s' % z
+                        x = x.encode('ASCII')
+                        z = z + 1
+
+                    if z == 10:
+                        z = 0
+                        t = t + 1
+                    self.obj.input_read(x)
+        self.obj.init_data_read()
+        with pytest.raises(InputReadException):
+            z, t = 0, 2
             for x in datas:
                 self.obj.input_read(x)
+                self.obj.state = 12
 
     def test_read_data_single(self):
         """Test read_data_single method."""
         data = self.obj.read_data_single()
         assert Ut.is_dict(data, not_null=True)
+        self.obj._com = None
+        with pytest.raises(SerialConnectionException):
+            data = self.obj.read_data_single()
 
     def test_read_data_callback(self):
         """Test read_data_callback method."""
@@ -148,13 +210,13 @@ class TestVedirect:
                                     max_loops=1
                                     )
 
-        with pytest.raises(TimeoutException):
+        with pytest.raises(ReadTimeoutException):
             self.obj.read_data_callback(callback_function=func_callback,
                                         timeout=0.1,
                                         max_loops=1
                                         )
 
-        with pytest.raises(VedirectException):
+        with pytest.raises(SerialConnectionException):
             self.obj._com = None
             self.obj.read_data_callback(callback_function=func_callback,
                                         timeout=20,
