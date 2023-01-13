@@ -362,6 +362,7 @@ class VedirectController(Vedirect):
                         "bytes_sum: %s ",
                         packet, self.state, self.bytes_sum
                     )
+                    self.init_data_read()
                     callback_function(packet)
                     now = tim
                     i = i+1
@@ -372,7 +373,6 @@ class VedirectController(Vedirect):
 
                 if Ut.is_int(max_loops) and i >= max_loops:
                     return True
-                time.sleep(0.1)
         else:
             logger.error(
                 '[VeDirect::read_data_callback] '
