@@ -1,5 +1,7 @@
 """SerialTestHelper unittest class."""
+import pytest
 from vedirect_m8.sertest import SerialTestHelper
+from vedirect_m8.exceptions import SettingInvalidException
 
 
 class TestSerialTestHelper:
@@ -128,6 +130,38 @@ class TestSerialTestHelper:
                                        "keys": "PIDs8_fg#"
                                       })
 
+    @staticmethod
+    def test_validate_serial_tests():
+        """Test validate_serial_tests method."""
+        with pytest.raises(SettingInvalidException):
+            SerialTestHelper.validate_serial_tests({
+                "PIDTest": {
+                    "typeTest": "badType",
+                    "keys": ["V", "VS", "VS", "HSDS", "HSDS", "SER#"]
+                }
+            })
+
+        with pytest.raises(SettingInvalidException):
+            SerialTestHelper.validate_serial_tests({
+                "PIDTest@": {
+                    "typeTest": "columns",
+                    "keys": ["V", "VS", "VS", "HSDS", "HSDS", "SER#"]
+                }
+            })
+
+        assert not SerialTestHelper.validate_serial_tests({
+            "PIDTest": {
+                "typeTest": "columns",
+                "maps": ["BadKey", "VS", "VS", "HSDS", "HSDS", "SER#"]
+            }
+        })
+
     def test_run_serial_tests(self):
         """Test run_serial_tests method."""
         assert self.obj.run_serial_tests(self.dict)
+        last_pid = self.dict.get('PID')
+        self.dict.update({'PID': "Azerty"})
+        assert not self.obj.run_serial_tests(self.dict)
+        self.dict.update({'PID': last_pid})
+        del self.dict['V']
+        assert not self.obj.run_serial_tests(self.dict)
