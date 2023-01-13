@@ -428,13 +428,16 @@ class Vedirect:
                     # timeout serial read
                     Vedirect.is_timeout(tim-now, timeout)
             except SerialException as ex:
-                raise VedirectException(
+                raise SerialVeException(
                     "[VeDirect:read_data_single] "
-                    "Unable to read vedirect data : %s.",
+                    "Unable to read vedirect data : %s." %
                     ex
                 ) from SerialException
         else:
-            logger.error('[VeDirect] Unable to read serial data. Not connected to serial port...')
+            raise SerialConnectionException(
+                "[VeDirect:read_data_single] "
+                "Unable to read vedirect data, serial port is closed."
+            )
 
         return None
 
@@ -474,10 +477,11 @@ class Vedirect:
                     return True
                 time.sleep(0.1)
         else:
-            raise VedirectException(
+            raise SerialConnectionException(
                 '[VeDirect::read_data_callback] '
                 'Unable to read serial data. '
-                'Not connected to serial port...')
+                'Not connected to serial port...'
+            )
 
     @staticmethod
     def is_serial_com(obj: SerialConnection) -> bool:
@@ -505,7 +509,7 @@ class Vedirect:
         :return: True if elapsed time is uppermore than timeout.
         """
         if elapsed >= timeout:
-            raise TimeoutException(
+            raise ReadTimeoutException(
                 '[VeDirect::is_timeout] '
                 'Unable to read serial data. '
                 'Timeout error.'
