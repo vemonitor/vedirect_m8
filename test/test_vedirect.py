@@ -10,7 +10,6 @@ from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
 from vedirect_m8.exceptions import SerialConfException
 from vedirect_m8.exceptions import SerialVeException
-from vedirect_m8.exceptions import VeReadException
 
 
 # noinspection PyTypeChecker
@@ -108,7 +107,7 @@ class TestVedirect:
 
         # test with bad serial port type
         with pytest.raises(SerialConfException):
-            self.obj.init_serial_connection({"serial_port":32},
+            self.obj.init_serial_connection({"serial_port": 32},
                                             source_name="TestVedirect"
                                             )
 
@@ -171,7 +170,6 @@ class TestVedirect:
         # if serial never has checksum
         with pytest.raises(PacketReadException):
             z, t = 0, 2
-            reset = False
             for i in range(22):
                 for x in datas:
                     if 0 <= z < 10 and x == datas[t]:
@@ -185,7 +183,6 @@ class TestVedirect:
                     self.obj.input_read(x)
         self.obj.init_data_read()
         with pytest.raises(InputReadException):
-            z, t = 0, 2
             for x in datas:
                 self.obj.input_read(x)
                 self.obj.state = 12
@@ -196,7 +193,7 @@ class TestVedirect:
         assert Ut.is_dict(data, not_null=True)
         self.obj._com = None
         with pytest.raises(SerialConnectionException):
-            data = self.obj.read_data_single()
+            self.obj.read_data_single()
 
     def test_read_data_callback(self):
         """Test read_data_callback method."""
