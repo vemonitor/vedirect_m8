@@ -494,7 +494,8 @@ class Vedirect:
         :param obj: The object to test.
         :return: True if obj is valid SerialConnection instance.
         """
-        return isinstance(obj, SerialConnection)
+        return isinstance(obj, SerialConnection)\
+            and obj.get_serial_port() is not None
 
     @staticmethod
     def is_timeout(elapsed: float or int, timeout: float or int = 60) -> bool:
