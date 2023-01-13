@@ -25,7 +25,7 @@ class TestVedirectController:
         conf = {
             'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
             'baud': 19200,
-            'timeout': 2
+            'timeout': 0
         }
         serial_test = {
             'PID_test': {
@@ -235,6 +235,7 @@ class TestVedirectController:
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
 
+        time.sleep(4)
         self.obj.set_wait_timeout(3600)
         self.obj.read_data_callback(callback_function=func_callback,
                                     timeout=20,
