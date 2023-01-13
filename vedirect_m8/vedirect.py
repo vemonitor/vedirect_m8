@@ -386,8 +386,6 @@ class Vedirect:
         :return: A dictionary of vedirect block data or None if block not entirely decoded.
         """
         byte = self._com.ser.read(1)
-        if byte == b'\x00':
-            byte = self._com.ser.read(1)
         return self.input_read(byte)
 
     def read_data_single(self, timeout: int = 60) -> dict or None:
