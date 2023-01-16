@@ -40,6 +40,132 @@ logging.basicConfig()
 logger = logging.getLogger("vedirect")
 
 
+class VedirectReaderHelper:
+    """Class helper used to read vedirect protocol from serial port."""
+
+    def __init__(self, max_packet_blocks: int or None = 18):
+        self._delimiters = {
+            "header1": ord('\r'),
+            "header2": ord('\n'),
+            "hexmarker": ord(':'),
+            "delimiter": ord('\t')
+        }
+        self.max_blocks = 18
+        self.key = ''
+        self.value = ''
+        self.bytes_sum = 0
+        self.state = self.WAIT_HEADER
+        self.dict = {}
+        self.set_max_packet_blocks(max_packet_blocks)
+
+    (HEX, WAIT_HEADER, IN_KEY, IN_VALUE, IN_CHECKSUM) = range(5)
+
+    def has_free_block(self) -> bool:
+        """Test if block of key value can be added to dict packet."""
+        return self.max_blocks is None\
+            or len(self.dict) <= self.max_blocks
+
+    def set_max_packet_blocks(self, value: int or None) -> bool:
+        """
+        Set max blocks by packet value.
+
+        If input packet in dict has more key that max_blocks,
+        raise a PacketReadException on reading serial.
+        To disable this limitation, set the value to None.
+        By default, the value is 18 blocks per packet.
+        (See VeDirect protocol)
+
+        Example :
+            >>> self.set_max_packet_blocks(22)
+            >>> True
+        :param value: max blocks by packet value
+        :return: True if max blocks by packet value is updated.
+
+        Raise:
+         - SettingInvalidException: if the value is invalid.
+        """
+        result = True
+        self.max_blocks = 18
+        if Ut.is_int(value, positive=True):
+            self.max_blocks = value
+        elif value is None:
+            self.max_blocks = None
+        else:
+            raise SettingInvalidException(
+                "[Vedirect:set_max_packet_blocks] "
+                "Max blocks by packet value is not valid. "
+                "Value must be integer or null. "
+            )
+        return result
+
+    def init_data_read(self):
+        """ Initialise reader properties """
+        self.key = ''
+        self.value = ''
+        self.bytes_sum = 0
+        self.state = self.WAIT_HEADER
+        self.dict = {}
+
+    def is_state(self, value: int) -> bool:
+        """ Initialise reader properties """
+        return self.state == value
+
+    def is_delimiter(self, key: str, value: int) -> bool:
+        """ Test if value is equal to delimiter key value"""
+        return self._delimiters.get(key) == value
+
+    def run_wait_header(self, data: int) -> None:
+        """ Wait block header."""
+        self.bytes_sum += data
+        if self.is_delimiter("header1", data):
+            self.state = self.WAIT_HEADER
+        elif self.is_delimiter("header2", data):
+            self.state = self.IN_KEY
+
+    def run_in_key(self, data: int, byte: bytes) -> None:
+        """ Get block key. """
+        self.bytes_sum += data
+        if self.is_delimiter("delimiter", data):
+            if self.key == 'Checksum':
+                self.state = self.IN_CHECKSUM
+            else:
+                self.state = self.IN_VALUE
+        else:
+            self.key += byte.decode('ascii')
+
+    def run_in_value(self, data: int, byte: bytes) -> None:
+        """ Get block value. """
+        self.bytes_sum += data
+        if self.is_delimiter("header1", data):
+            if not self.has_free_block():
+                raise PacketReadException
+            self.state = self.WAIT_HEADER
+            self.dict[self.key] = self.value
+            self.key = ''
+            self.value = ''
+        else:
+            self.value += byte.decode('ascii')
+
+    def run_in_checksum(self, data: int) -> dict or None:
+        """ Control checksum and return read packet. """
+        self.bytes_sum += data
+        self.key = ''
+        self.value = ''
+        self.state = self.WAIT_HEADER
+        if not self.bytes_sum % 256 == 0:
+            self.bytes_sum = 0
+        else:
+            self.bytes_sum = 0
+            return self.dict
+        return None
+
+    def run_in_hex(self, data: int) -> None:
+        """ Read a hex value, aboard and wait header. """
+        self.bytes_sum = 0
+        if self.is_delimiter("header1", data):
+            self.state = self.WAIT_HEADER
+
+
 class Vedirect:
     """
     Used to decode the Victron Energy VE.Direct text protocol.
@@ -86,63 +212,14 @@ class Vedirect:
         :return: Nothing
         """
         self._com = None
-        self._delimiters = {
-            "header1": ord('\r'),
-            "header2": ord('\n'),
-            "hexmarker": ord(':'),
-            "delimiter": ord('\t')
-        }
-        self.max_blocks = 18
-        self.set_max_packet_blocks(max_packet_blocks)
-        self.key = ''
-        self.value = ''
-        self.bytes_sum = 0
-        self.state = self.WAIT_HEADER
-        self.dict = {}
+        self._helper = VedirectReaderHelper(max_packet_blocks)
+
         self.init_settings(serial_conf=serial_conf,
                            source_name=source_name,
                            auto_start=auto_start
                            )
 
     (HEX, WAIT_HEADER, IN_KEY, IN_VALUE, IN_CHECKSUM) = range(5)
-
-    def has_free_block(self) -> bool:
-        """Test if block of key value can be added to dict packet."""
-        return self.max_blocks is None\
-            or len(self.dict) <= self.max_blocks
-
-    def set_max_packet_blocks(self, value: int or None) -> bool:
-        """
-        Set max blocks by packet value.
-
-        If input packet in dict has more key that max_blocks,
-        raise a PacketReadException on reading serial.
-        To disable this limitation, set the value to None.
-        By default, the value is 18 blocks per packet.
-        (See VeDirect protocol)
-
-        Example :
-            >>> self.set_max_packet_blocks(22)
-            >>> True
-        :param value: max blocks by packet value
-        :return: True if max blocks by packet value is updated.
-
-        Raise:
-         - SettingInvalidException: if the value is invalid.
-        """
-        result = True
-        self.max_blocks = 18
-        if Ut.is_int(value, positive=True):
-            self.max_blocks = value
-        elif value is None:
-            self.max_blocks = None
-        else:
-            raise SettingInvalidException(
-                "[Vedirect:set_max_packet_blocks] "
-                "Max blocks by packet value is not valid. "
-                "Value must be integer or null. "
-            )
-        return result
 
     def has_serial_com(self) -> bool:
         """Test if _com is a valid SerialConnection instance."""
@@ -303,64 +380,30 @@ class Vedirect:
                                            auto_start=auto_start
                                            )
 
-    def init_data_read(self):
-        """ Initialise reader properties """
-        self.key = ''
-        self.value = ''
-        self.bytes_sum = 0
-        self.state = self.WAIT_HEADER
-        self.dict = {}
-
     def input_read(self, byte) -> dict or None:
         """Input read from byte."""
+        result = None
         try:
             ord_byte = ord(byte)
-            if ord_byte == self._delimiters.get("hexmarker")\
-                    and self.state != self.IN_CHECKSUM:
-                self.state = self.HEX
-            if self.state == self.WAIT_HEADER:
-                self.bytes_sum += ord_byte
-                if ord_byte == self._delimiters.get("header1"):
-                    self.state = self.WAIT_HEADER
-                elif ord_byte == self._delimiters.get("header2"):
-                    self.state = self.IN_KEY
-                return None
-            elif self.state == self.IN_KEY:
-                self.bytes_sum += ord_byte
-                if ord_byte == self._delimiters.get("delimiter"):
-                    if self.key == 'Checksum':
-                        self.state = self.IN_CHECKSUM
-                    else:
-                        self.state = self.IN_VALUE
-                else:
-                    self.key += byte.decode('ascii')
-                return None
-            elif self.state == self.IN_VALUE:
-                self.bytes_sum += ord_byte
-                if ord_byte == self._delimiters.get("header1"):
-                    if not self.has_free_block():
-                        raise PacketReadException
-                    self.state = self.WAIT_HEADER
-                    self.dict[self.key] = self.value
-                    self.key = ''
-                    self.value = ''
-                else:
-                    self.value += byte.decode('ascii')
-                return None
-            elif self.state == self.IN_CHECKSUM:
-                self.bytes_sum += ord_byte
-                self.key = ''
-                self.value = ''
-                self.state = self.WAIT_HEADER
-                if self.bytes_sum % 256 == 0:
-                    self.bytes_sum = 0
-                    return self.dict
-                else:
-                    self.bytes_sum = 0
-            elif self.state == self.HEX:
-                self.bytes_sum = 0
-                if ord_byte == self._delimiters.get("header1"):
-                    self.state = self.WAIT_HEADER
+
+            if self._helper.is_delimiter("hexmarker", ord_byte)\
+                    and self._helper.state != self._helper.IN_CHECKSUM:
+                self._helper.state = self._helper.HEX
+            #
+            if self._helper.is_state(self._helper.WAIT_HEADER):
+                self._helper.run_wait_header(ord_byte)
+            #
+            elif self._helper.is_state(self._helper.IN_KEY):
+                self._helper.run_in_key(ord_byte, byte)
+            #
+            elif self._helper.is_state(self._helper.IN_VALUE):
+                self._helper.run_in_value(ord_byte, byte)
+            #
+            elif self._helper.is_state(self._helper.IN_CHECKSUM):
+                result = self._helper.run_in_checksum(ord_byte)
+            #
+            elif self._helper.is_state(self._helper.HEX):
+                self._helper.run_in_hex(ord_byte)
             else:
                 raise AssertionError()
         except PacketReadException as ex:
@@ -368,8 +411,8 @@ class Vedirect:
                 "[Vedirect::input_read] "
                 "Serial input read error: "
                 "Packet has limit of %s/%s blocks" % (
-                    len(self.dict),
-                    self.max_blocks
+                    len(self._helper.dict),
+                    self._helper.max_blocks
                 )
             ) from ex
         except Exception as ex:
@@ -378,6 +421,8 @@ class Vedirect:
                 "Serial input read error on byte : %s" %
                 byte
             ) from ex
+
+        return result
 
     def get_serial_packet(self) -> dict or None:
         """
@@ -428,7 +473,7 @@ class Vedirect:
                             "Serial reader success: dict: %s",
                             packet
                         )
-                        self.init_data_read()
+                        self._helper.init_data_read()
                         return packet
 
                     # timeout serial read
@@ -477,11 +522,11 @@ class Vedirect:
                     logger.debug(
                         "Serial reader success: packet: %s "
                         "-- state: %s -- bytes_sum: %s ",
-                        packet, self.state, self.bytes_sum
+                        packet, self._helper.state, self._helper.bytes_sum
                     )
                     now = tim
                     i = i + 1
-                    self.init_data_read()
+                    self._helper.init_data_read()
                     callback_function(packet)
 
                 # timeout serial read
