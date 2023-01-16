@@ -42,11 +42,11 @@ class TestVedirect:
 
     def test_set_max_packet_blocks(self):
         """Test set_max_packet_blocks method."""
-        assert self.obj.has_free_block()
-        assert self.obj.set_max_packet_blocks(2)
-        assert self.obj.set_max_packet_blocks(None)
+        assert self.obj._helper.has_free_block()
+        assert self.obj._helper.set_max_packet_blocks(2)
+        assert self.obj._helper.set_max_packet_blocks(None)
         with pytest.raises(SettingInvalidException):
-            self.obj.set_max_packet_blocks("error")
+            self.obj._helper.set_max_packet_blocks("error")
 
     def test_is_serial_com(self):
         """Test is_serial_com method."""
@@ -143,10 +143,13 @@ class TestVedirect:
 
     def test_init_data_read(self):
         """Test init_data_read method."""
-        packet = self.obj.read_data_single()
-        assert Ut.is_dict(packet, not_null=True)
-        self.obj.init_data_read()
-        assert not Ut.is_dict(self.obj.dict, not_null=True)
+        self.obj._helper.dict = {"a": 2, "b": 3}
+        assert self.obj._helper.init_data_read() is None
+        assert not Ut.is_dict(self.obj._helper.dict, not_null=True)
+        assert self.obj._helper.key == ''
+        assert self.obj._helper.value == ''
+        assert self.obj._helper.bytes_sum == 0
+        assert self.obj._helper.state == self.obj._helper.WAIT_HEADER
 
     def test_input_read(self):
         """Test input_read method."""
@@ -156,8 +159,8 @@ class TestVedirect:
         ]
         for x in [b':', b'a', b'1'] + datas:
             self.obj.input_read(x)
-        assert Ut.is_dict(self.obj.dict, not_null=True) and self.obj.dict.get('PID') == "Ox03"
-        self.obj.init_data_read()
+        assert Ut.is_dict(self.obj._helper.dict, not_null=True) and self.obj._helper.dict.get('PID') == "Ox03"
+        self.obj._helper.init_data_read()
         bad_datas = [
             b'\r', b'\n', b'C', b'h', b'e', b'c', b'k', b's', b'u', b'm', b'\t',
             b'O', b'\r', b'\n', b'\t', 'helloWorld'
@@ -181,11 +184,11 @@ class TestVedirect:
                         z = 0
                         t = t + 1
                     self.obj.input_read(x)
-        self.obj.init_data_read()
+        self.obj._helper.init_data_read()
         with pytest.raises(InputReadException):
             for x in datas:
                 self.obj.input_read(x)
-                self.obj.state = 12
+                self.obj._helper.state = 12
 
     def test_read_data_single(self):
         """Test read_data_single method."""
