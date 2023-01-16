@@ -18,6 +18,7 @@ This is a forked version of script originally created by Janne Kario.
 import logging
 import time
 from serial import SerialException
+from serial import SerialTimeoutException
 from ve_utils.utype import UType as Ut
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.exceptions import SettingInvalidException
@@ -388,9 +389,12 @@ class Vedirect:
         byte = self._com.ser.read(1)
         return self.input_read(byte)
 
-    def read_data_single(self, timeout: int = 60) -> dict or None:
+    def read_data_single(self,
+                         timeout: int = 60,
+                         max_read_errors: int = 0
+                         ) -> dict or None:
         """
-        Read a single block decoded from serial port and returns it as a dictionary.
+        Read a single packet decoded from serial port and returns it as a dictionary.
 
         :Example :
             >>> ve = Vedirect({"serial_port": "/dev/ttyUSB1"})
@@ -399,6 +403,7 @@ class Vedirect:
 
         :param self: Reference the class instance
         :param timeout: Set the timeout for the read_data_single function
+        :param max_read_errors: Set the timeout for the read_data_single function
         :return: A dictionary of the data
         - SerialConfException:
            Will be raised when parameter
@@ -409,10 +414,11 @@ class Vedirect:
          - OpenSerialVeException:
            Will be raised when the device is configured but port is not openned.
         """
-        run, now, tim = True, time.time(), 0
+        run, now, tim, nb_errors = True, time.time(), 0, 0
+        max_read_errors = Ut.get_int(max_read_errors, 0)
         if self.is_ready():
-            try:
-                while run:
+            while run:
+                try:
                     packet, tim = None, time.time()
 
                     packet = self.get_serial_packet()
@@ -427,19 +433,26 @@ class Vedirect:
 
                     # timeout serial read
                     Vedirect.is_timeout(tim-now, timeout)
-            except SerialException as ex:
-                raise SerialVeException(
-                    "[VeDirect:read_data_single] "
-                    "Unable to read vedirect data : %s." %
-                    ex
-                ) from SerialException
+                except InputReadException as ex:
+                    if max_read_errors == 0 or nb_errors >= max_read_errors:
+                        raise InputReadException(ex) from InputReadException
+                    nb_errors = nb_errors + 1
+                except SerialTimeoutException as ex:
+                    raise ReadTimeoutException(
+                        "[VeDirect:read_data_single] SerialTimeoutException"
+                        "Unable to read vedirect data."
+                    ) from ex
+                except SerialException as ex:
+                    raise SerialVeException(
+                        "[VeDirect:read_data_single] "
+                        "Unable to read vedirect data."
+                    ) from ex
+
         else:
             raise SerialConnectionException(
                 "[VeDirect:read_data_single] "
                 "Unable to read vedirect data, serial port is closed."
             )
-
-        return None
 
     def read_data_callback(self,
                            callback_function,
