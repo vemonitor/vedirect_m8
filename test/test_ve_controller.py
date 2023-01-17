@@ -331,13 +331,13 @@ class TestVedirectController:
 
             def error_test():
                 """Test test_search_serial_port with bad serial_port."""
+                test_port = False
                 for i in range(20):
                     if self.obj.search_serial_port():
-                        tst = True
+                        test_port = True
                         print("serial port retrieved at %s" % i)
                         break
-                    time.sleep(0.8)
-                assert tst
+                assert test_port
 
             self.ve_sim.run_vedirect_sim_callback(
                 callback=error_test,
