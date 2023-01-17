@@ -313,37 +313,28 @@ class TestVedirectController:
 
     def test_search_serial_port(self):
         """Test search_serial_port method."""
-        try:
-            def main_test():
-                """Main test_search_serial_port tests."""
+
+        def main_test():
+            """Main test_search_serial_port tests."""
+            try:
                 self.obj.init_serial_connection(
                     {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
                     source_name="TestVedirectController"
                 )
-
-            self.ve_sim.run_vedirect_sim_callback(
-                callback=main_test,
-                nb_packets=20,
-                sleep=0.5
-            )
-        except SerialVeException:
-            tst = False
-
-            def error_test():
-                """Test test_search_serial_port with bad serial_port."""
+            except SerialVeException:
                 test_port = False
-                for i in range(20):
+                for i in range(10):
                     if self.obj.search_serial_port():
                         test_port = True
                         print("serial port retrieved at %s" % i)
                         break
                 assert test_port
 
-            self.ve_sim.run_vedirect_sim_callback(
-                callback=error_test,
-                nb_packets=20,
-                sleep=0.5
-            )
+        self.ve_sim.run_vedirect_sim_callback(
+            callback=main_test,
+            nb_packets=40,
+            sleep=0.5
+        )
 
         def error_test():
             """Test test_search_serial_port with bad serial_port."""
