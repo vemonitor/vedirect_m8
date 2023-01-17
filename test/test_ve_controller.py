@@ -326,7 +326,7 @@ class TestVedirectController:
                 for i in range(10):
                     if self.obj.search_serial_port():
                         test_port = True
-                        print("serial port retrieved at %s" % i)
+                        print("\n search_serial_port: serial port retrieved at %s" % i)
                         break
                 assert test_port
 
