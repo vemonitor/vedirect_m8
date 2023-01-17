@@ -6,7 +6,7 @@ Used to decode the Victron Energy VE.Direct text protocol.
 Extends Vedirect, and add ability to wait for serial connection,
 at start, and or when reading serial data.
 
- .. seealso:: Vedirect
+ .. see also:: Vedirect
  .. raises:: InputReadException,
              serial.SerialException,
              serial.SerialTimeoutException,
@@ -43,7 +43,7 @@ class VedirectController(Vedirect):
     Extends Vedirect, and add ability to wait for serial connection,
     at start, and or when reading serial data.
 
-     .. seealso:: Vedirect
+     .. see also:: Vedirect
      .. raises:: InputReadException,
                  serial.SerialException,
                  serial.SerialTimeoutException,
@@ -65,7 +65,6 @@ class VedirectController(Vedirect):
             - > sc = VedirectController(serial_port = "/dev/ttyUSB1")
             - > sc.connect()
             - > True # if connection opened on serial port "/dev/tyyUSB1"
-        :param self: Refer to the object instance itself,
         :param serial_conf: dict: The serial connection configuration,
         :param serial_test: The serial_test to execute to retrieve the serial port,
         :param source_name: This is used in logger to identify the source of call,
@@ -152,8 +151,8 @@ class VedirectController(Vedirect):
          - SettingInvalidException if serial_port, baud or timeout are not valid.
          - VedirectException if connection to serial port fails
         :Example :
-            - >self.init_settings(serial_port="/tmp/vmodem0")
-            - >True
+            >>> self.init_settings({"serial_port": "/dev/ttyUSB1"})
+            >>> True
         :param self: Refer to the object itself
         :param serial_conf: dict: The serial connection configuration,
         :param source_name: This is used in logger to identify the source of call
@@ -177,7 +176,7 @@ class VedirectController(Vedirect):
                     "[VedirectController::init_settings] "
                     "Unable to retrieve valid serial port to read. "
                     "waiting: %ss." % self._wait_timeout
-                )
+                ) from ex
         return result
 
     def read_data_to_test(self) -> dict:
@@ -203,7 +202,9 @@ class VedirectController(Vedirect):
         return result
 
     def test_serial_port(self, port: str) -> bool:
-        """Attempt serial connection on specified port."""
+        """
+        Attempt serial connection on specified port.
+        """
         result = False
         if SerialConnection.is_serial_port(port):
             timeout, serial_port = self._com.get_timeout(), self._com.get_serial_port()
@@ -219,9 +220,20 @@ class VedirectController(Vedirect):
                     self._com.set_serial_port(port)
                     result = True
                 else:
+                    logger.debug(
+                        "[VeDirect::_test_serial_port] Test serial port %s fails."
+                        "\n data: %s",
+                        port,
+                        data
+                    )
                     self._com.set_timeout(timeout)
                     self._com.set_serial_port(serial_port)
                     self._com.ser.close()
+            else:
+                logger.info(
+                    "[VeDirect::_test_serial_port] Unable to test serial port %s, connexion fails.",
+                    port
+                )
         return result
 
     def test_serial_ports(self, ports: list) -> bool:
@@ -261,7 +273,7 @@ class VedirectController(Vedirect):
         if self.is_ready_to_search_ports():
             ports = self._com.get_serial_ports_list()
             if self.test_serial_ports(ports):
-                self.init_data_read()
+                self._helper.init_data_read()
                 return True
         return False
 
@@ -332,12 +344,14 @@ class VedirectController(Vedirect):
         :doc-author: Trelent
         """
         run, now, tim, i = True, time.time(), 0, 0
+        nb_loops = 0
         packet = None
         if self.is_ready():
             while run:
                 tim = time.time()
                 try:
                     packet = self.get_serial_packet()
+                    nb_loops += 1
                 except (
                         InputReadException,
                         serial.SerialException,
@@ -353,16 +367,18 @@ class VedirectController(Vedirect):
 
                 if packet is not None:
                     logger.debug(
-                        "Serial reader success: "
-                        "packet: %s -- "
+                        "Serial reader success: \n"
+                        "packet: %s -- \n"
                         "state: %s -- "
-                        "bytes_sum: %s ",
-                        packet, self.state, self.bytes_sum
+                        "bytes_sum: %s "
+                        "nb_loops: %s \n",
+                        packet, self._helper.state, self._helper.bytes_sum, nb_loops
                     )
-                    self.init_data_read()
+                    self._helper.init_data_read()
                     callback_function(packet)
                     now = tim
                     i = i+1
+                    nb_loops = 0
                     packet = None
 
                 # timeout serial read
