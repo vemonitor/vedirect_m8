@@ -265,6 +265,7 @@ class TestVedirectController:
 
         def bad_port_test():
             """Test init_settings with bad serial_port."""
+            self.obj._ser_test = None
             with pytest.raises(SerialConnectionException):
                 self.obj.test_serial_ports(ports)
 
