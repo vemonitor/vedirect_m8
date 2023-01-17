@@ -1,5 +1,6 @@
 """Vedirect unittest class."""
 import pytest
+from .serial_test_helper import SerialTestHelper
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
 from ve_utils.utype import UType as Ut
@@ -14,6 +15,18 @@ from vedirect_m8.exceptions import SerialVeException
 
 # noinspection PyTypeChecker
 class TestVedirect:
+
+    def setup_class(self):
+        """
+        Setup any state tied to the execution of the given function.
+
+        Invoked for every test function in the module.
+        """
+        conf = {
+            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem0")
+        }
+
+        self.ve_sim = SerialTestHelper(**conf)
 
     def setup_method(self):
         """
@@ -192,11 +205,26 @@ class TestVedirect:
 
     def test_read_data_single(self):
         """Test read_data_single method."""
-        data = self.obj.read_data_single()
-        assert Ut.is_dict(data, not_null=True)
+        # test success, ReadTimeoutException and InputReadException
+        def main_test():
+            """Main read_data_single tests."""
+            assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
+            with pytest.raises(ReadTimeoutException):
+                assert Ut.is_dict(self.obj.read_data_single(timeout=0.00000000001), not_null=True)
+            assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
+            with pytest.raises(InputReadException):
+                assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
+
+        self.ve_sim.run_vedirect_sim_callback(
+            callback=main_test,
+            nb_packets=2,
+            sleep=0.5
+        )
+
+        # test SerialConnectionException (instance not ready)
         self.obj._com = None
         with pytest.raises(SerialConnectionException):
-            self.obj.read_data_single()
+            assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
 
     def test_read_data_callback(self):
         """Test read_data_callback method."""
@@ -205,20 +233,28 @@ class TestVedirect:
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
 
-        self.obj.read_data_callback(callback_function=func_callback,
-                                    timeout=20,
-                                    max_loops=1
-                                    )
-
-        with pytest.raises(ReadTimeoutException):
-            self.obj.read_data_callback(callback_function=func_callback,
-                                        timeout=0.1,
-                                        max_loops=1
-                                        )
-
-        with pytest.raises(SerialConnectionException):
-            self.obj._com = None
+        def main_test():
+            """Main read_data_callback tests."""
             self.obj.read_data_callback(callback_function=func_callback,
                                         timeout=20,
                                         max_loops=1
                                         )
+
+            with pytest.raises(ReadTimeoutException):
+                self.obj.read_data_callback(callback_function=func_callback,
+                                            timeout=0.1,
+                                            max_loops=1
+                                            )
+
+            with pytest.raises(SerialConnectionException):
+                self.obj._com = None
+                self.obj.read_data_callback(callback_function=func_callback,
+                                            timeout=20,
+                                            max_loops=1
+                                            )
+
+        self.ve_sim.run_vedirect_sim_callback(
+            callback=main_test,
+            nb_packets=4,
+            sleep=0.5
+        )
