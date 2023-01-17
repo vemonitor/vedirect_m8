@@ -256,7 +256,6 @@ class TestVedirectController:
         def main_test():
             """Main test_serial_ports tests."""
             assert self.obj.test_serial_ports(ports)
-            self.obj._ser_test = None
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
