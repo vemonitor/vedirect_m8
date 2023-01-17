@@ -238,7 +238,7 @@ class TestVedirectController:
 
         def bad_port_test():
             """Test test_serial_port with bad serial_port."""
-            with pytest.raises(SerialVeException):
+            with pytest.raises(SerialConnectionException):
                 self.obj.test_serial_port(
                     port=SerialConnection.get_virtual_home_serial_port("vmodem255")
                 )
@@ -326,7 +326,7 @@ class TestVedirectController:
                 nb_packets=20,
                 sleep=0.5
             )
-        except VedirectException:
+        except SerialVeException:
             tst = False
 
             def error_test():
