@@ -44,11 +44,6 @@ jobs:
           command: socat -d -d PTY,raw,echo=0,link=/${HOME}/vmodem0 PTY,raw,echo=0,link=/${HOME}/vmodem1
           background: true
       - run:
-          name: run vedirectsim
-          # This assumes pytest is installed via the install-package step above
-          command: python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv702
-          background: true
-      - run:
           name: Run tests
           # This assumes pytest is installed via the install-package step above
           command: coverage run -m pytest -s
