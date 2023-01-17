@@ -3,22 +3,27 @@
 Used to decode the Victron Energy VE.Direct text protocol.
 
 This is a forked version of script originally created by Janne Kario.
-(https://github.com/karioja/vedirect).
-
+    - original: https://github.com/karioja/vedirect.
+    - repo: https://github.com/mano8/vedirect_m8.
  Raise:
-        - SettingInvalidException
-        - InputReadException
-        - PacketReadException
-        - ReadTimeoutException
-        - SerialConnectionException
-        - SerialConfException
-        - SerialVeException
-        - OpenSerialVeException
+    - VedirectException: when any exception is raised.
+      All extends from it.
+    - SettingInvalidException: when invalid setting is set.
+    - VeReadException: when any exception occurs on reading data.
+      All read exception extends from it.
+    - InputReadException: when error on reading serial byte
+    - PacketReadException: when error on reading serial packet (Invalid packet).
+    - ReadTimeoutException: when serial read timeout exceeded.
+    - SerialConnectionException: when any exception occurs on connecting serial port.
+      All connection exception extends from it.
+    - SerialConfException: When serial connection settings is bad
+    - SerialVeException: In case the device can not be found or can not be configured.
+      From serial.SerialException
+    - OpenSerialVeException: Will be raised when the device is configured but port is not opened.
 """
 import logging
 import time
 from serial import SerialException
-from serial import SerialTimeoutException
 from ve_utils.utype import UType as Ut
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.exceptions import SettingInvalidException
@@ -218,8 +223,6 @@ class Vedirect:
                            source_name=source_name,
                            auto_start=auto_start
                            )
-
-    (HEX, WAIT_HEADER, IN_KEY, IN_VALUE, IN_CHECKSUM) = range(5)
 
     def has_serial_com(self) -> bool:
         """Test if _com is a valid SerialConnection instance."""
@@ -482,11 +485,6 @@ class Vedirect:
                     if max_read_errors == 0 or nb_errors >= max_read_errors:
                         raise InputReadException(ex) from InputReadException
                     nb_errors = nb_errors + 1
-                except SerialTimeoutException as ex:
-                    raise ReadTimeoutException(
-                        "[VeDirect:read_data_single] SerialTimeoutException"
-                        "Unable to read vedirect data."
-                    ) from ex
                 except SerialException as ex:
                     raise SerialVeException(
                         "[VeDirect:read_data_single] "
