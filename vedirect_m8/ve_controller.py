@@ -184,7 +184,7 @@ class VedirectController(Vedirect):
         result = None
         if self.is_ready():
             try:
-                result = dict()
+                result = {}
                 for i in range(4):
                     try:
                         data = self.read_data_single(timeout=2)
