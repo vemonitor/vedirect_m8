@@ -37,7 +37,7 @@ class Vedirectsim:
         self.perf = PerfStats()
         self.device = None
         self.dump_file_path = None
-        self.block_counter = 0
+        self.packet_counter = 0
         self.dict = {'V': '12800', 'VS': '12800', 'VM': '1280', 'DM': '120',
                      'VPV': '3350', 'PPV': '130', 'I': '15000', 'IL': '1500',
                      'LOAD': 'ON', 'T': '25', 'P': '130', 'CE': '13500',
@@ -123,6 +123,12 @@ class Vedirectsim:
             device
         )
 
+    def reset_cache(self) -> None:
+        """Convert data to vedirect protocol."""
+        self.packet_counter = 0
+        self.perf = PerfStats()
+        self.dict = {}
+
     def convert(self, data: dict) -> list:
         """Convert data to vedirect protocol."""
         result = list()
@@ -146,13 +152,13 @@ class Vedirectsim:
         packet = self.convert(self.dict)
         try:
             self.ser.write(bytes(packet))
-            self.block_counter += 1
+            self.packet_counter += 1
             packet_write = True
         except serial.SerialTimeoutException as ex:
             logger.error(
                 "Error : SerialTimeoutException on writing on serial :"
                 "packet nb : %s - packet %s - ex %s. \n",
-                self.block_counter, self.dict, ex
+                self.packet_counter, self.dict, ex
             )
             self.ser.cancel_write()
             self.ser.reset_output_buffer()
@@ -173,7 +179,7 @@ class Vedirectsim:
                 "Sending packet %s %s on serial in %s s."
                 "Sleep before next: %s.\n"
                 "Write Stats: %s.\n %s\n",
-                self.block_counter,
+                self.packet_counter,
                 packet_write,
                 write_time,
                 sleep_time,
@@ -197,7 +203,7 @@ class Vedirectsim:
 
     def is_max_writes(self, max_writes: int or None = None):
         """Test if max serial writes."""
-        return Ut.is_int(max_writes) and self.block_counter >= max_writes
+        return Ut.is_int(max_writes) and self.packet_counter >= max_writes
 
     def read_dump_file(self):
         """Read dump file."""
@@ -212,6 +218,7 @@ class Vedirectsim:
         """Read file lines."""
         result = False
         if self.is_ready():
+
             self.perf.start_perf_key("writes")
             result = True
             for key, value in self.read_dump_file():
@@ -219,7 +226,7 @@ class Vedirectsim:
                 if self.is_max_writes(max_writes):
                     logger.info(
                         "End read dump file lines on max serial writes : %s/%s",
-                        self.block_counter, max_writes
+                        self.packet_counter, max_writes
                     )
                     result = True
                     break
@@ -234,12 +241,13 @@ class Vedirectsim:
     def run(self, max_writes: int or None = None) -> bool:
         """Run the simulator."""
         if self.is_ready():
+            self.reset_cache()
             running = True
             while running:
                 self.dict = dict()
                 self.perf.start_perf_key("dump")
 
-                start_writes = self.block_counter
+                start_writes = self.packet_counter
                 logger.info(
                     "Starting to read dump file lines on device %s. "
                     "Max serial writes : %s",
@@ -251,14 +259,14 @@ class Vedirectsim:
                     "End read dump file lines. Write %s/%s packets in % s.\n"
                     "Write Stats : %s.\n"
                     "Stats dump: %s\n",
-                    self.block_counter - start_writes,
-                    self.block_counter,
+                    self.packet_counter - start_writes,
+                    self.packet_counter,
                     time_dump,
                     self.perf.serialize_perf_key("writes"),
                     self.perf.serialize_perf_key("dump")
                 )
                 self.perf.init_perf_key("writes", reset=True)
-                if Ut.is_int(max_writes) and self.block_counter >= max_writes:
+                if Ut.is_int(max_writes) and self.packet_counter >= max_writes:
                     break
             return running
         raise ValueError(
@@ -271,7 +279,7 @@ class Vedirectsim:
     @staticmethod
     def get_valid_devices() -> list:
         """Get valid devices to simulate vedirect data."""
-        return ["bmv702", "bluesolar_1.23", "smartsolar_1.39"]
+        return ["bmv702", "bluesolar_1.23", "smartsolar_1.39", "test_bad_packets"]
 
     @staticmethod
     def get_key_value_from_line(line):
