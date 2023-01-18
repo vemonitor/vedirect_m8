@@ -197,9 +197,7 @@ class Vedirect:
     """
     def __init__(self,
                  serial_conf: dict,
-                 source_name: str = 'Vedirect',
-                 auto_start: bool = True,
-                 max_packet_blocks: int or None = 18
+                 options: dict or None = None
                  ):
         """
         Constructor of Vedirect class.
@@ -212,13 +210,20 @@ class Vedirect:
             >>> {"ser_key1": "ser_value1", ...}
         :param self: Refer to the object instance itself,
         :param serial_conf: dict: The serial connection configuration,
-        :param source_name: This is used in logger to identify the source of call,
-        :param auto_start: bool: Define if serial connection must be established automatically.
+        :param options: Options parameters as dict,
         :return: Nothing
         """
         self._com = None
-        self._helper = VedirectReaderHelper(max_packet_blocks)
+        self._helper = None
+        max_packet_blocks = 18
+        source_name = "VeDirect"
+        auto_start = True
+        if Ut.is_dict(options, not_null=True):
+            max_packet_blocks = options.get('max_packet_blocks') or 18
+            source_name = options.get('source_name') or "VeDirect" or "VeDirect"
+            auto_start = options.get('auto_start') or True
 
+        self._helper = VedirectReaderHelper(max_packet_blocks)
         self.init_settings(serial_conf=serial_conf,
                            source_name=source_name,
                            auto_start=auto_start

@@ -52,11 +52,7 @@ class VedirectController(Vedirect):
     def __init__(self,
                  serial_conf: dict,
                  serial_test: dict,
-                 source_name: str = 'VedirectController',
-                 auto_start: bool = True,
-                 wait_connection: bool = True,
-                 wait_timeout: int or float = 3600,
-                 max_packet_blocks: int or None = 18
+                 options: dict or None = None
                  ):
         """
         Constructor of VedirectController class.
@@ -67,23 +63,22 @@ class VedirectController(Vedirect):
             - > True # if connection opened on serial port "/dev/tyyUSB1"
         :param serial_conf: dict: The serial connection configuration,
         :param serial_test: The serial_test to execute to retrieve the serial port,
-        :param source_name: This is used in logger to identify the source of call,
-        :param auto_start: bool: Define if serial connection must be established automatically,
-        :param wait_connection: bool: Used to wait for connection on new serial port at start,
-        :param wait_timeout: Timeout value to search valid serial port in case of connection fails
-        :param max_packet_blocks: Max blocks per packet value
+        :param options: Options parameters as dict,
         :return: Nothing
         """
-        self._wait_connection = Ut.str_to_bool(wait_connection)
-        self._wait_timeout = Ut.get_float(wait_timeout)
+        self._wait_connection = True
+        self._wait_timeout = 30
         self._ser_test = None
         self.init_serial_test(serial_test)
+        if Ut.is_dict(options, not_null=True):
+            self._wait_connection = Ut.str_to_bool(options.get('wait_connection'))
+            self._wait_timeout = Ut.get_float(options.get('wait_timeout'))
+
+        ve_opt = Ut.get_items_from_dict(options, ['source_name', 'auto_start', 'max_packet_blocks'])
         Vedirect.__init__(
             self,
             serial_conf=serial_conf,
-            source_name=source_name,
-            auto_start=auto_start,
-            max_packet_blocks=max_packet_blocks
+            options=ve_opt
         )
 
     def has_serial_test(self) -> bool:
