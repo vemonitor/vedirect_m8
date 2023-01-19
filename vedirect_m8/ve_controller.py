@@ -277,7 +277,8 @@ class VedirectController(Vedirect):
 
     def wait_or_search_serial_connection(self,
                                          exception: Exception or None = None,
-                                         timeout: int or float = 18400
+                                         timeout: int or float = 18400,
+                                         sleep_time: int or float = 5
                                          ) -> bool:
         """
         Wait or search for a new serial connection.
@@ -294,6 +295,7 @@ class VedirectController(Vedirect):
         :param self: Reference the class instance
         :param exception: Pass an exception to the function
         :param timeout: Set the timeout of the function
+        :param sleep_time: Time to sleep between two connection test
         :return: True if the serial connection was successful
 
         .. raises:: TimeoutException, VedirectException
@@ -307,6 +309,9 @@ class VedirectController(Vedirect):
                 timeout
             )
             run, now, tim = True, time.time(), 0
+            sleep_time = Ut.get_float(sleep_time, 5)
+            if sleep_time <= 0:
+                sleep_time = 5
             while run:
                 tim = time.time()
                 if self.search_serial_port():
@@ -319,7 +324,7 @@ class VedirectController(Vedirect):
                         "Timeout error : %s. Exception : %s" %
                         (timeout, exception)
                     )
-                time.sleep(5)
+                time.sleep(sleep_time)
         raise SerialConnectionException(
             "[VeDirect::wait_or_search_serial_connection] "
             "Unable to connect to any serial item. "
