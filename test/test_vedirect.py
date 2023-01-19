@@ -277,7 +277,7 @@ class TestVedirect:
 
             with pytest.raises(ReadTimeoutException):
                 self.obj.read_data_callback(callback_function=func_callback,
-                                            timeout=0.1,
+                                            timeout=0.00001,
                                             max_loops=1
                                             )
 
