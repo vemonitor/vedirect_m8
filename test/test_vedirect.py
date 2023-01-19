@@ -109,18 +109,21 @@ class TestVedirect:
 
     def test_init_serial_connection(self):
         """Test init_serial_connection method."""
-        assert self.obj.init_serial_connection({"serial_port": self.obj._com._serial_port}
-                                               )
+        assert self.obj.init_serial_connection(
+            {"serial_port": self.obj._com.get_serial_port()}
+        )
 
         # test with bad serial port format
         with pytest.raises(SerialConfException):
-            self.obj.init_serial_connection({"serial_port": "/etc/bad_port"}
-                                            )
+            self.obj.init_serial_connection(
+                {"serial_port": "/etc/bad_port"}
+            )
 
         # test with bad serial port type
         with pytest.raises(SerialConfException):
-            self.obj.init_serial_connection({"serial_port": 32}
-                                            )
+            self.obj.init_serial_connection(
+                {"serial_port": 32}
+            )
 
         # test with bad serial port connection
         with pytest.raises(SerialVeException):
@@ -159,7 +162,7 @@ class TestVedirect:
         }
         assert self.obj.init_settings(
             {
-                "serial_port": self.obj._com._serial_port,
+                "serial_port": self.obj._com.get_serial_port(),
                 'source_name': 'TestVedirect'
              },
             options=options

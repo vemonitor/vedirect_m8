@@ -113,7 +113,7 @@ class TestVedirectController:
 
     def test_init_settings(self):
         """Test init_settings method."""
-        good_serial_port = self.obj._com._serial_port
+        good_serial_port = self.obj._com.get_serial_port()
 
         def good_port_test():
             """Test init_settings with good serial_port."""
@@ -158,7 +158,7 @@ class TestVedirectController:
                 {"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")}
             )
             # now serial port is same as start
-            assert good_serial_port == self.obj._com._serial_port
+            assert good_serial_port == self.obj._com.get_serial_port()
 
             with pytest.raises(VedirectException):
                 self.obj._ser_test = None
