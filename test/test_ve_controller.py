@@ -385,6 +385,10 @@ class TestVedirectController:
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
 
+        def func_bad_callback(data: dict or None):
+            """Callback function."""
+            assert data is None
+
         def main_test():
             """Main read_data_single tests."""
             self.obj.set_wait_timeout(10)
@@ -399,7 +403,7 @@ class TestVedirectController:
                                             max_loops=1
                                             )
             self.obj._com = None
-            self.obj.read_data_callback(callback_function=func_callback,
+            self.obj.read_data_callback(callback_function=func_bad_callback,
                                         timeout=20,
                                         max_loops=1
                                         )
