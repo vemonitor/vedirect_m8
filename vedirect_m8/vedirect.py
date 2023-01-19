@@ -215,18 +215,8 @@ class Vedirect:
         """
         self._com = None
         self._helper = None
-        max_packet_blocks = 18
-        source_name = "VeDirect"
-        auto_start = True
-        if Ut.is_dict(options, not_null=True):
-            max_packet_blocks = options.get('max_packet_blocks') or 18
-            source_name = options.get('source_name') or "VeDirect" or "VeDirect"
-            auto_start = options.get('auto_start') or True
-
-        self._helper = VedirectReaderHelper(max_packet_blocks)
         self.init_settings(serial_conf=serial_conf,
-                           source_name=source_name,
-                           auto_start=auto_start
+                           options=options
                            )
 
     def has_serial_com(self) -> bool:
@@ -307,14 +297,13 @@ class Vedirect:
 
     def init_serial_connection(self,
                                serial_conf: dict,
-                               source_name: str = 'Vedirect',
                                auto_start: bool = True
                                ) -> bool:
         """
         Initialise serial connection from parameters.
 
         At least serial_port must be provided.
-        Default :
+        serial_conf default :
          - baud rate = 19200,
          - timeout = 0 (non blocking mode)
          - source_name = 'Vedirect'
@@ -329,14 +318,12 @@ class Vedirect:
             >>> True
         :param self: Refer to the object itself,
         :param serial_conf: dict: dict: The serial connection configuration,
-        :param source_name: str: This is used in logger to identify the source of call,
         :param auto_start: bool: Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
         """
         result = False
         serial_conf = SerialConnection.get_default_serial_conf(serial_conf)
         if SerialConnection.is_serial_conf(**serial_conf):
-            serial_conf.update({"source_name": source_name})
             auto_start = Ut.str_to_bool(auto_start)
             self._com = SerialConnection(**serial_conf)
             if auto_start is False\
@@ -354,26 +341,28 @@ class Vedirect:
 
     def init_settings(self,
                       serial_conf: dict,
-                      source_name: str = 'Vedirect',
-                      auto_start: bool = True
+                      options: dict or None = None
                       ) -> bool:
         """
         Initialise the settings for the class.
 
         At least serial_port must be provided.
 
-        Default :
+        serial_conf default :
          - baud rate = 19200,
          - timeout = 0 (non blocking mode)
-         - source_name = 'Vedirect'
+
+        options default :
+         - source_name: "VeDirect"
+         - max_packet_blocks: 18
+         - auto_start: True
 
         :Example :
             >>> self.init_settings({"serial_port": "/dev/ttyUSB1"})
             >>> True
         :param self: Refer to the object itself,
         :param serial_conf: dict: The serial connection configuration,
-        :param source_name: This is used in logger to identify the source of call,
-        :param auto_start: bool: Define if serial connection must be established automatically.
+        :param options: Options parameters as dict,
         :return: True if connection to serial port success.
 
         Raise:
@@ -383,8 +372,15 @@ class Vedirect:
          - SerialVeException: on raise serial.SerialException
          - SerialConnectionException: on connection fails
         """
+        max_packet_blocks = 18
+        auto_start = True
+        if Ut.is_dict(options, not_null=True):
+            max_packet_blocks = options.get('max_packet_blocks') or 18
+            if options.get('auto_start') is not None:
+                auto_start = Ut.str_to_bool(options.get('auto_start'))
+
+        self._helper = VedirectReaderHelper(max_packet_blocks)
         return self.init_serial_connection(serial_conf=serial_conf,
-                                           source_name=source_name,
                                            auto_start=auto_start
                                            )
 

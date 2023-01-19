@@ -49,7 +49,7 @@ class SerialConnection:
                  serial_port: str or None = None,
                  baud: int = 19200,
                  timeout: int or float = 0,
-                 source_name: str = 'void'
+                 source_name: str = 'SerialConnection'
                  ):
         """
         Constructor of SerialConnection class.
@@ -66,7 +66,7 @@ class SerialConnection:
          to identify the source of call.
         :return: Nothing
         """
-        self._source_name = 'void'
+        self._source_name = 'SerialConnection'
         self._serial_port = None
         self._baud = 19200
         self._timeout = 0
@@ -75,6 +75,15 @@ class SerialConnection:
                             baud=baud,
                             timeout=timeout,
                             source_name=source_name)
+
+    def serialize(self) -> dict:
+        """Serialize instance properties."""
+        return {
+            "serial_port": self._serial_port,
+            "baud": self._baud,
+            "timeout": self._timeout,
+            "source_name": self._source_name
+        }
 
     def get_serial_port(self) -> str or None:
         """Return serial_port value from instance."""
@@ -291,7 +300,7 @@ class SerialConnection:
          - SerialVeException:
            In case the device can not be found or can not be configured.
          - OpenSerialVeException:
-           Will be raised when the device is configured but port is not openned.
+           Will be raised when the device is configured but port is not opened.
         """
         serial_conf = self._set_serial_conf(
             serial_port=serial_port,
@@ -447,10 +456,11 @@ class SerialConnection:
         result = {
             "serial_port": None,
             "baud": 19200,
-            "timeout": 0
+            "timeout": 0,
+            "source_name": "SerialConnection"
         }
         if Ut.is_dict(conf, not_null=True):
-            serial_conf = Ut.get_items_from_dict(conf, ["serial_port", "baud", "timeout"])
+            serial_conf = Ut.get_items_from_dict(conf, ["serial_port", "baud", "timeout", "source_name"])
             if Ut.is_dict(serial_conf, not_null=True):
                 result.update(serial_conf)
         return result
@@ -458,7 +468,9 @@ class SerialConnection:
     @staticmethod
     def is_serial_conf(serial_port: str or None,
                        baud: int,
-                       timeout: int or float) -> bool:
+                       timeout: int or float,
+                       source_name: str or None = None
+                       ) -> bool:
         """
         Test if valid serial configuration settings.
 
@@ -466,12 +478,14 @@ class SerialConnection:
             >>> SerialConnection.is_serial_conf(
             >>>     serial_port="/tmp/vmodem0",
             >>>     baud=19200,
-            >>>     timeout=0
+            >>>     timeout=0,
+                   source_name="MyFunc"
             >>> )
             >>> True
         :param serial_port: The serial port,
         :param baud: The baudrate.
         :param timeout: The timeout.
+        :param source_name: Source name caller to log.
         :return: True if configuration settings are valid
         """
         return SerialConnection.is_serial_port(serial_port) \

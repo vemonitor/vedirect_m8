@@ -70,15 +70,11 @@ class VedirectController(Vedirect):
         self._wait_timeout = 30
         self._ser_test = None
         self.init_serial_test(serial_test)
-        if Ut.is_dict(options, not_null=True):
-            self._wait_connection = Ut.str_to_bool(options.get('wait_connection'))
-            self._wait_timeout = Ut.get_float(options.get('wait_timeout'))
 
-        ve_opt = Ut.get_items_from_dict(options, ['source_name', 'auto_start', 'max_packet_blocks'])
         Vedirect.__init__(
             self,
             serial_conf=serial_conf,
-            options=ve_opt
+            options=options
         )
 
     def has_serial_test(self) -> bool:
@@ -131,17 +127,20 @@ class VedirectController(Vedirect):
 
     def init_settings(self,
                       serial_conf: dict,
-                      source_name: str = 'VedirectController',
-                      auto_start: bool = True
+                      options: dict or None = None
                       ) -> bool:
         """
         Initialise the settings for the class.
 
         At least serial_port must be provided.
-        Default :
+        serial_conf default :
          - baud rate = 19200,
          - timeout = 0 (non blocking mode)
-         - source_name = 'Vedirect'
+
+        options default :
+         - source_name: "VeDirect"
+         - max_packet_blocks: 18
+         - auto_start: True
         Raise:
          - SettingInvalidException if serial_port, baud or timeout are not valid.
          - VedirectException if connection to serial port fails
@@ -150,15 +149,19 @@ class VedirectController(Vedirect):
             >>> True
         :param self: Refer to the object itself
         :param serial_conf: dict: The serial connection configuration,
-        :param source_name: This is used in logger to identify the source of call
-        :param auto_start: bool: Define if serial connection must be established automatically
+        :param options: Options parameters as dict,
         :return: True if connection to serial port success.
         """
         try:
-            result = self.init_serial_connection(serial_conf=serial_conf,
-                                                 source_name=source_name,
-                                                 auto_start=auto_start
-                                                 )
+            if Ut.is_dict(options, not_null=True):
+                self._wait_connection = Ut.str_to_bool(options.get('wait_connection'))
+                self._wait_timeout = Ut.get_float(options.get('wait_timeout'))
+
+            result = Vedirect.init_settings(
+                self,
+                serial_conf=serial_conf,
+                options=options
+            )
         except SerialConnectionException as ex:
             if self._wait_connection is True\
                     and self.wait_or_search_serial_connection(

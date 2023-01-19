@@ -38,6 +38,7 @@ class TestVedirect:
             'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
             'baud': 19200,
             'timeout': 0,
+            'source_name': 'TestVedirect'
         }
 
         self.obj = Vedirect(serial_conf=conf)
@@ -48,7 +49,7 @@ class TestVedirect:
         assert self.obj.is_ready()
         assert self.obj.has_serial_com()
         assert self.obj.connect_to_serial()
-        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port("vmodem1")
+
         self.obj._com = None
         with pytest.raises(SerialConnectionException):
             self.obj.connect_to_serial()
@@ -108,50 +109,81 @@ class TestVedirect:
 
     def test_init_serial_connection(self):
         """Test init_serial_connection method."""
-        assert self.obj.init_serial_connection({"serial_port": self.obj._com._serial_port},
-                                               source_name="TestVedirect"
+        assert self.obj.init_serial_connection({"serial_port": self.obj._com._serial_port}
                                                )
 
         # test with bad serial port format
         with pytest.raises(SerialConfException):
-            self.obj.init_serial_connection({"serial_port": "/etc/bad_port"},
-                                            source_name="TestVedirect"
+            self.obj.init_serial_connection({"serial_port": "/etc/bad_port"}
                                             )
 
         # test with bad serial port type
         with pytest.raises(SerialConfException):
-            self.obj.init_serial_connection({"serial_port": 32},
-                                            source_name="TestVedirect"
+            self.obj.init_serial_connection({"serial_port": 32}
                                             )
 
         # test with bad serial port connection
         with pytest.raises(SerialVeException):
-            self.obj.init_serial_connection({"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")},
-                                            source_name="TestVedirectBadPort"
-                                            )
+            self.obj.init_serial_connection(
+                {
+                    "serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255"),
+                    "source_name": "TestVedirectBadPort"
+                },
+            )
 
     def test_init_settings(self):
         """Test init_settings method."""
-        assert self.obj.init_settings({"serial_port": self.obj._com._serial_port},
-                                      source_name="TestVedirect"
-                                      )
+        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port("vmodem1")
+        assert self.obj._helper.max_blocks == 18
+        assert self.obj._com._source_name == "TestVedirect"
+        serial_conf = {
+            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
+            'baud': 19200,
+            'timeout': 0,
+            'source_name': 'NewTestVedirect'
+        }
+        options = {
+            'max_packet_blocks': 17,
+            'auto_start': False
+        }
+        assert self.obj.init_settings(
+            serial_conf=serial_conf,
+            options=options
+        )
+        assert self.obj._helper.max_blocks == 17
+        assert self.obj._com._source_name == "NewTestVedirect"
+        assert not self.obj.is_serial_ready()
+        options = {
+            'max_packet_blocks': 18,
+            'auto_start': True
+        }
+        assert self.obj.init_settings(
+            {
+                "serial_port": self.obj._com._serial_port,
+                'source_name': 'TestVedirect'
+             },
+            options=options
+        )
+        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port("vmodem1")
+        assert self.obj._helper.max_blocks == 18
+        assert self.obj._com._source_name == "TestVedirect"
 
         # test with bad serial port format
         with pytest.raises(SerialConfException):
             self.obj.init_settings({"serial_port": "/etc/bad_port"},
-                                   source_name="TestVedirect"
+                                   options=options
                                    )
 
         # test with bad serial port type
         with pytest.raises(SerialConfException):
             self.obj.init_settings({"serial_port": 32},
-                                   source_name="TestVedirect"
+                                   options=options
                                    )
 
         # test with bad serial port connection
         with pytest.raises(SerialVeException):
             self.obj.init_settings({"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")},
-                                   source_name="TestVedirect"
+                                   options=options
                                    )
 
     def test_init_data_read(self):

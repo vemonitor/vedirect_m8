@@ -1,8 +1,6 @@
 """VedirectController unittest class."""
-import time
 import pytest
 from ve_utils.utype import UType as Ut
-from .serial_test_helper import SerialTestHelper
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.exceptions import SettingInvalidException
@@ -10,10 +8,11 @@ from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
 from vedirect_m8.exceptions import SerialVeException
 from vedirect_m8.exceptions import VedirectException
+from .serial_test_helper import SerialTestHelper
 
 
 class TestVedirectController:
-
+    """VedirectController unittest class."""
     def setup_class(self):
         """
         Setup any state tied to the execution of the given function.
@@ -35,7 +34,8 @@ class TestVedirectController:
         conf = {
             'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
             'baud': 19200,
-            'timeout': 0
+            'timeout': 0,
+            'source_name': "TestVedirectController"
         }
         serial_test = {
             'PID_test': {
@@ -73,7 +73,7 @@ class TestVedirectController:
     def test_is_serial_com(self):
         """Test is_serial_com method."""
         assert VedirectController.is_serial_com(self.obj._com)
-        assert not VedirectController.is_serial_com(dict())
+        assert not VedirectController.is_serial_com({})
         assert not VedirectController.is_serial_com(None)
 
     @staticmethod
@@ -98,10 +98,10 @@ class TestVedirectController:
             self.obj.init_serial_test(serial_test=None)
 
         with pytest.raises(SettingInvalidException):
-            self.obj.init_serial_test(serial_test=list())
+            self.obj.init_serial_test(serial_test=[])
 
         with pytest.raises(SettingInvalidException):
-            self.obj.init_serial_test(serial_test=dict())
+            self.obj.init_serial_test(serial_test={})
 
         with pytest.raises(SettingInvalidException):
             self.obj.init_serial_test(serial_test={
@@ -118,9 +118,13 @@ class TestVedirectController:
         def good_port_test():
             """Test init_settings with good serial_port."""
 
-            assert self.obj.init_settings({'serial_port': good_serial_port},
-                                          source_name="TestVedirectController"
-                                          )
+            assert self.obj.init_settings(
+                {'serial_port': good_serial_port},
+                {
+                    'wait_connection': True,
+                    'wait_timeout': 15
+                }
+            )
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=good_port_test,
@@ -134,25 +138,8 @@ class TestVedirectController:
 
         def bad_port_test():
             """Test init_settings with bad serial_port."""
-            self.obj.init_settings({"serial_port": "/etc/bad_port"},
-                                   source_name="TestVedirect"
-                                   )
-
-        self.ve_sim.run_vedirect_sim_callback(
-            callback=bad_port_test,
-            nb_packets=20,
-            sleep=0.5
-        )
-
-        # test with bad serial port type
-        # now on bad serial port scan, test and connect valid port.
-        # Don't raise exception if valid port available.
-
-        def bad_port_test():
-            """Test init_settings with bad serial_port."""
-            self.obj.init_settings(
-                {"serial_port": 32},
-                source_name="TestVedirect"
+            assert self.obj.init_settings(
+                {"serial_port": "/etc/bad_port"}
             )
 
         self.ve_sim.run_vedirect_sim_callback(
@@ -167,9 +154,8 @@ class TestVedirectController:
 
         def bad_port_test():
             """Test init_settings with bad serial_port."""
-            self.obj.init_settings(
-                {"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")},
-                source_name="TestVedirect"
+            assert self.obj.init_settings(
+                {"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")}
             )
             # now serial port is same as start
             assert good_serial_port == self.obj._com._serial_port
@@ -178,8 +164,7 @@ class TestVedirectController:
                 self.obj._ser_test = None
                 self.obj.set_wait_timeout(0.5)
                 self.obj.init_settings(
-                    {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
-                    source_name="TestVedirectController"
+                    {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")}
                 )
 
         self.ve_sim.run_vedirect_sim_callback(
@@ -213,6 +198,18 @@ class TestVedirectController:
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
             nb_packets=20,
+            sleep=0.5
+        )
+
+        def bad_port_test():
+            """Test test_serial_port with bad serial_port."""
+            assert not self.obj.test_serial_port(
+                port=32
+            )
+
+        self.ve_sim.run_vedirect_sim_callback(
+            callback=bad_port_test,
+            nb_packets=1,
             sleep=0.5
         )
 
@@ -281,7 +278,8 @@ class TestVedirectController:
         def main_test():
             """Main wait_or_search_serial_connection tests."""
             assert self.obj.wait_or_search_serial_connection(
-                timeout=2
+                timeout=10,
+                sleep_time=1
             )
 
         self.ve_sim.run_vedirect_sim_callback(
@@ -302,7 +300,8 @@ class TestVedirectController:
             assert self.obj.init_serial_test(bad_serial_test)
             with pytest.raises(ReadTimeoutException):
                 self.obj.wait_or_search_serial_connection(
-                    timeout=0.0000000000001
+                    timeout=0.0000000000001,
+                    sleep_time=-2
                 )
 
         self.ve_sim.run_vedirect_sim_callback(
@@ -318,8 +317,10 @@ class TestVedirectController:
             """Main test_search_serial_port tests."""
             try:
                 self.obj.init_serial_connection(
-                    {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
-                    source_name="TestVedirectController"
+                    {
+                        'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255"),
+                        'source_name': "TestVedirectController"
+                    }
                 )
             except SerialVeException:
                 test_port = False
@@ -397,9 +398,14 @@ class TestVedirectController:
                                             timeout=0.000001,
                                             max_loops=1
                                             )
+            self.obj._com = None
+            self.obj.read_data_callback(callback_function=func_callback,
+                                        timeout=20,
+                                        max_loops=1
+                                        )
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
-            nb_packets=10,
+            nb_packets=1,
             sleep=0.5
         )

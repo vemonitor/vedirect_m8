@@ -255,3 +255,7 @@ class SerialTestHelper:
                         and not SerialTestHelper.run_columns_test(item, serial_data):
                     tst = False
         return tst
+
+    def serialize(self) -> dict:
+        """Serialize instance properties."""
+        return self._tests
