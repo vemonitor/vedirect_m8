@@ -524,38 +524,78 @@ class Vedirect:
     def read_data_callback(self,
                            callback_function,
                            timeout: int = 60,
-                           max_loops: int or None = None
+                           sleep_time: int or float = 1,
+                           max_loops: int or None = None,
+                           max_block_errors: int = 0,
+                           max_packet_errors: int = 0
                            ):
         """
         Read data from the serial port and returns it to a callback function.
 
+        max_block_errors and max_packet_errors possible values:
+            - -1: never exit
+            - 0: exit on first error
+            - x: exit after x errors
+
         :param self: Reference the class instance
         :param callback_function:function: Pass a function to the read_data_callback function
         :param timeout:int=60: Set the timeout for the read_data_callback function
+        :param sleep_time:int=1: Define time to sleep between 2 packet read
         :param max_loops:int or None=None: Limit the number of loops
+        :param max_block_errors:int=0: Define nb errors permitted on read blocks before exit (InputReadException)
+        :param max_packet_errors:int=1: Define nb errors permitted on read packets before exit (PacketReadException)
         """
         run, now, tim, i = True, time.time(), 0, 0
+
+        sleep_time = Vedirect.set_sleep_time(value=sleep_time, default=1)
+        nb_block_errors, nb_packet_errors = 0, 0
+        max_block_errors = Ut.get_int(max_block_errors, 0)
+        max_packet_errors = Ut.get_int(max_packet_errors, 0)
+        logger.info(
+            '[Vedirect::read_data_callback] '
+            'Start to decode Vedirect data from serial port . '
+            'timeout: %s - sleep_time: %s  - max_loops: %s '
+            '- max_block_errors: %s - max_packet_errors: %s',
+            timeout,
+            sleep_time,
+            max_loops,
+            max_block_errors,
+            max_packet_errors
+        )
         if self.is_ready():
+
             while run:
-                tim = time.time()
-                packet = self.get_serial_packet()
+                try:
+                    tim = time.time()
+                    packet = self.get_serial_packet()
 
-                if packet is not None:
-                    logger.debug(
-                        "Serial reader success: packet: %s "
-                        "-- state: %s -- bytes_sum: %s ",
-                        packet, self._helper.state, self._helper.bytes_sum
-                    )
-                    now = tim
-                    i = i + 1
+                    if packet is not None:
+                        logger.debug(
+                            "Serial reader success: packet: %s "
+                            "-- state: %s -- bytes_sum: %s ",
+                            packet, self._helper.state, self._helper.bytes_sum
+                        )
+                        now = tim
+                        i = i + 1
+                        self._helper.init_data_read()
+                        callback_function(packet)
+                        time.sleep(sleep_time)
+
+                    # timeout serial read
+                    Vedirect.is_timeout(tim-now, timeout)
+                    if isinstance(max_loops, int) and 0 < max_loops <= i:
+                        return True
+                except InputReadException as ex:
+                    if Vedirect.is_max_read_error(max_block_errors, nb_block_errors):
+                        raise ex
                     self._helper.init_data_read()
-                    callback_function(packet)
+                    nb_block_errors = nb_block_errors + 1
+                except PacketReadException as ex:
+                    if Vedirect.is_max_read_error(max_packet_errors, nb_packet_errors):
+                        raise ex
+                    self._helper.init_data_read()
+                    nb_packet_errors = nb_packet_errors + 1
 
-                # timeout serial read
-                Vedirect.is_timeout(tim-now, timeout)
-                if isinstance(max_loops, int) and 0 < max_loops <= i:
-                    return True
-                time.sleep(0.1)
         else:
             raise SerialConnectionException(
                 '[VeDirect::read_data_callback] '
