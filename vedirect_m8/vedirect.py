@@ -297,7 +297,8 @@ class Vedirect:
 
     def init_serial_connection(self,
                                serial_conf: dict,
-                               auto_start: bool = True
+                               auto_start: bool = True,
+                               set_default: bool = True,
                                ) -> bool:
         """
         Initialise serial connection from parameters.
@@ -322,10 +323,9 @@ class Vedirect:
         :return: True if connection to serial port success.
         """
         result = False
-        serial_conf = SerialConnection.get_default_serial_conf(serial_conf)
-        if SerialConnection.is_serial_conf(**serial_conf):
+        self._com = SerialConnection(**serial_conf)
+        if self._com.is_settings():
             auto_start = Ut.str_to_bool(auto_start)
-            self._com = SerialConnection(**serial_conf)
             if auto_start is False\
                     or (auto_start is True
                         and self.connect_to_serial()):
