@@ -453,7 +453,8 @@ class Vedirect:
 
     def read_data_single(self,
                          timeout: int = 60,
-                         max_read_errors: int = 0
+                         max_block_errors: int = 0,
+                         max_packet_errors: int = 0
                          ) -> dict or None:
         """
         Read a single packet decoded from serial port and returns it as a dictionary.
@@ -465,7 +466,8 @@ class Vedirect:
 
         :param self: Reference the class instance
         :param timeout: Set the timeout for the read_data_single function
-        :param max_read_errors: Set the timeout for the read_data_single function
+        :param max_block_errors:int=0: Define nb errors permitted on read blocks before exit (InputReadException)
+        :param max_packet_errors:int=0: Define nb errors permitted on read packets before exit (PacketReadException)
         :return: A dictionary of the data
         - SerialConfException:
            Will be raised when parameter
@@ -476,8 +478,10 @@ class Vedirect:
          - OpenSerialVeException:
            Will be raised when the device is configured but port is not openned.
         """
-        run, now, tim, nb_errors = True, time.time(), 0, 0
-        max_read_errors = Ut.get_int(max_read_errors, 0)
+        run, now, tim, = True, time.time(), 0
+        nb_block_errors, nb_packet_errors = 0, 0
+        max_block_errors = Ut.get_int(max_block_errors, 0)
+        max_packet_errors = Ut.get_int(max_packet_errors, 0)
         if self.is_ready():
             while run:
                 try:
@@ -496,9 +500,15 @@ class Vedirect:
                     # timeout serial read
                     Vedirect.is_timeout(tim-now, timeout)
                 except InputReadException as ex:
-                    if max_read_errors == 0 or nb_errors >= max_read_errors:
+                    if Vedirect.is_max_read_error(max_block_errors, nb_block_errors):
                         raise InputReadException(ex) from InputReadException
-                    nb_errors = nb_errors + 1
+                    self._helper.init_data_read()
+                    nb_block_errors = nb_block_errors + 1
+                except PacketReadException as ex:
+                    if Vedirect.is_max_read_error(max_packet_errors, nb_packet_errors):
+                        raise PacketReadException from ex
+                    self._helper.init_data_read()
+                    nb_packet_errors = nb_packet_errors + 1
                 except SerialException as ex:
                     raise SerialVeException(
                         "[VeDirect:read_data_single] "
