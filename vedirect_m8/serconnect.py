@@ -133,7 +133,7 @@ class SerialConnectionHelper:
         )
         return self.is_settings()
 
-    def _set_serial_conf(self,
+    def init_serial_conf(self,
                          conf: dict or None = None,
                          set_default: bool = False
                          ) -> dict or None:
@@ -141,7 +141,7 @@ class SerialConnectionHelper:
         Set serial configuration settings to open serial connection.
 
         :Example :
-            >>> self._set_serial_conf(
+            >>> self.init_serial_conf(
             >>>     serial_port="/tmp/vmodem0",
             >>>     baudrate=19200,
             >>>     timeout=0,
@@ -588,7 +588,7 @@ class SerialConnection(SerialConnectionHelper):
          - OpenSerialVeException:
            Will be raised when the device is configured but port is not opened.
         """
-        serial_conf = self._set_serial_conf(
+        serial_conf = self.init_serial_conf(
             conf=conf,
             set_default=set_default
         )
