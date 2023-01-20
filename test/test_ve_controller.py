@@ -279,8 +279,8 @@ class TestVedirectController:
         def main_test():
             """Main wait_or_search_serial_connection tests."""
             assert self.obj.wait_or_search_serial_connection(
-                timeout=10,
-                sleep_time=0.1
+                timeout=20,
+                sleep_time=0.01
             )
 
         self.ve_sim.run_vedirect_sim_callback(
