@@ -604,6 +604,24 @@ class Vedirect:
             )
 
     @staticmethod
+    def is_max_read_error(max_value: int, counter: int) -> bool:
+        """Get sleep time value or default if invalid type or value."""
+        result = False
+        if max_value == 0:
+            result = True
+        elif max_value > 0 and  0 <= counter <= max_value:
+            result = True
+        return result
+
+    @staticmethod
+    def set_sleep_time(value: int or float, default: int or float = 0) -> int or float:
+        """Get sleep time value or default if invalid type or value."""
+        value = Ut.get_float(value, default)
+        if value <= 0:
+            value = default
+        return value
+
+    @staticmethod
     def is_serial_com(obj: SerialConnection) -> bool:
         """
         Test if obj is valid SerialConnection instance.
