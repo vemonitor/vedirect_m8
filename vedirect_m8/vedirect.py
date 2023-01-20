@@ -600,6 +600,70 @@ class Vedirect:
             )
 
     @staticmethod
+    def get_read_data_params(options: dict or None = None):
+        """Get formatted read_data_callback parameters"""
+        result = {
+            'timeout': 2,
+            'sleep_time': 1,
+            'max_loops': None,
+            'max_block_errors': 0,
+            'max_packet_errors': 0
+        }
+        if Ut.is_dict(options, not_null=True):
+
+            timeout = options.get('timeout')
+            if Ut.is_numeric(timeout, positive=True):
+                result['timeout'] = timeout
+            elif timeout is not None:
+                raise SettingInvalidException(
+                    "[Vedirect:get_read_data_callback_params] "
+                    "Invalid timeout parameter, "
+                    "Must be positive int or float type."
+                )
+
+            sleep_time = options.get('sleep_time')
+            if Ut.is_numeric(sleep_time, positive=True):
+                result['sleep_time'] = sleep_time
+            elif sleep_time is not None:
+                raise SettingInvalidException(
+                    "[Vedirect:get_read_data_callback_params] "
+                    "Invalid sleep_time parameter, "
+                    "Must be positive int or float type."
+                )
+
+            max_loops = options.get('max_loops')
+            if Ut.is_int(max_loops, positive=True):
+                result['max_loops'] = max_loops
+            elif max_loops is not None:
+                raise SettingInvalidException(
+                    "[Vedirect:get_read_data_callback_params] "
+                    "Invalid max_loops parameter, "
+                    "Must be positive int type."
+                )
+
+            max_block_errors = options.get('max_block_errors')
+            if Ut.is_int(max_block_errors):
+                result['max_block_errors'] = max_block_errors
+            elif max_block_errors is not None:
+                raise SettingInvalidException(
+                    "[Vedirect:get_read_data_callback_params] "
+                    "Invalid max_block_errors parameter, "
+                    "Must be int type."
+                )
+
+            max_packet_errors = options.get('max_packet_errors')
+            if Ut.is_int(max_packet_errors):
+                result['max_packet_errors'] = max_packet_errors
+            elif max_packet_errors is not None:
+                raise SettingInvalidException(
+                    "[Vedirect:get_read_data_callback_params] "
+                    "Invalid max_packet_errors parameter, "
+                    "Must be int type."
+                )
+        return result
+
+
+    @staticmethod
     def is_max_read_error(max_value: int, counter: int) -> bool:
         """Get sleep time value or default if invalid type or value."""
         result = False
