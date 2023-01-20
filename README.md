@@ -78,7 +78,7 @@ then echoed to the vmodem1 by socat, and finally decoded by the vedirect module.
 ## Vedirect
 
 Module used to decode the Victron Energy VE.Direct text protocol from serial port.   
-See [vedirect_print.py](https://github.com/mano8/vedirect_m8/examples/vedirect_print.py)
+See [vedirect_print.py](https://github.com/mano8/vedirect_m8/blob/1cd58d8c335b8c2e830b701dc5cbb3b65d09711c/examples/vedirect_print.py)
 example file for detailed options.
 
 Victron devices send packets with maximum of 18 blocks of key/value pairs.
