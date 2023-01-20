@@ -25,145 +25,36 @@ __copyright__ = "Copyright 2020, Eli Serra"
 __deprecated__ = False
 __license__ = "MIT"
 __status__ = "Production"
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 
 logging.basicConfig()
 logger = logging.getLogger("vedirect")
 
 
-class SerialConnection:
+class SerialConnectionHelper:
     """
-        Serial connection tool. Set up connection to serial port.
+    SerialConnection class helper
 
-        Able to scan serial ports available on system.
-
-        If you are working with VeDirect protocol,
-        remember the configuration :
-            - Baud rate : 19200
-            - Data bits : 8
-            - Parity: None
-            - Stop bits: 1
-            - Flow Control None
+    Available parameters:
+          - serial_port = None: str or None: Serial port path to open
+          - baudrate = 19600: int: Baud rate such as 9600 or 115200 etc.
+          - timeout = 0: int or float or None: Set read timeout value in seconds
+          - write_timeout = 0: int or float or None: Set write timeout value in seconds
+          - exclusive = False: bool: Set exclusive access mode (POSIX only).
+            A port cannot be opened in exclusive access mode
+            if it is already open in exclusive access mode.
+          - source_name: str: This is used in logger to identify the source of call
     """
+
     def __init__(self,
-                 serial_port: str or None = None,
-                 baud: int = 19200,
-                 timeout: int or float = 0,
-                 source_name: str = 'SerialConnection'
+                 set_default: bool = True,
+                 **kwargs
                  ):
-        """
-        Constructor of SerialConnection class.
-
-        :Example:
-            >>> sc = SerialConnection(serial_port = "/dev/ttyUSB1")
-            >>> sc.connect()
-            >>> True # if connection opened on serial port "/dev/tyyUSB1"
-        :param self: Refer to the object instance itself,
-        :param serial_port: The serial port to connect,
-        :param baud: Baud rate such as 9600 or 115200 etc.
-        :param timeout: Set a read timeout value in seconds,
-        :param source_name: This is used in logger
-         to identify the source of call.
-        :return: Nothing
-        """
-        self._source_name = 'SerialConnection'
-        self._serial_port = None
-        self._baud = 19200
-        self._timeout = 0
         self.ser = None
-        self._init_settings(serial_port=serial_port,
-                            baud=baud,
-                            timeout=timeout,
-                            source_name=source_name)
+        self._conf = None
+        self._init_settings(conf=kwargs, set_default=set_default)
 
-    def serialize(self) -> dict:
-        """Serialize instance properties."""
-        return {
-            "serial_port": self._serial_port,
-            "baud": self._baud,
-            "timeout": self._timeout,
-            "source_name": self._source_name
-        }
-
-    def get_serial_port(self) -> str or None:
-        """Return serial_port value from instance."""
-        return self._serial_port
-
-    def set_serial_port(self, serial_port: str or None) -> bool:
-        """
-        Set serial_port value.
-
-        :Example :
-            >>> self.set_serial_port(serial_port="/tmp/vmodem0")
-            >>> True
-        :param serial_port: The serial port to set.
-        :return: True if is valid serial_port
-        """
-        if SerialConnection.is_serial_port(serial_port):
-            self._serial_port = serial_port
-            return True
-        return False
-
-    def set_baud(self, baud: int or None) -> bool:
-        """
-        Set baud value.
-
-        :Example :
-            >>> self.set_baud(baud=19200)
-            >>> True
-        :param baud: The baud to set.
-        :return: True if is valid baud
-        """
-        if SerialConnection.is_baud(baud):
-            self._baud = baud
-            return True
-        return False
-
-    def get_timeout(self) -> int or float:
-        """Return timeout value from instance."""
-        return self._timeout
-
-    def set_timeout(self, timeout: int or float or None) -> bool:
-        """
-        Set timeout value.
-
-        :Example :
-            >>> self.set_timeout(timeout=0)
-            >>> True
-        :param timeout: The timeout to set.
-        :return: True if is valid timeout
-        """
-        if SerialConnection.is_timeout(timeout):
-            self._timeout = timeout
-            return True
-        return False
-
-    def set_source_name(self, source_name: str or None) -> bool:
-        """
-        Set source_name value.
-
-        This is used in logger to identify the source of call.
-        When multiple serial connections are defined.
-        :Example :
-            >>> self.set_source_name(source_name='BMV700')
-            >>> True
-        :param source_name: The source_name to set.
-        :return: True if is valid source_name
-        """
-        if Ut.is_str(source_name, mini=2):
-            self._source_name = source_name
-            return True
-        return False
-
-    def is_ready(self) -> bool:
-        """
-        Test if the object is ready.
-
-        :return: True if configuration settings are valid and if the serial connection is opened.
-        """
-        return self.is_settings() and self.is_serial_ready()
-
-    def is_serial_ready(self) -> bool:
+    def _is_serial_ready(self) -> bool:
         """
         Test if is serial connection is ready.
 
@@ -171,51 +62,80 @@ class SerialConnection:
         """
         return isinstance(self.ser, Serial) and self.ser.isOpen()
 
+    def has_conf(self) -> str or None:
+        """Return source_name value from instance."""
+        return Ut.is_dict(self._conf, not_null=True)
+
+    def get_conf_key(self, key: str) -> any:
+        """Return source_name value from instance."""
+        result = None
+        if self.has_conf() and Ut.is_str(key):
+            result = self._conf.get(key)
+        return result
+
+    def get_source_name(self) -> str or None:
+        """Return source_name value from instance."""
+        return self.get_conf_key('source_name')
+
+    def get_serial_port(self) -> str or None:
+        """Return serial_port value from instance."""
+        return self.get_conf_key('serial_port')
+
+    def get_timeout(self) -> int or float:
+        """Return timeout value from instance."""
+        return self.get_conf_key('timeout')
+
     def is_settings(self) -> bool:
         """
         Test if class instance has valid configuration settings.
 
         :return: True if is valid configuration settings.
         """
-        return SerialConnection.is_serial_conf(serial_port=self._serial_port,
-                                               baud=self._baud,
-                                               timeout=self._timeout)
+        return SerialConnectionHelper.is_serial_conf(conf=self._conf)
 
     def _init_settings(self,
-                       serial_port: str or None = None,
-                       baud: int = 19200,
-                       timeout: int or float or None = 0,
-                       source_name: str = 'void'
+                       conf: dict or None,
+                       set_default: bool = True,
                        ) -> bool:
         """
         Initialise configuration settings.
-
         :Example :
-            >>> self._init_settings(
-            >>>     serial_port="/tmp/vmodem0",
-            >>>     baud=19200,
-            >>>     timeout=0,
-            >>>     source_name="BMV700"
-            >>> )
+            >>> self._init_settings(conf={
+            >>>     "serial_port": "/tmp/vmodem0",
+            >>>     "baudrate": 19200,
+            >>>     "timeout": 0,
+            >>>     "write_timeout": 0,
+            >>>     "exclusive": False,
+            >>>     "source_name": "BMV700"
+            >>> })
             >>> True
-        :param serial_port: The serial port
-        :param baud: The serial baud rate
-        :param timeout: The serial timeout
-        :param source_name: The source_name.
+        Available parameters:
+          - serial_port = None: str or None: Serial port path to open
+          - baudrate = 19600: int: Baud rate such as 9600 or 115200 etc.
+          - timeout = 0: int or float or None: Set read timeout value in seconds
+          - write_timeout = 0: int or float or None: Set write timeout value in seconds
+          - exclusive = False: bool: Set exclusive access mode (POSIX only).
+            A port cannot be opened in exclusive access mode
+            if it is already open in exclusive access mode.
+          - source_name: str: This is used in logger to identify the source of call
         :return: True if configuration settings are valid.
         """
-        self.set_serial_port(serial_port)
-        self.set_baud(baud)
-        self.set_timeout(timeout)
-        self.set_source_name(source_name)
+        logger.info(
+            '[SerialConnectionHelper::init_settings] '
+            'Start SerialConnectionHelper instance.'
+        )
+        if Ut.is_bool(conf.get('set_default')):
+            set_default = conf.pop('set_default')
+
+        self._conf = SerialConnectionHelper.set_serial_conf(
+            conf=conf,
+            set_default=set_default
+        )
         return self.is_settings()
 
     def _set_serial_conf(self,
-                         serial_port: str or None = "default",
-                         baud: int or None = None,
-                         timeout: int or float or None = -1,
-                         write_timeout: int or float or None = -1,
-                         exclusive: bool = False
+                         conf: dict or None = None,
+                         set_default: bool = False
                          ) -> dict or None:
         """
         Set serial configuration settings to open serial connection.
@@ -223,14 +143,14 @@ class SerialConnection:
         :Example :
             >>> self._set_serial_conf(
             >>>     serial_port="/tmp/vmodem0",
-            >>>     baud=19200,
+            >>>     baudrate=19200,
             >>>     timeout=0,
             >>>     write_timeout=0,
             >>>     exclusive=True
             >>> )
             >>> True
         :param serial_port: The serial port
-        :param baud: The serial baud rate
+        :param baudrate: The serial baud rate
         :param timeout: The serial timeout
         :param write_timeout: The serial write timeout
         :param exclusive: Set exclusive access mode (POSIX only).
@@ -239,121 +159,20 @@ class SerialConnection:
         :return: a dictionary with the configuration to open a serial connection.
             Or None if a parameter is invalid.
         """
-        if (not serial_port == "default"
-                and not SerialConnection.is_serial_port(serial_port))\
-                or (baud is not None
-                    and not SerialConnection.is_baud(baud))\
-                or (not timeout == -1
-                    and not SerialConnection.is_timeout(timeout))\
-                or (not write_timeout == -1
-                    and not SerialConnection.is_timeout(write_timeout)):
-            result = None
-        else:
-            self.set_serial_port(serial_port)
-            self.set_baud(baud)
-            self.set_timeout(timeout)
-
-            result = {
-                'port': self._serial_port,
-                'baudrate': self._baud,
-                'timeout': self._timeout
-            }
-            if SerialConnection.is_timeout(write_timeout):
-                result.update({'write_timeout': write_timeout})
-            if Ut.str_to_bool(exclusive) is True:
-                result.update({'exclusive': True})
-        return result
-
-    def connect(self,
-                serial_port: str or None = "default",
-                baud: int or None = None,
-                timeout: int or float or None = -1,
-                write_timeout: int or float or None = -1,
-                exclusive: bool = False
-                ) -> bool:
-        """
-        Start serial connection from parameters.
-
-        :Example :
-            >>> self.connect(
-            >>>     serial_port="/tmp/vmodem0",
-            >>>     baud=19200,
-            >>>     timeout=0,
-            >>>     write_timeout=0,
-            >>>     exclusive=True
-            >>> )
-            >>> True
-
-        :param serial_port: The serial port
-        :param baud: The serial baud rate
-        :param timeout: The serial timeout
-        :param write_timeout: The serial write timeout
-        :param exclusive: Set exclusive access mode (POSIX only).
-            A port cannot be opened in exclusive access mode
-            if it is already open in exclusive access mode.
-        :return: True if success to open a serial connection.
-        Raise:
-         - SerialConfException:
-           Will be raised when parameter
-           are out of range or invalid,
-           e.g. serial_port, baud rate, data bits
-         - SerialVeException:
-           In case the device can not be found or can not be configured.
-         - OpenSerialVeException:
-           Will be raised when the device is configured but port is not opened.
-        """
-        serial_conf = self._set_serial_conf(
-            serial_port=serial_port,
-            baud=baud,
-            timeout=timeout,
-            write_timeout=write_timeout,
-            exclusive=exclusive
-        )
-        logger.debug(
-            '[SerialConnection::connect::%s] '
-            'settings : %s',
-            self._source_name, serial_conf
-        )
-        if SerialConnection.is_serial_conf_data(serial_conf):
-            try:
-                self.ser = Serial(**serial_conf)
-                if self.ser.isOpen():
-                    logger.info(
-                        '[SerialConnection::connect::%s] New Serial connection established. '
-                        'args : %s.',
-                        self._source_name, serial_conf
-                    )
-                    result = True
-                else:
-                    raise OpenSerialVeException(
-                        '[SerialConnection::connect::%s] '
-                        'Unable to open serial connection. args: %s' %
-                        (self._source_name, serial_conf)
-                    )
-
-            except SerialException as ex:
-                raise SerialVeException(
-                    '[SerialConnection::connect::%s] '
-                    'Exception when attempting to open serial connection. '
-                    ' args: %s - ex : %s' %
-                    (self._source_name, serial_conf, ex)
-                ) from SerialException
-            except ValueError as ex:
-                raise SerialConfException(
-                    '[SerialConnection::connect::%s] '
-                    'Parameter are out of range, e.g. baud rate, data bits. '
-                    ' args: %s - ex : %s' %
-                    (self._source_name, serial_conf, ex)
-                ) from ValueError
-
-        else:
-            raise SerialConfException(
-                '[SerialConnection::connect::%s] '
-                'Unable to open serial connection. '
-                'Invalid configuration : %s' %
-                (self._source_name, serial_conf)
+        result = None
+        if conf is not None:
+            result = SerialConnectionHelper.set_serial_conf(
+                conf=conf,
+                old_conf=self._conf,
+                set_default=set_default
             )
+        else:
+            result = self._conf
 
+        result = Ut.get_items_from_dict(
+            result,
+            ['serial_port', 'baudrate', 'timeout', 'write_timeout', 'exclusive']
+        )
         return result
 
     def get_serial_ports_list(self) -> list:
@@ -368,7 +187,7 @@ class SerialConnection:
             >>> ['/tmp/vmodem0', '/tmp/vmodem1', '/dev/ttyUSB1']
         :return: List of serial ports and virtual serial ports available.
         """
-        result = list()
+        result = []
         try:
             # scan unix virtual serial ports ports
             result = self.get_unix_virtual_serial_ports_list()
@@ -383,10 +202,10 @@ class SerialConnection:
                     )
         except Exception as ex:
             logger.error(
-                '[SerialConnection::get_serial_ports_list::%s] '
+                '[SerialConnectionHelper::get_serial_ports_list::%s] '
                 'Unable to list serial ports. '
                 'exception : %s',
-                self._source_name, ex
+                self.get_source_name(), ex
             )
         return result
 
@@ -405,36 +224,21 @@ class SerialConnection:
 
         :return: List of virtual serial ports available.
         """
-        result = list()
+        result = []
         try:
             if USys.is_op_sys_type('unix'):
-                for path in SerialConnection._get_virtual_ports_paths():
-                    tmp = SerialConnection._scan_path(path)
+                for path in SerialConnectionHelper._get_virtual_ports_paths():
+                    tmp = SerialConnectionHelper._scan_path(path)
                     if Ut.is_list(tmp, not_null=True):
                         result = result + tmp
         except Exception as ex:
             logger.error(
-                '[SerialConnection::get_unix_virtual_serial_ports_list::%s] '
+                '[SerialConnectionHelper::get_unix_virtual_serial_ports_list::%s] '
                 'Unable to list serial ports. '
                 'exception : %s',
-                self._source_name, ex
+                self.get_source_name(), ex
             )
         return result
-
-    def serialize(self):
-        """
-        This method allows to serialize in a proper way this object
-
-        :return: A dict of order
-        :rtype: Dict
-        """
-
-        return {
-            'source_name': self._source_name,
-            'serial_port': self._serial_port,
-            'baud': self._baud,
-            'timeout': self._timeout
-        }
 
     @staticmethod
     def _scan_path(path: str) -> list:
@@ -442,7 +246,7 @@ class SerialConnection:
         result = None
         if path != "/dev" and os.path.exists(path):
             # get list files from path
-            result = list()
+            result = []
             for entry in os.scandir(path):
                 if not os.path.isdir(entry.path) \
                         and Ut.is_serial_port_name_pattern(entry.name):
@@ -451,68 +255,74 @@ class SerialConnection:
         return result
 
     @staticmethod
-    def get_default_serial_conf(conf: dict or None) -> dict:
+    def set_serial_conf(conf: dict or None,
+                        old_conf: dict or None = None,
+                        set_default: bool = True
+                        ) -> dict:
         """Get serial configuration data with default values."""
-        result = {
-            "serial_port": None,
-            "baud": 19200,
-            "timeout": 0,
-            "source_name": "SerialConnection"
-        }
+        result = None
         if Ut.is_dict(conf, not_null=True):
-            serial_conf = Ut.get_items_from_dict(conf, ["serial_port", "baud", "timeout", "source_name"])
-            if Ut.is_dict(serial_conf, not_null=True):
-                result.update(serial_conf)
+            result = {}
+            if SerialConnectionHelper.is_serial_conf(old_conf):
+                result = old_conf
+            elif set_default is True:
+                result = SerialConnectionHelper.get_default_serial_conf()
+
+            if SerialConnectionHelper.is_serial_port(conf.get('serial_port')):
+                result['serial_port'] = conf.get('serial_port')
+
+            if SerialConnectionHelper.is_timeout(conf.get('timeout', -1)):
+                result['timeout'] = conf.get('timeout')
+
+            if SerialConnectionHelper.is_baud(conf.get('baudrate')):
+                result['baudrate'] = conf.get('baudrate')
+
+            if SerialConnectionHelper.is_timeout(conf.get('write_timeout', -1)):
+                result['write_timeout'] = conf.get('write_timeout')
+
+            if conf.get('exclusive') is not None:
+                result['exclusive'] = Ut.str_to_bool(conf.get('exclusive'))
+
+            if Ut.is_key_pattern(conf.get('source_name')):
+                result['source_name'] = conf.get('source_name')
         return result
 
     @staticmethod
-    def is_serial_conf(serial_port: str or None,
-                       baud: int,
-                       timeout: int or float,
-                       source_name: str or None = None
-                       ) -> bool:
-        """
-        Test if valid serial configuration settings.
-
-        :Example :
-            >>> SerialConnection.is_serial_conf(
-            >>>     serial_port="/tmp/vmodem0",
-            >>>     baud=19200,
-            >>>     timeout=0,
-                   source_name="MyFunc"
-            >>> )
-            >>> True
-        :param serial_port: The serial port,
-        :param baud: The baudrate.
-        :param timeout: The timeout.
-        :param source_name: Source name caller to log.
-        :return: True if configuration settings are valid
-        """
-        return SerialConnection.is_serial_port(serial_port) \
-            and SerialConnection.is_baud(baud) \
-            and SerialConnection.is_timeout(timeout)
+    def get_default_serial_conf() -> dict:
+        """Get serial configuration data with default values."""
+        return {
+            "serial_port": None,
+            "baudrate": 19200,
+            "timeout": 0,
+            "write_timeout": 0,
+            # "exclusive": None,
+            "source_name": "SerialConnectionHelper"
+        }
 
     @staticmethod
-    def is_serial_conf_data(conf: dict or None) -> bool:
+    def is_serial_conf(conf: dict or None) -> bool:
         """
         Test if valid serial configuration settings.
 
         :Example :
-            >>> SerialConnection.is_serial_conf(
-            >>>     serial_port="/tmp/vmodem0",
-            >>>     baud=19200,
-            >>>     timeout=0
-            >>> )
+            >>> SerialConnectionHelper.is_serial_conf({
+            >>>     "serial_port": "/tmp/vmodem0",
+            >>>     "baudrate": 19200,
+            >>>     "timeout": 0,
+            >>>     "write_timeout": 0,
+            >>>     "exclusive": False,
+            >>>     "source_name": "BMV700"
+            >>> })
             >>> True
         :param conf: The Configuration data
         :return: True if configuration settings are valid
         """
-        return Ut.is_dict(conf)\
-            and SerialConnection.is_serial_port(
+        return Ut.is_dict(conf) \
+            and SerialConnectionHelper.is_serial_port(
                 conf.get('serial_port')) \
-            and SerialConnection.is_baud(
+            and SerialConnectionHelper.is_baud(
                 conf.get('baudrate')) \
-            and SerialConnection.is_timeout(
+            and SerialConnectionHelper.is_timeout(
                 conf.get('timeout'))
 
     @staticmethod
@@ -530,7 +340,7 @@ class SerialConnection:
         Return the virtual serial port path from user home directory.
 
         :Example :
-            >>> SerialConnection.get_virtual_home_serial_port(
+            >>> SerialConnectionHelper.get_virtual_home_serial_port(
             >>>     port="vmodem0"
             >>> )
             >>> "/home/${USER}/vmodem0"
@@ -551,20 +361,20 @@ class SerialConnection:
         First split the serial port in path and port name.
         Then test if serial port is a string, if path and port name are valid.
         :Example :
-            >>> SerialConnection._is_virtual_serial_port(
+            >>> SerialConnectionHelper._is_virtual_serial_port(
             >>>     serial_port="/tmp/vmodem0"
             >>> )
             >>> True
-            >>> SerialConnection._is_virtual_serial_port(
+            >>> SerialConnectionHelper._is_virtual_serial_port(
             >>>     serial_port="/run/vmodem0"
             >>> )
             >>> False
         :param serial_port: The serial port to test.
         :return: True if the virtual serial port is valid.
         """
-        name, path = SerialConnection._split_serial_port(serial_port)
-        return Ut.is_str(serial_port)\
-            and path in SerialConnection._get_virtual_ports_paths()\
+        name, path = SerialConnectionHelper._split_serial_port(serial_port)
+        return Ut.is_str(serial_port) \
+            and path in SerialConnectionHelper._get_virtual_ports_paths() \
             and Ut.is_virtual_serial_port_pattern(name)
 
     @staticmethod
@@ -573,7 +383,7 @@ class SerialConnection:
         Return serial port split in name and path.
 
         :Example :
-            >>> SerialConnection._split_serial_port(
+            >>> SerialConnectionHelper._split_serial_port(
             >>>     serial_port="/tmp/vmodem0"
             >>> )
             >>> ('vmodem0', '/tmp')
@@ -591,7 +401,7 @@ class SerialConnection:
         Test serial_port path exists.
 
         :Example :
-            >>> SerialConnection.is_serial_port_exists(
+            >>> SerialConnectionHelper.is_serial_port_exists(
             >>>     serial_port="/tmp/vmodem0"
             >>> )
             >>> True
@@ -606,18 +416,18 @@ class SerialConnection:
         Test if is valid baud rate.
 
         :Example :
-            >>> SerialConnection.is_baud(baud=1200)
+            >>> SerialConnectionHelper.is_baud(baud=1200)
             >>> True
         :param baud: The baudrate value to test.
         :return: True if the baudrate value is valid and is an integer instance.
         """
-        return Ut.is_int(baud)\
+        return Ut.is_int(baud) \
             and baud in [
                110, 300, 600, 1200,
                2400, 4800, 9600, 14400,
                19200, 38400, 57600, 115200,
                128000, 256000
-           ]
+            ]
 
     @staticmethod
     def is_timeout(timeout: int or float or None) -> bool:
@@ -634,7 +444,7 @@ class SerialConnection:
            and return all bytes that were received until then.
 
         :Example :
-            >>> SerialConnection.is_timeout(timeout=0)
+            >>> SerialConnectionHelper.is_timeout(timeout=0)
             >>> True
         :param timeout: The timeout value to test.
         :return: True if is valid read timeout value.
@@ -649,20 +459,20 @@ class SerialConnection:
         First split the serial port in path and port name.
         Then test if serial port is a string, if path and port name are valid.
         :Example :
-            >>> SerialConnection.is_serial_port(
+            >>> SerialConnectionHelper.is_serial_port(
             >>>     serial_port="/tmp/vmodem0"
             >>> )
             >>> True
-            >>> SerialConnection.is_serial_port(
+            >>> SerialConnectionHelper.is_serial_port(
             >>>     serial_port="/run/vmodem0"
             >>> )
             >>> False
         :param serial_port: The serial_port to test.
         :return: True if the serial port is valid or None.
         """
-        name, path = SerialConnection._split_serial_port(serial_port)
+        name, path = SerialConnectionHelper._split_serial_port(serial_port)
         return (Ut.is_str(serial_port, not_null=True)
-                and SerialConnection.is_serial_path(path)
+                and SerialConnectionHelper.is_serial_path(path)
                 and Ut.is_serial_port_name_pattern(name)) \
             or serial_port is None
 
@@ -674,16 +484,183 @@ class SerialConnection:
         For win32 systems path must be null (None or "").
         For unix systems path must be /dev or in get_virtual_ports_paths() method.
         :Example :
-            >>> SerialConnection.is_serial_path(serial_port="/tmp")
+            >>> SerialConnectionHelper.is_serial_path(serial_port="/tmp")
             >>> True
-            >>> SerialConnection.is_serial_path(serial_port="/run")
+            >>> SerialConnectionHelper.is_serial_path(serial_port="/run")
             >>> False
         :param path: The serial port path to test.
         :return: True if the serial port path is valid.
         """
         return (USys.is_op_sys_type('win32')
-                and path is None or path == "")\
+                and path is None or path == "") \
             or (USys.is_op_sys_type('unix')
                 and Ut.is_str(path)
-                and (path in SerialConnection._get_virtual_ports_paths()
-                     or path == "/dev"))
+                and (path in SerialConnectionHelper._get_virtual_ports_paths()
+                or path == "/dev"))
+
+
+class SerialConnection(SerialConnectionHelper):
+    """
+        Serial connection tool. Set up connection to serial port.
+
+        Able to scan serial ports available on system.
+
+        If you are working with VeDirect protocol,
+        remember the configuration :
+            - Baud rate : 19200
+            - Data bits : 8
+            - Parity: None
+            - Stop bits: 1
+            - Flow Control None
+    """
+    def __init__(self,
+                 set_default: bool = True,
+                 **kwargs):
+        """
+        Constructor of SerialConnection class.
+
+        Initialise configuration and open serial port
+
+        :Example :
+            >>> sc = SerialConnection(serial_port = "/dev/ttyUSB1")
+            >>> sc.connect()
+            >>> True
+
+        Available parameters:
+          - serial_port = None: str or None: Serial port path to open
+          - baudrate = 19600: int: Baud rate such as 9600 or 115200 etc.
+          - timeout = 0: int or float or None: Set read timeout value in seconds
+          - write_timeout = 0: int or float or None: Set write timeout value in seconds
+          - exclusive = False: bool: Set exclusive access mode (POSIX only).
+            A port cannot be opened in exclusive access mode
+            if it is already open in exclusive access mode.
+          - source_name: str: This is used in logger to identify the source of call
+        """
+        SerialConnectionHelper.__init__(
+            self,
+            set_default=set_default,
+            **kwargs
+        )
+
+    def is_ready(self) -> bool:
+        """
+        Test if the object is ready.
+
+        :return: True if configuration settings are valid and if the serial connection is opened.
+        """
+        return self.is_settings() and self._is_serial_ready()
+
+    def connect(self,
+                conf: dict or None = None,
+                set_default: bool = False
+                ) -> bool:
+        """
+        Start serial connection from parameters.
+
+        :Example :
+            >>> self.connect({
+            >>>     "serial_port": "/tmp/vmodem0",
+            >>>     "baudrate": 19200,
+            >>>     "timeout": 0,
+            >>>     "write_timeout": 0,
+            >>>     "exclusive": False,
+            >>>     "source_name": "BMV700"
+            >>> })
+            >>> True
+        Available parameters:
+          - serial_port = None: str or None: Serial port path to open
+          - baudrate = 19600: int: Baud rate such as 9600 or 115200 etc.
+          - timeout = 0: int or float or None: Set read timeout value in seconds
+          - write_timeout = 0: int or float or None: Set write timeout value in seconds
+          - exclusive = False: bool: Set exclusive access mode (POSIX only).
+            A port cannot be opened in exclusive access mode
+            if it is already open in exclusive access mode.
+          - source_name: str: This is used in logger to identify the source of call
+        :param conf: The serial configuration to open port
+        :return: True if success to open a serial connection.
+        Raise:
+         - SerialConfException:
+           Will be raised when parameter
+           are out of range or invalid,
+           e.g. serial_port, baudrate, data bits
+         - SerialVeException:
+           In case the device can not be found or can not be configured.
+         - OpenSerialVeException:
+           Will be raised when the device is configured but port is not opened.
+        """
+        serial_conf = self._set_serial_conf(
+            conf=conf,
+            set_default=set_default
+        )
+        logger.debug(
+            '[SerialConnection::connect::%s] '
+            'settings : %s',
+            self.get_source_name(), serial_conf
+        )
+
+        if SerialConnection.is_serial_conf(serial_conf):
+            try:
+                serial_conf['port'] = serial_conf.pop('serial_port')
+                self.ser = Serial(
+                    **serial_conf
+                )
+                if self.ser.isOpen():
+                    logger.info(
+                        '[SerialConnection::connect::%s]'
+                        'New Serial connection established: %s.',
+                        self.get_source_name(), serial_conf
+                    )
+                    result = True
+                else:
+                    raise OpenSerialVeException(
+                        '[SerialConnection::connect::%s] '
+                        'Unable to open serial connection. args: %s' %
+                        (self.get_source_name(), serial_conf)
+                    )
+
+            except SerialException as ex:
+                raise SerialVeException(
+                    '[SerialConnection::connect::%s] '
+                    'Exception when attempting to open serial connection. '
+                    ' args: %s - ex : %s' %
+                    (self.get_source_name(), serial_conf, ex)
+                ) from SerialException
+            except ValueError as ex:
+                raise SerialConfException(
+                    '[SerialConnection::connect::%s] '
+                    'Parameter are out of range, e.g. baud rate, data bits. '
+                    ' args: %s - ex : %s' %
+                    (self.get_source_name(), serial_conf, ex)
+                ) from ValueError
+
+        else:
+            raise SerialConfException(
+                '[SerialConnection::connect::%s] '
+                'Unable to open serial connection. '
+                'Invalid configuration : %s' %
+                (self.get_source_name(), serial_conf)
+            )
+
+        return result
+
+    def flush_serial_cache(self) -> bool:
+        """
+        Flush serial cache data from serial port.
+
+        :return: True if ready and flushed data cache
+        """
+        result = False
+        if self.is_ready():
+            self.ser.flush()
+            result = True
+        return result
+
+    def serialize(self):
+        """
+        This method allows to serialize in a proper way this object
+
+        :return: A dict of order
+        :rtype: Dict
+        """
+
+        return self._conf

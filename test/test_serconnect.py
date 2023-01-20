@@ -29,8 +29,9 @@ class TestSerialConnection:
         """
         conf = {
             'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
-            'baud': 19200,
+            'baudrate': 19200,
             'timeout': 0,
+            'source_name': "TestSerialConnection",
         }
 
         self.obj = SerialConnection(**conf)
@@ -38,52 +39,64 @@ class TestSerialConnection:
     def test_settings(self):
         """Test configuration settings from SerialConnection constructor."""
         assert self.obj.is_settings()
-
-    def test_set_timeout(self):
-        """Test set_timeout method."""
-        assert self.obj.set_timeout(0)
-        assert self.obj.set_timeout(10)
-        assert not self.obj.set_timeout(-1)
-        assert not self.obj.set_timeout("hello")
-
-    def test_set_source_name(self):
-        """Test set_source_name method."""
-        assert self.obj.set_source_name("hello")
-        assert not self.obj.set_source_name("")
-        assert not self.obj.set_source_name(-1)
-        assert not self.obj.set_source_name(None)
+        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port("vmodem1")
+        assert self.obj.get_conf_key("hello") is None
+        assert self.obj.get_source_name() == "TestSerialConnection"
+        assert self.obj.get_timeout() == 0
+        conf = {
+            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem0"),
+            'baudrate': 19200,
+            'timeout': 0,
+            'write_timeout': 0,
+            'exclusive': True
+        }
+        assert self.obj._init_settings(conf)
+        assert self.obj.is_settings()
+        assert self.obj.get_conf_key("exclusive") is True
+        assert self.obj.is_serial_port_exists(
+            SerialConnection.get_virtual_home_serial_port("vmodem1")
+        )
 
     def test_set_serial_conf(self):
         """Test set_serial_conf method."""
         conf = {
             'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem0"),
-            'baud': 19200,
+            'baudrate': 19200,
             'timeout': 0,
             'write_timeout': 0,
             'exclusive': True
         }
-        result = self.obj._set_serial_conf(**conf)
+        result = self.obj._set_serial_conf(conf)
         assert Ut.is_dict(result, eq=5)
         # test bad conf
         conf.update({'serial_port': 32})
-        result = self.obj._set_serial_conf(**conf)
+        result = self.obj._set_serial_conf(conf)
         assert result is None
 
     def test_connect(self):
         """Test connect method."""
         assert self.obj.connect()
-        assert self.obj.is_serial_ready()
+        assert self.obj._is_serial_ready()
         assert self.obj.is_ready()
+        assert self.obj.flush_serial_cache()
         # test valid but unavailable port.
         with pytest.raises(SerialVeException):
-            self.obj.connect(serial_port="/dev/ttyUSB99")
+            self.obj.connect(
+                conf={'serial_port': "/dev/ttyUSB99"}
+            )
         # test valid serial device configuration,
         # Serial is initialized but port is not open.
         with pytest.raises(OpenSerialVeException):
-            self.obj.connect(serial_port=None)
+            self.obj.connect(
+                conf={'serial_port': None}
+            )
         # test invalid configuration parameter
         with pytest.raises(SerialConfException):
-            self.obj.connect(serial_port=32)
+            self.obj._conf.pop('baudrate')
+            self.obj.connect(
+                conf={'exclusive': True},
+                set_default=False
+            )
 
     def test_get_serial_ports_list(self):
         """Test get_serial_ports_list method."""
@@ -98,8 +111,8 @@ class TestSerialConnection:
     def test_serialize(self):
         """Test serialize method."""
         obj = self.obj.serialize()
-        assert Ut.is_dict(obj) and len(obj) == 4
-        assert obj.get('source_name') == self.obj._source_name
+        assert Ut.is_dict(obj) and len(obj) == 5
+        assert obj.get('source_name') == 'TestSerialConnection'
 
     @staticmethod
     def test_get_virtual_ports_paths():
@@ -225,11 +238,25 @@ class TestSerialConnection:
         assert len(tests) == 6
 
     @staticmethod
-    def test_get_default_serial_conf():
-        """Test get_default_serial_conf method."""
-        data = {"timeout": 6}
-        result = SerialConnection.get_default_serial_conf(data)
-        assert Ut.is_dict(result)
-        assert result.get('serial_port') is None
-        assert result.get('baud') == 19200
+    def test_set_serial_conf():
+        """Test set_serial_conf method."""
+        data = {
+            "serial_port": "/dev/ttyUSB0",
+            "baudrate": 19200,
+            "timeout": 6,
+            "write_timeout": 4,
+            "exclusive": True,
+            "source_name": "TestSerialConnection"
+        }
+        result = SerialConnection.set_serial_conf(data)
+        assert Ut.is_dict(SerialConnection.get_default_serial_conf(), not_null=True)
+        assert SerialConnection.is_serial_conf(result)
+        assert result.get('serial_port') == "/dev/ttyUSB0"
+        assert result.get('baudrate') == 19200
         assert result.get('timeout') == 6
+        assert result.get('write_timeout') == 4
+        assert result.get('exclusive') is True
+        assert result.get('source_name') == "TestSerialConnection"
+        data.update({"serial_port": "/dev/ttyUSB3"})
+        result = SerialConnection.set_serial_conf(data, result)
+        assert result.get('serial_port') == "/dev/ttyUSB3"
