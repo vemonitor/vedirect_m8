@@ -298,7 +298,6 @@ class Vedirect:
     def init_serial_connection(self,
                                serial_conf: dict,
                                auto_start: bool = True,
-                               set_default: bool = True,
                                ) -> bool:
         """
         Initialise serial connection from parameters.
@@ -372,6 +371,10 @@ class Vedirect:
          - SerialVeException: on raise serial.SerialException
          - SerialConnectionException: on connection fails
         """
+        logger.info(
+            '[Vedirect::init_settings] '
+            'Start Vedirect instance.'
+        )
         max_packet_blocks = 18
         auto_start = True
         if Ut.is_dict(options, not_null=True):
@@ -414,9 +417,11 @@ class Vedirect:
             raise PacketReadException(
                 "[Vedirect::input_read] "
                 "Serial input read error: "
-                "Packet has limit of %s/%s blocks" % (
+                "Packet read limit: %s/%s blocks"
+                "packet: %s" % (
                     len(self._helper.dict),
-                    self._helper.max_blocks
+                    self._helper.max_blocks,
+                    self._helper.dict
                 )
             ) from ex
         except Exception as ex:
