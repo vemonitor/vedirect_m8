@@ -257,7 +257,7 @@ class TestVedirectController:
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
-            nb_packets=40,
+            nb_packets=60,
             sleep=0.1
         )
 
