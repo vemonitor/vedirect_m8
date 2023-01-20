@@ -17,6 +17,7 @@ import time
 
 from ve_utils.utype import UType as Ut
 from vedirect_m8.sertest import SerialTestHelper
+from vedirect_m8.helpers import TimeoutHelper
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.exceptions import VedirectException
@@ -313,15 +314,16 @@ class VedirectController(Vedirect):
                 "reconnection timeout is set to %ss",
                 timeout
             )
-            run, now, tim = True, time.time(), 0
+            run, timer = True, TimeoutHelper()
+            timer.set_start()
             sleep_time = Vedirect.set_sleep_time(value=sleep_time, default=5)
 
             while run:
-                tim = time.time()
+                timer.set_now()
                 if self.search_serial_port():
                     return True
 
-                if tim-now > timeout:
+                if timer.is_timeout(timeout):
                     raise ReadTimeoutException(
                         "[VeDirect::wait_or_search_serial_connection] "
                         "Unable to connect to any serial item. "
@@ -336,24 +338,28 @@ class VedirectController(Vedirect):
 
     def read_data_callback(self,
                            callback_function,
-                           timeout: int or float = 60,
-                           sleep_time: int or float = 1,
-                           max_loops: int or None = None,
-                           max_block_errors: int = 0,
-                           max_packet_errors: int = 0
+                           options: dict or None = None
                            ) -> dict or None:
         """
         Read data from the serial port and returns it to a callback function
 
+        max_block_errors and max_packet_errors possible values:
+            - -1: never exit
+            - 0: exit on first error
+            - x: exit after x errors
+
+        Method options available:
+          - timeout:int=60: Set the timeout for the read_data_callback function
+          - sleep_time:int=1: Define time to sleep between 2 packet read
+          - max_loops:int or None=None: Limit the number of loops
+          - max_block_errors:int=0: Define nb errors permitted on read blocks
+          before exit (InputReadException)
+          - max_packet_errors:int=1: Define nb errors permitted on read packets
+          before exit (PacketReadException)
+
         :param self: Reference the class instance
         :param callback_function:function: Pass a function to the read_data_callback function
-        :param timeout:int=60: Set the timeout for the read_data_callback function
-        :param sleep_time:int=1: Define time to sleep between 2 packet read
-        :param max_loops:int or None=None: Limit the number of loops on read blocks
-          before exit (InputReadException)
-        :param max_packet_errors:int=1: Define nb errors permitted on read packets
-          before exit (PacketReadException)
-        :doc-author: Trelent
+        :param options:dict: Method options see on description
         """
         run = True
         if self.is_ready():
@@ -362,11 +368,7 @@ class VedirectController(Vedirect):
                     return Vedirect.read_data_callback(
                         self,
                         callback_function=callback_function,
-                        timeout=timeout,
-                        sleep_time=sleep_time,
-                        max_loops=max_loops,
-                        max_block_errors=max_block_errors,
-                        max_packet_errors=max_packet_errors
+                        options=options
                     )
                 except (
                         InputReadException,
