@@ -138,9 +138,10 @@ class TestVedirectController:
 
         def bad_port_test():
             """Test init_settings with bad serial_port."""
-            assert self.obj.init_settings(
-                {"serial_port": "/etc/bad_port"}
-            )
+            with pytest.raises(SerialConnectionException):
+                self.obj.init_settings(
+                    {"serial_port": "/etc/bad_port"}
+                )
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=bad_port_test,
