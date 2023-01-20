@@ -531,7 +531,6 @@ class Vedirect:
             - -1: never exit
             - 0: exit on first error
             - x: exit after x errors
-
         :param self: Reference the class instance
         :param callback_function:function: Pass a function to the read_data_callback function
         :param timeout:int=60: Set the timeout for the read_data_callback function
@@ -606,7 +605,7 @@ class Vedirect:
         result = False
         if max_value == 0:
             result = True
-        elif max_value > 0 and  0 <= counter <= max_value:
+        elif max_value > 0 and 0 <= counter <= max_value:
             result = True
         return result
 
