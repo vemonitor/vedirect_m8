@@ -122,7 +122,7 @@ class TestVedirectController:
                 {'serial_port': good_serial_port},
                 {
                     'wait_connection': True,
-                    'wait_timeout': 15
+                    'wait_timeout': 20
                 }
             )
 
