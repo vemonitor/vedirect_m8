@@ -163,7 +163,7 @@ class TestVedirectController:
 
             with pytest.raises(VedirectException):
                 self.obj._ser_test = None
-                self.obj.set_wait_timeout(2)
+                self.obj.set_wait_timeout(20)
                 self.obj.init_settings(
                     {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")}
                 )
@@ -171,7 +171,7 @@ class TestVedirectController:
         self.ve_sim.run_vedirect_sim_callback(
             callback=bad_port_test,
             nb_packets=40,
-            sleep=0.5
+            sleep=0.1
         )
 
     def test_read_data_to_test(self):
