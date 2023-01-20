@@ -387,6 +387,14 @@ class Vedirect:
                                            auto_start=auto_start
                                            )
 
+    def flush_serial_cache(self) -> bool:
+        """Flush serial cache data from serial port."""
+        result = False
+        if self.is_ready():
+            self._com.flush_serial_cache()
+            result = True
+        return result
+
     def input_read(self, byte) -> dict or None:
         """Input read from byte."""
         result = None
