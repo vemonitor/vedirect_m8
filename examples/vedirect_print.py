@@ -10,6 +10,7 @@ import time
 from vedirect_m8.serutils import SerialUtils as Ut
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8 import configure_logging
+from vedirect_m8.helpers import CountersHelper
 from vedirect_m8.exceptions import PacketReadException
 
 logging.basicConfig()
@@ -22,15 +23,18 @@ def print_data_callback(packet_callback: dict):
 
     See above on read_data_callback method.
     """
-    logger.info(
-        '[print_data_callback] '
-        'New packet received in callback function: '
-    )
+
     if Ut.is_dict(packet, not_null=True):
         logger.info(
-            '[print_data_callback] -> Packet '
+            '[print_data_callback] -> callback Packet '
             '(%s Blocks): %s.',
             len(packet_callback),
+            packet_callback
+        )
+    else:
+        logger.info(
+            '[print_data_callback] '
+            'Bad packet received in callback function: %s',
             packet_callback
         )
 
@@ -82,6 +86,7 @@ if __name__ == '__main__':
     ve.flush_serial_cache()
     time.sleep(1)
 
+    # - Example 1: -
     # decode one packet from serial port
     packet = ve.read_data_single(
         # time max to read one packet
@@ -112,42 +117,53 @@ if __name__ == '__main__':
         '[vedirect_print] '
         'Decode packets and send them to callback function: '
     )
+
+    # - Example 2: -
+    # decode packets and send them to callback function
+    # here get 2 packet for second with disabled InputReadException
+    # Catching PacketReadException in while loop to log errors.
+    # If a PacketReadException occurs:
+    #   - log error
+    #   - and restart read_data_callback
     run = True
+    packet_counter = CountersHelper()
+    packet_counter.add_counter_key('packet_errors')
     nb_packet_errors = 0
     while run:
         try:
-            # decode packets and send them to callback function
-            # here get 2 packet for second with disabled InputReadException
-            # And catching PacketReadException here without exiting.
+
             ve.read_data_callback(
                 # callback function who receive the decoded data
                 callback_function=print_data_callback,
-                # time max to read one packet
-                timeout=1,
-                # time to sleep between read two packets from serial
-                # sleep 0.5 seem ~ 2 packets/second
-                sleep_time=0.5,
-                # Define max packets to read before exit :
-                #   - None: never stop until no error occurs
-                #   - x: exit after read and decode x packets if no error occurs.
-                max_loops=None,
-                # Define nb errors permitted on read blocks before exit (InputReadException):
-                #   - -1: never exit
-                #   - 0: exit on first error
-                #   - x: exit after x errors
-                max_block_errors=0,
-                # Define nb errors permitted on read blocks before exit (PacketReadException):
-                #   - -1: never exit
-                #   - 0: exit on first error
-                #   - x: exit after x errors
-                max_packet_errors=0
+                options={
+                    # time max to read one packet
+                    'timeout': 1,
+                    # time to sleep between read two packets from serial
+                    # sleep 0.5 seem ~ 2 packets/second
+                    'sleep_time': 0.5,
+                    # Define max packets to read before exit :
+                    #   - None: never stop until no error occurs
+                    #   - x: exit after read and decode x packets if no error occurs.
+                    'max_loops': None,
+                    # Define nb errors permitted on read blocks before exit (InputReadException):
+                    #   - -1: never exit
+                    #   - 0: exit on first error
+                    #   - x: exit after x errors
+                    'max_block_errors': -1,
+                    # Define nb errors permitted on read blocks before exit (PacketReadException):
+                    #   - -1: never exit
+                    #   - 0: exit on first error
+                    #   - x: exit after x errors
+                    'max_packet_errors': 0
+                }
+
             )
         except PacketReadException as ex:
             # catch PacketReadException errors and count them
             logger.info(
                 '[vedirect_print] '
                 'Invalid packet detected (%s): %s',
-                nb_packet_errors,
+                packet_counter.get_key_value('packet_errors'),
                 ex
             )
-            nb_packet_errors = nb_packet_errors + 1
+            packet_counter.add_to_key('packet_errors')
