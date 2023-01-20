@@ -195,17 +195,15 @@ class SerialTestHelper:
                     elif type_test not in SerialTestHelper.get_valid_type_tests():
                         raise SettingInvalidException(
                             "[SerialTestHelper::validate_serial_tests] "
-                            "unrecognized typeTest %s, from key %s."
-                            "typeTest must be in : %s" %
-                            (type_test, key, SerialTestHelper.get_valid_type_tests())
+                            f"unrecognized typeTest {type_test}, from key {key}."
+                            f"typeTest must be in : {SerialTestHelper.get_valid_type_tests()}"
                         )
                 else:
                     raise SettingInvalidException(
                             "[SerialTestHelper::validate_serial_tests] "
-                            "invalid serialTest settings from key %s. "
+                            f"invalid serialTest settings from key {key}. "
                             "Key must start by char [a-zA-Z0-9], "
-                            "and must contain only chars [a-zA-Z0-9_]." %
-                            key
+                            "and must contain only chars [a-zA-Z0-9_]."
                         )
         return tst
 

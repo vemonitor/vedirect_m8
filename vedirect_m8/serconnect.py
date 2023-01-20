@@ -613,32 +613,28 @@ class SerialConnection(SerialConnectionHelper):
                     result = True
                 else:
                     raise OpenSerialVeException(
-                        '[SerialConnection::connect::%s] '
-                        'Unable to open serial connection. args: %s' %
-                        (self.get_source_name(), serial_conf)
+                        f'[SerialConnection::connect::{self.get_source_name()}] '
+                        f'Unable to open serial connection : {serial_conf}'
                     )
 
             except SerialException as ex:
                 raise SerialVeException(
-                    '[SerialConnection::connect::%s] '
+                    f'[SerialConnection::connect::{self.get_source_name()}] '
                     'Exception when attempting to open serial connection. '
-                    ' args: %s - ex : %s' %
-                    (self.get_source_name(), serial_conf, ex)
+                    f' args: {serial_conf} - ex : {ex}'
                 ) from SerialException
             except ValueError as ex:
                 raise SerialConfException(
-                    '[SerialConnection::connect::%s] '
+                    f'[SerialConnection::connect::{self.get_source_name()}] '
                     'Parameter are out of range, e.g. baud rate, data bits. '
-                    ' args: %s - ex : %s' %
-                    (self.get_source_name(), serial_conf, ex)
+                    f' args: {serial_conf} - ex : {ex}'
                 ) from ValueError
 
         else:
             raise SerialConfException(
-                '[SerialConnection::connect::%s] '
+                f'[SerialConnection::connect::{self.get_source_name()}] '
                 'Unable to open serial connection. '
-                'Invalid configuration : %s' %
-                (self.get_source_name(), serial_conf)
+                'Invalid configuration : {serial_conf}'
             )
 
         return result

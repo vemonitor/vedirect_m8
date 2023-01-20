@@ -1,9 +1,8 @@
 """Serial test helper class."""
 import time
 from threading import Thread
-from vedirect_m8.vedirectsim import Vedirectsim
 from ve_utils.utype import UType as Ut
-from ve_utils.usys import USys
+from vedirect_m8.vedirectsim import Vedirectsim
 
 
 class SerialTestHelper:
@@ -38,7 +37,7 @@ class SerialTestHelper:
                                   sleep: int or float = 0.5
                                   ):
         """Run vedirect simulator before the callback function and join thread."""
-        self.thread = self.run_vedirect_sim(nb_packets)
+        self.run_vedirect_sim(nb_packets, sleep)
         callback()
         self.join()
 

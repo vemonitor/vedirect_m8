@@ -115,15 +115,14 @@ class VedirectController(Vedirect):
                 raise SettingInvalidException(
                     "[Vedirect::init_serial_test] "
                     "Unable to init SerialTestHelper, "
-                    "bad parameters : %s." %
-                    serial_test
+                    f"bad parameters : {serial_test}."
+
                 )
             return True
         raise SettingInvalidException(
             "[Vedirect::init_serial_test] "
             "Unable to init SerialTestHelper, "
-            "bad parameters : %s." %
-            serial_test
+            f"bad parameters : {serial_test}."
         )
 
     def init_settings(self,
@@ -174,7 +173,7 @@ class VedirectController(Vedirect):
                 raise SerialConnectionException(
                     "[VedirectController::init_settings] "
                     "Unable to retrieve valid serial port to read. "
-                    "waiting: %ss." % self._wait_timeout
+                    f"waiting: {self._wait_timeout}s."
                 ) from ex
         return result
 
@@ -277,7 +276,7 @@ class VedirectController(Vedirect):
         if self.is_ready_to_search_ports():
             ports = self._com.get_serial_ports_list()
             if self.test_serial_ports(ports):
-                self._helper.init_data_read()
+                self.helper.init_data_read()
                 return True
         return False
 
@@ -326,14 +325,13 @@ class VedirectController(Vedirect):
                     raise ReadTimeoutException(
                         "[VeDirect::wait_or_search_serial_connection] "
                         "Unable to connect to any serial item. "
-                        "Timeout error : %s. Exception : %s" %
-                        (timeout, exception)
+                        f"Timeout error : {timeout}. Exception : {exception}"
                     )
                 time.sleep(sleep_time)
         raise SerialConnectionException(
             "[VeDirect::wait_or_search_serial_connection] "
             "Unable to connect to any serial item. "
-            "Exception : %s" % exception
+            f"Exception : {exception}"
         )
 
     def read_data_callback(self,
@@ -358,9 +356,6 @@ class VedirectController(Vedirect):
         :doc-author: Trelent
         """
         run = True
-        nb_block_errors, nb_packet_errors = 0, 0
-        max_block_errors = Ut.get_int(max_block_errors, 0)
-        max_packet_errors = Ut.get_int(max_packet_errors, 0)
         if self.is_ready():
             while run:
                 try:
@@ -373,16 +368,6 @@ class VedirectController(Vedirect):
                         max_block_errors=max_block_errors,
                         max_packet_errors=max_packet_errors
                     )
-                except InputReadException as ex:
-                    if Vedirect.is_max_read_error(max_block_errors, nb_block_errors):
-                        raise ex
-                    self._helper.init_data_read()
-                    nb_block_errors = nb_block_errors + 1
-                except PacketReadException as ex:
-                    if Vedirect.is_max_read_error(max_packet_errors, nb_packet_errors):
-                        raise ex
-                    self._helper.init_data_read()
-                    nb_packet_errors = nb_packet_errors + 1
                 except (
                         InputReadException,
                         PacketReadException,

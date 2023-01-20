@@ -1,9 +1,8 @@
 """Vedirect unittest class."""
 import pytest
-from .serial_test_helper import SerialTestHelper
+from ve_utils.utype import UType as Ut
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
-from ve_utils.utype import UType as Ut
 from vedirect_m8.exceptions import SettingInvalidException
 from vedirect_m8.exceptions import InputReadException
 from vedirect_m8.exceptions import PacketReadException
@@ -11,11 +10,12 @@ from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
 from vedirect_m8.exceptions import SerialConfException
 from vedirect_m8.exceptions import SerialVeException
+from .serial_test_helper import SerialTestHelper
 
 
 # noinspection PyTypeChecker
 class TestVedirect:
-
+    """Vedirect unittest class."""
     def setup_class(self):
         """
         Setup any state tied to the execution of the given function.
@@ -56,16 +56,16 @@ class TestVedirect:
 
     def test_set_max_packet_blocks(self):
         """Test set_max_packet_blocks method."""
-        assert self.obj._helper.has_free_block()
-        assert self.obj._helper.set_max_packet_blocks(2)
-        assert self.obj._helper.set_max_packet_blocks(None)
+        assert self.obj.helper.has_free_block()
+        assert self.obj.helper.set_max_packet_blocks(2)
+        assert self.obj.helper.set_max_packet_blocks(None)
         with pytest.raises(SettingInvalidException):
-            self.obj._helper.set_max_packet_blocks("error")
+            self.obj.helper.set_max_packet_blocks("error")
 
     def test_is_serial_com(self):
         """Test is_serial_com method."""
         assert Vedirect.is_serial_com(self.obj._com)
-        assert not Vedirect.is_serial_com(dict())
+        assert not Vedirect.is_serial_com({})
         assert not Vedirect.is_serial_com(None)
 
     @staticmethod
@@ -141,8 +141,10 @@ class TestVedirect:
 
     def test_init_settings(self):
         """Test init_settings method."""
-        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port("vmodem1")
-        assert self.obj._helper.max_blocks == 18
+        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port(
+            "vmodem1"
+        )
+        assert self.obj.helper.max_blocks == 18
         assert self.obj._com.get_source_name() == "TestVedirect"
         serial_conf = {
             'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
@@ -158,7 +160,7 @@ class TestVedirect:
             serial_conf=serial_conf,
             options=options
         )
-        assert self.obj._helper.max_blocks == 17
+        assert self.obj.helper.max_blocks == 17
         assert self.obj._com.get_source_name() == "NewTestVedirect"
         assert not self.obj.is_serial_ready()
         options = {
@@ -172,8 +174,10 @@ class TestVedirect:
              },
             options=options
         )
-        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port("vmodem1")
-        assert self.obj._helper.max_blocks == 18
+        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port(
+            "vmodem1"
+        )
+        assert self.obj.helper.max_blocks == 18
         assert self.obj._com.get_source_name() == "TestVedirect"
 
         # test with bad serial port format
@@ -206,13 +210,13 @@ class TestVedirect:
 
     def test_init_data_read(self):
         """Test init_data_read method."""
-        self.obj._helper.dict = {"a": 2, "b": 3}
-        assert self.obj._helper.init_data_read() is None
-        assert not Ut.is_dict(self.obj._helper.dict, not_null=True)
-        assert self.obj._helper.key == ''
-        assert self.obj._helper.value == ''
-        assert self.obj._helper.bytes_sum == 0
-        assert self.obj._helper.state == self.obj._helper.WAIT_HEADER
+        self.obj.helper.dict = {"a": 2, "b": 3}
+        assert self.obj.helper.init_data_read() is None
+        assert not Ut.is_dict(self.obj.helper.dict, not_null=True)
+        assert self.obj.helper.key == ''
+        assert self.obj.helper.value == ''
+        assert self.obj.helper.bytes_sum == 0
+        assert self.obj.helper.state == self.obj.helper.WAIT_HEADER
 
     def test_input_read(self):
         """Test input_read method."""
@@ -220,38 +224,39 @@ class TestVedirect:
             b'\r', b'\n', b'P', b'I', b'D', b'\t',
             b'O', b'x', b'0', b'3', b'\r'
         ]
-        for x in [b':', b'a', b'1'] + datas:
-            self.obj.input_read(x)
-        assert Ut.is_dict(self.obj._helper.dict, not_null=True) and self.obj._helper.dict.get('PID') == "Ox03"
-        self.obj._helper.init_data_read()
+        for data in [b':', b'a', b'1'] + datas:
+            self.obj.input_read(data)
+        assert Ut.is_dict(self.obj.helper.dict, not_null=True) \
+               and self.obj.helper.dict.get('PID') == "Ox03"
+        self.obj.helper.init_data_read()
         bad_datas = [
             b'\r', b'\n', b'C', b'h', b'e', b'c', b'k', b's', b'u', b'm', b'\t',
             b'O', b'\r', b'\n', b'\t', 'helloWorld'
         ]
         with pytest.raises(InputReadException):
-            for x in bad_datas:
-                self.obj.input_read(x)
+            for data in bad_datas:
+                self.obj.input_read(data)
 
         # Test max input blocks
         # if serial never has checksum
         with pytest.raises(PacketReadException):
-            z, t = 0, 2
-            for i in range(22):
-                for x in datas:
-                    if 0 <= z < 10 and x == datas[t]:
-                        x = '%s' % z
-                        x = x.encode('ASCII')
-                        z = z + 1
+            counter, key = 0, 2
+            for step in range(22):
+                for data in datas:
+                    if 0 <= counter < 10 and data == datas[key]:
+                        data = f'{counter}'
+                        data = data.encode('ASCII')
+                        counter = counter + 1
 
-                    if z == 10:
-                        z = 0
-                        t = t + 1
-                    self.obj.input_read(x)
-        self.obj._helper.init_data_read()
+                    if counter == 10:
+                        counter = 0
+                        key = key + 1
+                    self.obj.input_read(data)
+        self.obj.helper.init_data_read()
         with pytest.raises(InputReadException):
-            for x in datas:
-                self.obj.input_read(x)
-                self.obj._helper.state = 12
+            for data in datas:
+                self.obj.input_read(data)
+                self.obj.helper.state = 12
 
     def test_read_data_single(self):
         """Test read_data_single method."""

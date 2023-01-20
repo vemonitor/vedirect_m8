@@ -20,7 +20,11 @@ __version__ = "1.0.0"
 
 
 class TestSerialConnection:
+    """
+    SerialConnection unittest class.
 
+    Use pytest package.
+    """
     def setup_method(self):
         """
         Setup any state tied to the execution of the given function.
@@ -39,7 +43,9 @@ class TestSerialConnection:
     def test_settings(self):
         """Test configuration settings from SerialConnection constructor."""
         assert self.obj.is_settings()
-        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port("vmodem1")
+        assert self.obj.get_serial_port() == SerialConnection.get_virtual_home_serial_port(
+            "vmodem1"
+        )
         assert self.obj.get_conf_key("hello") is None
         assert self.obj.get_source_name() == "TestSerialConnection"
         assert self.obj.get_timeout() == 0
@@ -57,8 +63,8 @@ class TestSerialConnection:
             SerialConnection.get_virtual_home_serial_port("vmodem1")
         )
 
-    def test_set_serial_conf(self):
-        """Test set_serial_conf method."""
+    def test_init_serial_conf(self):
+        """Test init_serial_conf method."""
         conf = {
             'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem0"),
             'baudrate': 19200,
@@ -66,12 +72,12 @@ class TestSerialConnection:
             'write_timeout': 0,
             'exclusive': True
         }
-        result = self.obj.init_serial_conf(conf)
-        assert Ut.is_dict(result, eq=5)
+        good = self.obj.init_serial_conf(conf)
+        assert Ut.is_dict(good, eq=5)
         # test bad conf
         conf.update({'serial_port': 32})
-        result = self.obj.init_serial_conf(conf)
-        assert result is None
+        result = self.obj.init_serial_conf(conf, set_default=False)
+        assert result == good
 
     def test_connect(self):
         """Test connect method."""
@@ -132,7 +138,7 @@ class TestSerialConnection:
             SerialConnection.get_virtual_home_serial_port("vmodem9999"),
             SerialConnection.get_virtual_home_serial_port("z9999"),
             SerialConnection.get_virtual_home_serial_port(1),
-            SerialConnection.get_virtual_home_serial_port(dict())
+            SerialConnection.get_virtual_home_serial_port({})
         ]
         tests = [x for x in v_ports if x is not None]
         assert len(tests) == 2
@@ -148,7 +154,7 @@ class TestSerialConnection:
             SerialConnection.get_virtual_home_serial_port("vmodem9999"),
             SerialConnection.get_virtual_home_serial_port("z9999"),
             SerialConnection.get_virtual_home_serial_port(1),
-            SerialConnection.get_virtual_home_serial_port(dict())
+            SerialConnection.get_virtual_home_serial_port({})
         ]
         tests = [x for x in virtual_ports if SerialConnection._is_virtual_serial_port(x)]
         assert len(tests) == 2
@@ -208,7 +214,7 @@ class TestSerialConnection:
             1,
             1.1,
             ("COM1999", 1),
-            dict(),
+            {},
             None
         ]
         tests = [x for x in paths if SerialConnection.is_serial_path(x)]

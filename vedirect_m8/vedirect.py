@@ -214,7 +214,7 @@ class Vedirect:
         :return: Nothing
         """
         self._com = None
-        self._helper = None
+        self.helper = None
         self.init_settings(serial_conf=serial_conf,
                            options=options
                            )
@@ -290,8 +290,7 @@ class Vedirect:
             raise SerialConfException(
                 "[Vedirect::init_serial_connection_from_object] "
                 "Unable to init init_serial_connection_from_object, "
-                "bad parameters : %s" %
-                serial_connection
+                f"bad parameters: {serial_connection}"
             )
         return result
 
@@ -333,8 +332,7 @@ class Vedirect:
             raise SerialConfException(
                 "[Vedirect::init_serial_connection] "
                 "Unable to init SerialConnection, "
-                "bad parameters. serial_conf : %s" %
-                serial_conf
+                f"bad parameters. serial_conf : {serial_conf}"
             )
         return result
 
@@ -382,7 +380,7 @@ class Vedirect:
             if options.get('auto_start') is not None:
                 auto_start = Ut.str_to_bool(options.get('auto_start'))
 
-        self._helper = VedirectReaderHelper(max_packet_blocks)
+        self.helper = VedirectReaderHelper(max_packet_blocks)
         return self.init_serial_connection(serial_conf=serial_conf,
                                            auto_start=auto_start
                                            )
@@ -401,42 +399,37 @@ class Vedirect:
         try:
             ord_byte = ord(byte)
 
-            if self._helper.is_delimiter("hexmarker", ord_byte)\
-                    and self._helper.state != self._helper.IN_CHECKSUM:
-                self._helper.state = self._helper.HEX
+            if self.helper.is_delimiter("hexmarker", ord_byte)\
+                    and self.helper.state != self.helper.IN_CHECKSUM:
+                self.helper.state = self.helper.HEX
             #
-            if self._helper.is_state(self._helper.WAIT_HEADER):
-                self._helper.run_wait_header(ord_byte)
+            if self.helper.is_state(self.helper.WAIT_HEADER):
+                self.helper.run_wait_header(ord_byte)
             #
-            elif self._helper.is_state(self._helper.IN_KEY):
-                self._helper.run_in_key(ord_byte, byte)
+            elif self.helper.is_state(self.helper.IN_KEY):
+                self.helper.run_in_key(ord_byte, byte)
             #
-            elif self._helper.is_state(self._helper.IN_VALUE):
-                self._helper.run_in_value(ord_byte, byte)
+            elif self.helper.is_state(self.helper.IN_VALUE):
+                self.helper.run_in_value(ord_byte, byte)
             #
-            elif self._helper.is_state(self._helper.IN_CHECKSUM):
-                result = self._helper.run_in_checksum(ord_byte)
+            elif self.helper.is_state(self.helper.IN_CHECKSUM):
+                result = self.helper.run_in_checksum(ord_byte)
             #
-            elif self._helper.is_state(self._helper.HEX):
-                self._helper.run_in_hex(ord_byte)
+            elif self.helper.is_state(self.helper.HEX):
+                self.helper.run_in_hex(ord_byte)
             else:
                 raise AssertionError()
         except PacketReadException as ex:
             raise PacketReadException(
                 "[Vedirect::input_read] "
                 "Serial input read error: "
-                "Packet read limit: %s/%s blocks"
-                "packet: %s" % (
-                    len(self._helper.dict),
-                    self._helper.max_blocks,
-                    self._helper.dict
-                )
+                f"Packet read limit: {len(self.helper.dict)} / {self.helper.max_blocks} blocks"
+                f"packet: {self.helper.dict}"
             ) from ex
         except Exception as ex:
             raise InputReadException(
                 "[Vedirect::input_read] "
-                "Serial input read error on byte : %s" %
-                byte
+                f"Serial input read error on byte : {byte}"
             ) from ex
 
         return result
@@ -466,8 +459,10 @@ class Vedirect:
 
         :param self: Reference the class instance
         :param timeout: Set the timeout for the read_data_single function
-        :param max_block_errors:int=0: Define nb errors permitted on read blocks before exit (InputReadException)
-        :param max_packet_errors:int=0: Define nb errors permitted on read packets before exit (PacketReadException)
+        :param max_block_errors:int=0: Define nb errors permitted on read blocks
+          before exit (InputReadException)
+        :param max_packet_errors:int=0: Define nb errors permitted on read packets
+          before exit (PacketReadException)
         :return: A dictionary of the data
         - SerialConfException:
            Will be raised when parameter
@@ -494,7 +489,7 @@ class Vedirect:
                             "Serial reader success: dict: %s",
                             packet
                         )
-                        self._helper.init_data_read()
+                        self.helper.init_data_read()
                         return packet
 
                     # timeout serial read
@@ -502,12 +497,12 @@ class Vedirect:
                 except InputReadException as ex:
                     if Vedirect.is_max_read_error(max_block_errors, nb_block_errors):
                         raise InputReadException(ex) from InputReadException
-                    self._helper.init_data_read()
+                    self.helper.init_data_read()
                     nb_block_errors = nb_block_errors + 1
                 except PacketReadException as ex:
                     if Vedirect.is_max_read_error(max_packet_errors, nb_packet_errors):
                         raise PacketReadException from ex
-                    self._helper.init_data_read()
+                    self.helper.init_data_read()
                     nb_packet_errors = nb_packet_errors + 1
                 except SerialException as ex:
                     raise SerialVeException(
@@ -542,8 +537,10 @@ class Vedirect:
         :param timeout:int=60: Set the timeout for the read_data_callback function
         :param sleep_time:int=1: Define time to sleep between 2 packet read
         :param max_loops:int or None=None: Limit the number of loops
-        :param max_block_errors:int=0: Define nb errors permitted on read blocks before exit (InputReadException)
-        :param max_packet_errors:int=1: Define nb errors permitted on read packets before exit (PacketReadException)
+        :param max_block_errors:int=0: Define nb errors permitted on read blocks
+          before exit (InputReadException)
+        :param max_packet_errors:int=1: Define nb errors permitted on read packets
+          before exit (PacketReadException)
         """
         run, now, tim, i = True, time.time(), 0, 0
 
@@ -573,11 +570,11 @@ class Vedirect:
                         logger.debug(
                             "Serial reader success: packet: %s "
                             "-- state: %s -- bytes_sum: %s ",
-                            packet, self._helper.state, self._helper.bytes_sum
+                            packet, self.helper.state, self.helper.bytes_sum
                         )
                         now = tim
                         i = i + 1
-                        self._helper.init_data_read()
+                        self.helper.init_data_read()
                         callback_function(packet)
                         time.sleep(sleep_time)
 
@@ -588,12 +585,12 @@ class Vedirect:
                 except InputReadException as ex:
                     if Vedirect.is_max_read_error(max_block_errors, nb_block_errors):
                         raise ex
-                    self._helper.init_data_read()
+                    self.helper.init_data_read()
                     nb_block_errors = nb_block_errors + 1
                 except PacketReadException as ex:
                     if Vedirect.is_max_read_error(max_packet_errors, nb_packet_errors):
                         raise ex
-                    self._helper.init_data_read()
+                    self.helper.init_data_read()
                     nb_packet_errors = nb_packet_errors + 1
 
         else:

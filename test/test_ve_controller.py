@@ -64,11 +64,11 @@ class TestVedirectController:
 
     def test_set_max_packet_blocks(self):
         """Test set_max_packet_blocks method."""
-        assert self.obj._helper.has_free_block()
-        assert self.obj._helper.set_max_packet_blocks(2)
-        assert self.obj._helper.set_max_packet_blocks(None)
+        assert self.obj.helper.has_free_block()
+        assert self.obj.helper.set_max_packet_blocks(2)
+        assert self.obj.helper.set_max_packet_blocks(None)
         with pytest.raises(SettingInvalidException):
-            self.obj._helper.set_max_packet_blocks("error")
+            self.obj.helper.set_max_packet_blocks("error")
 
     def test_is_serial_com(self):
         """Test is_serial_com method."""
@@ -356,7 +356,7 @@ class TestVedirectController:
             """Main read_data_single tests."""
             assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
             # init_data_read() is now called in read_data_single()
-            assert not Ut.is_dict(self.obj._helper.dict, not_null=True)
+            assert not Ut.is_dict(self.obj.helper.dict, not_null=True)
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
@@ -371,7 +371,7 @@ class TestVedirectController:
             """Main read_data_single tests."""
             assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
             # init_data_read() is now called in read_data_single()
-            assert not Ut.is_dict(self.obj._helper.dict, not_null=True)
+            assert not Ut.is_dict(self.obj.helper.dict, not_null=True)
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
