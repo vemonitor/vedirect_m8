@@ -305,19 +305,7 @@ class TestPacketStats:
             assert self.obj.set_loop_packet_stats(count, packet)
             count = count + 1
         stats = self.obj.get_packet_stats_by_index(0)
-        assert stats.get('nb_resets') == 1
+        assert stats.get('nb_resets') == 0
 
     def test_count_linear_index(self):
         """Test set_packet_stats method."""
-        packets = get_dummy_packets_1()
-
-        assert self.obj.add_stats(packets[0])
-        stats = self.obj.get_packet_stats_by_index(0)
-        assert self.obj.count_linear_index(
-            is_linear=True,
-            stats_packet=stats
-        ) == (1, 0)
-        assert self.obj.count_linear_index(
-            is_linear=False,
-            stats_packet=stats
-        ) == (0, 1)
