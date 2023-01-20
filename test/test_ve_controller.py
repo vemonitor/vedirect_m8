@@ -136,7 +136,7 @@ class TestVedirectController:
         # now on bad serial port scan, test and connect valid port.
         # Don't raise exception if valid port available.
 
-        def bad_port_test():
+        def fail_port_test():
             """Test init_settings with bad serial_port."""
             with pytest.raises(SerialConnectionException):
                 self.obj.init_settings(
@@ -144,7 +144,7 @@ class TestVedirectController:
                 )
 
         self.ve_sim.run_vedirect_sim_callback(
-            callback=bad_port_test,
+            callback=fail_port_test,
             nb_packets=20,
             sleep=0.5
         )
@@ -202,19 +202,19 @@ class TestVedirectController:
             sleep=0.5
         )
 
-        def bad_port_test():
+        def bad_type_port_test():
             """Test test_serial_port with bad serial_port."""
             assert not self.obj.test_serial_port(
                 port=32
             )
 
         self.ve_sim.run_vedirect_sim_callback(
-            callback=bad_port_test,
+            callback=bad_type_port_test,
             nb_packets=1,
             sleep=0.5
         )
 
-        def bad_port_test():
+        def bad_test_data_test():
             """Test test_serial_port with bad serial_port."""
             bad_serial_test = {
                 'PID_test': {
@@ -229,7 +229,7 @@ class TestVedirectController:
             )
 
         self.ve_sim.run_vedirect_sim_callback(
-            callback=bad_port_test,
+            callback=bad_test_data_test,
             nb_packets=20,
             sleep=0.5
         )

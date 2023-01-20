@@ -187,7 +187,7 @@ class TestVedirect:
                     "set_default": False
                 },
                options=options
-           )
+            )
 
         # test with bad serial port type
         with pytest.raises(SerialConfException):
