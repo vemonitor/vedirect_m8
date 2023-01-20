@@ -258,6 +258,48 @@ class TestVedirect:
                 self.obj.input_read(data)
                 self.obj.helper.state = 12
 
+    @staticmethod
+    def test_get_read_data_params():
+        """Test get_read_data_params method."""
+        assert Ut.is_dict(Vedirect.get_read_data_params(), not_null=True)
+        options = {
+            'timeout': 3,
+            'sleep_time': 3,
+            'max_loops': 3,
+            'max_block_errors': 3,
+            'max_packet_errors': 3
+        }
+        params = Vedirect.get_read_data_params(
+            options=options
+        )
+        assert Ut.is_dict(params, eq=5)
+        assert params == options
+
+        with pytest.raises(SettingInvalidException):
+            Vedirect.get_read_data_params(
+                {'timeout': 'a'}
+            )
+
+        with pytest.raises(SettingInvalidException):
+            Vedirect.get_read_data_params(
+                {'sleep_time': 'a'}
+            )
+
+        with pytest.raises(SettingInvalidException):
+            Vedirect.get_read_data_params(
+                {'max_loops': 'a'}
+            )
+
+        with pytest.raises(SettingInvalidException):
+            Vedirect.get_read_data_params(
+                {'max_block_errors': 'a'}
+            )
+
+        with pytest.raises(SettingInvalidException):
+            Vedirect.get_read_data_params(
+                {'max_packet_errors': 'a'}
+            )
+
     def test_read_data_single(self):
         """Test read_data_single method."""
         # test success, ReadTimeoutException and InputReadException
@@ -296,29 +338,33 @@ class TestVedirect:
         def main_test():
             """Main read_data_callback tests."""
             self.obj.read_data_callback(callback_function=func_callback,
-                                        timeout=20,
-                                        max_loops=1
-                                        )
+                                        options={
+                                            'timeout': 20,
+                                            'max_loops': 1,
+                                        })
 
             with pytest.raises(ReadTimeoutException):
                 self.obj.read_data_callback(callback_function=func_callback,
-                                            timeout=0.00001,
-                                            max_loops=1
-                                            )
+                                            options={
+                                                'timeout': 0.000001,
+                                                'max_loops': 1,
+                                            })
 
             with pytest.raises(InputReadException):
                 self.obj.read_data_callback(callback_function=func_callback,
-                                            timeout=2,
-                                            max_loops=2,
-                                            max_block_errors=5
-                                            )
+                                            options={
+                                                'timeout': 2,
+                                                'max_loops': 2,
+                                                'max_block_errors': 0
+                                            })
 
             with pytest.raises(SerialConnectionException):
                 self.obj._com = None
                 self.obj.read_data_callback(callback_function=func_callback,
-                                            timeout=20,
-                                            max_loops=1
-                                            )
+                                            options={
+                                                'timeout': 20,
+                                                'max_loops': 1,
+                                            })
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
