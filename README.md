@@ -20,12 +20,12 @@ To install directly from GitHub:
 
 To install from PypI :
 
-``python3 -m pip install vedirect_m8``
+``$ python3 -m pip install vedirect_m8``
 
 ## Test on virtual serial port
 
 The sim_data directory contains a set of live recordings of the serial port data
-sent by the 3 devices that I own.
+sent by the 3 devices: 
 
 * SmartSolar MPPT 100/20 running firmware version 1.39
 * BlueSolar MPPT 75/15 running firmware version 1.23
@@ -53,7 +53,7 @@ This will create 2 virtual serials ports connected to each other.
 
 Anything sent to ```/${HOME}/vmodem0``` will be echoed to ```/${HOME}/vmodem1``` and vice versa.
 
-In other terminal, run the vedirectsim script with your desired device:
+In other terminal, run the Vedirectsim script with your desired device:
 
 ```plaintext
 $ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700
@@ -75,7 +75,26 @@ $ python examples/vedirect_print.py --port /${HOME}/vmodem1
 All the inputs from the selected device file, are encoded to the vmodem0 serial port,
 then echoed to the vmodem1 by socat, and finally decoded by the vedirect module.
 
-## The Vedirect Controller
+## Vedirect
+
+Module used to decode the Victron Energy VE.Direct text protocol from serial port.   
+See [vedirect_print.py](https://github.com/mano8/vedirect_m8/examples/vedirect_print.py)
+example file for detailed options.
+
+Victron devices send packets with maximum of 18 blocks of key/value pairs.
+That mean you can receive many packets/second on serial port depending on your device type.   
+e.g. BMV702 from vedirect simulator sends 2 packets and 26 Blocks of key/value pairs per second.
+
+This module contain two methods for decode data from serial:
+ - read_data_single: Read and decode only one packet from serial port.
+ - read_data_callback: Read, decode packet and send them to callback function
+
+In all cases: 
+ - Read errors can be enabled, disabled or limited.
+ - Packet or blocks are not formatted or verified. 
+ - Only control max blocks per packet limit (if defined)
+
+## Vedirect Controller
 
 This script extends from Vedirect,
 and add ability to automate connection to serial port.
