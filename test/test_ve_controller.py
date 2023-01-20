@@ -392,25 +392,27 @@ class TestVedirectController:
 
         def main_test():
             """Main read_data_single tests."""
-            self.obj.set_wait_timeout(10)
+            self.obj.set_wait_timeout(5)
             self.obj.read_data_callback(callback_function=func_callback,
-                                        timeout=20,
+                                        timeout=2,
                                         max_loops=1
                                         )
             with pytest.raises(ReadTimeoutException):
                 self.obj.set_wait_timeout(10)
                 self.obj.read_data_callback(callback_function=func_callback,
                                             timeout=0.000001,
-                                            max_loops=1
+                                            max_loops=1,
+                                            max_block_errors=6
                                             )
             self.obj._com = None
             self.obj.read_data_callback(callback_function=func_bad_callback,
                                         timeout=20,
-                                        max_loops=1
+                                        max_loops=1,
+                                        max_block_errors=6
                                         )
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
-            nb_packets=1,
-            sleep=0.5
+            nb_packets=20,
+            sleep=1
         )

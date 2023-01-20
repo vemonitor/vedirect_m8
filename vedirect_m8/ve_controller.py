@@ -14,12 +14,12 @@ at start, and or when reading serial data.
 """
 import logging
 import time
-import serial
 
 from ve_utils.utype import UType as Ut
 from vedirect_m8.sertest import SerialTestHelper
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
+from vedirect_m8.exceptions import VedirectException
 from vedirect_m8.exceptions import SettingInvalidException
 from vedirect_m8.exceptions import InputReadException
 from vedirect_m8.exceptions import ReadTimeoutException
@@ -192,7 +192,7 @@ class VedirectController(Vedirect):
                         time.sleep(0.1)
                     except InputReadException:
                         time.sleep(0.5)
-            except Exception as ex:
+            except VedirectException as ex:
                 logger.debug(
                     '[VeDirect] Unable to read serial data to test'
                     'ex : %s',
@@ -216,7 +216,7 @@ class VedirectController(Vedirect):
                         "New connection established to serial port %s. ",
                         port
                     )
-                    self._com._set_serial_conf(
+                    self._com.init_serial_conf(
                         conf={"serial_port": port},
                         set_default=False
                     )
@@ -228,8 +228,8 @@ class VedirectController(Vedirect):
                         port,
                         data
                     )
-                    self._com._set_serial_conf(
-                        conf={"serial_port": port, "timeout": timeout},
+                    self._com.init_serial_conf(
+                        conf={"serial_port": serial_port, "timeout": timeout},
                         set_default=False
                     )
                     self._com.ser.close()
@@ -345,53 +345,34 @@ class VedirectController(Vedirect):
                            max_packet_errors: int = 0
                            ) -> dict or None:
         """
-        Read data from the serial port and returns it to a callback function.
+        Read data from the serial port and returns it to a callback function
 
         :param self: Reference the class instance
         :param callback_function:function: Pass a function to the read_data_callback function
         :param timeout:int=60: Set the timeout for the read_data_callback function
         :param sleep_time:int=1: Define time to sleep between 2 packet read
-        :param max_loops:int or None=None: Limit the number of loops
-        :param max_block_errors:int=0: Define nb errors permitted on read blocks before exit (InputReadException)
-        :param max_packet_errors:int=1: Define nb errors permitted on read packets before exit (PacketReadException)
+        :param max_loops:int or None=None: Limit the number of loops on read blocks
+          before exit (InputReadException)
+        :param max_packet_errors:int=1: Define nb errors permitted on read packets
+          before exit (PacketReadException)
         :doc-author: Trelent
         """
-        run, now, tim, i = True, time.time(), 0, 0
-        nb_loops = 0
-        sleep_time = Vedirect.set_sleep_time(value=sleep_time, default=1)
+        run = True
         nb_block_errors, nb_packet_errors = 0, 0
         max_block_errors = Ut.get_int(max_block_errors, 0)
         max_packet_errors = Ut.get_int(max_packet_errors, 0)
-
         if self.is_ready():
             while run:
-                tim = time.time()
                 try:
-                    packet = self.get_serial_packet()
-                    nb_loops += 1
-
-                    if packet is not None:
-                        logger.debug(
-                            "Serial reader success: \n"
-                            "packet: %s -- \n"
-                            "state: %s -- "
-                            "bytes_sum: %s "
-                            "nb_loops: %s \n",
-                            packet, self._helper.state, self._helper.bytes_sum, nb_loops
-                        )
-                        self._helper.init_data_read()
-                        callback_function(packet)
-                        now = tim
-                        i = i + 1
-                        nb_loops = 0
-                        packet = None
-                        time.sleep(sleep_time)
-
-                    # timeout serial read
-                    Vedirect.is_timeout(tim - now, timeout)
-
-                    if Ut.is_int(max_loops) and i >= max_loops:
-                        return True
+                    return Vedirect.read_data_callback(
+                        self,
+                        callback_function=callback_function,
+                        timeout=timeout,
+                        sleep_time=sleep_time,
+                        max_loops=max_loops,
+                        max_block_errors=max_block_errors,
+                        max_packet_errors=max_packet_errors
+                    )
                 except InputReadException as ex:
                     if Vedirect.is_max_read_error(max_block_errors, nb_block_errors):
                         raise ex
@@ -412,8 +393,7 @@ class VedirectController(Vedirect):
                                 exception=ex,
                                 timeout=self._wait_timeout
                             ):
-                        now = tim = time.time()
-                        packet = self.get_serial_packet()
+                        pass
         else:
             logger.error(
                 '[VeDirect::read_data_callback] '
