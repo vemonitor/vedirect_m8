@@ -234,6 +234,7 @@ class Vedirect:
         """
         self._com = None
         self.helper = None
+        self._counter = CountersHelper()
         self.init_settings(serial_conf=serial_conf,
                            options=options
                            )
@@ -512,7 +513,10 @@ class Vedirect:
         """
         run, timer = True, TimeoutHelper()
         timer.set_start()
-        nb_block_errors, nb_packet_errors = 0, 0
+        self._counter.add_counter_key('single_byte', reset=True)
+        self._counter.add_counter_key('single_packet')
+        self._counter.add_counter_key('single_packet_errors')
+        self._counter.add_counter_key('single_block_errors', reset=True)
         max_block_errors = Ut.get_int(max_block_errors, 0)
         max_packet_errors = Ut.get_int(max_packet_errors, 0)
         sleep_time = self.get_bitrate_duration()
@@ -521,13 +525,14 @@ class Vedirect:
                 try:
                     timer.set_now()
                     packet = self.get_serial_packet()
-
+                    self._counter.add_to_key('single_byte')
                     if packet is not None:
                         logger.debug(
                             "Serial reader success: dict: %s",
                             packet
                         )
                         self.helper.reset_data_read()
+                        self._counter.add_to_key('single_packet')
                         return packet
                     # sleep to ensure reading speed not exceed serial bitrate
                     if sleep_time > 0:
@@ -541,10 +546,19 @@ class Vedirect:
                     if Vedirect.is_max_read_error(max_block_errors, nb_block_errors):
                         raise InputReadException(ex) from InputReadException
                     self.helper.reset_data_read()
-                    nb_block_errors = nb_block_errors + 1
+                    if Vedirect.is_max_read_error(
+                            max_block_errors,
+                            self._counter.get_key_value('single_block_errors')):
+                        raise InputReadException(ex) from InputReadException
+                    self._counter.add_to_key('single_block_errors')
                 except PacketReadException as ex:
-                    if Vedirect.is_max_read_error(max_packet_errors, nb_packet_errors):
+                    self.helper.reset_data_read()
+                    if Vedirect.is_max_read_error(
+                            max_packet_errors,
+                            self._counter.get_key_value('single_packet_errors')):
                         raise ex
+                    self._counter.add_to_key('single_packet_errors')
+                except SerialException as ex:
                     self.helper.reset_data_read()
                     nb_packet_errors = nb_packet_errors + 1
                 except SerialException as ex:
@@ -588,9 +602,8 @@ class Vedirect:
 
         params = Vedirect.get_read_data_params(options)
 
-        packet_counter = CountersHelper()
-        packet_counter.add_counter_key('packets')
-        packet_counter.add_counter_key('packet_errors')
+        self._counter.add_counter_key('callback_packets', True)
+        self._counter.add_counter_key('callback_packet_errors', True)
 
         logger.debug(
             '[Vedirect::read_data_callback] '
@@ -619,7 +632,7 @@ class Vedirect:
                             self.helper.bytes_sum,
                             timer.get_elapsed()
                         )
-                        packet_counter.add_to_key('packets')
+                        self._counter.add_to_key('callback_packets')
                         self.helper.reset_data_read()
                         callback_function(packet)
                         time.sleep(params.get('sleep_time'))
@@ -631,15 +644,21 @@ class Vedirect:
                         callback=Vedirect.raise_timeout
                     )
 
-                    if packet_counter.is_max_key('packets', params.get('max_loops')):
+                    if self._counter.is_max_key(
+                            'callback_packets',
+                            params.get('max_loops')):
                         return True
                 except PacketReadException as ex:
                     if Vedirect.is_max_read_error(
                             params.get('max_packet_errors'),
-                            packet_counter.get_key_value('packet_errors')):
+                            self._counter.get_key_value('callback_packet_errors')):
                         raise ex
-                    self.helper.reset_data_read()
-                    packet_counter.add_to_key('packet_errors')
+                    self._counter.add_to_key('callback_packet_errors')
+
+                self.sleep_on_read_single_loop(
+                    params.get('sleep_time'),
+                    execution_time
+                )
 
         else:
             raise SerialConnectionException(
