@@ -1,7 +1,5 @@
 """Helpers unittest class."""
 import time
-
-from ve_utils.utype import UType as Ut
 from vedirect_m8.helpers import TimeoutHelper
 from vedirect_m8.helpers import CounterHelper
 from vedirect_m8.helpers import CountersHelper
