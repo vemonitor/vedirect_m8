@@ -20,12 +20,16 @@ class AppFilter(logging.Filter):
         return True
 
 
-def configure_logging(debug: bool = False):
+def configure_logging(debug: bool = False,
+                      warning: bool = False,
+                      critical: bool = False):
     """
     Prepare log folder in current home directory.
 
     Format logger output
     :param debug: If true, set the lof level to debug
+    :param warning: If true, set the lof level to warning
+    :param critical: If true, set the lof level to critical
     """
     logger = logging.getLogger("vedirect")
     logger.addFilter(AppFilter())
@@ -42,6 +46,12 @@ def configure_logging(debug: bool = False):
     if debug:
         logger.setLevel(logging.DEBUG)
         syslog.setLevel(logging.DEBUG)
+    elif warning:
+        logger.setLevel(logging.WARNING)
+        syslog.setLevel(logging.WARNING)
+    elif critical:
+        logger.setLevel(logging.CRITICAL)
+        syslog.setLevel(logging.CRITICAL)
 
     # add the handlers to logger
     logger.addHandler(syslog)

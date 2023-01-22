@@ -43,10 +43,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process VE.Direct protocol')
     parser.add_argument('--port', help='Serial port')
     parser.add_argument('--timeout', help='Serial port read timeout', type=int, default='60')
-    parser.add_argument('--debug', action='store_true', help='Show debug output')
+    parser.add_argument('--debug', action='store_true', help='Show log debug output')
+    parser.add_argument('--warning', action='store_true', help='Show log warning output')
+    parser.add_argument('--critical', action='store_true', help='Show log critical output')
     args = parser.parse_args()
 
-    configure_logging(args.debug)
+    configure_logging(debug=args.debug,
+                      warning=args.warning,
+                      critical=args.critical)
 
     # serial configuration settings used to open serial port (Required)
     serial_conf = {
