@@ -599,6 +599,59 @@ class Vedirect:
                 "Unable to read vedirect data, serial port is closed."
             )
 
+    def sleep_on_read_single_loop(self,
+                                  sleep_time: int or float,
+                                  execution_timer: TimeoutHelper or None = None
+                                  ) -> bool or None:
+        """
+        Used to compensate sleep duration on read single loops.
+
+        In read_data_single method for every byte read,
+        sleep time is defined by serial bitrate duration.
+
+        To compensate sleep duration on main loop, we rest:
+            - byte_counter value * bitrate_duration
+              (total sleep time in read_data_single method)
+            - Optional execution time value
+
+        :return: None if no sleep executed,
+            False if sleep not compensate time (sleep_time value),
+            or True if sleep compensate time
+
+        """
+        result = None
+
+        is_sleep_time = Ut.is_numeric(sleep_time, positive=True)
+        execution_time = 0
+        if isinstance(execution_timer, TimeoutHelper):
+            execution_timer.set_now()
+            execution_time = execution_timer.get_elapsed()
+        if Ut.is_numeric(execution_time, positive=True)\
+                and is_sleep_time\
+                and 0 < execution_time < sleep_time:
+            sleep_total = sleep_time - execution_time
+
+            if Vedirect.sleep_on_demand(sleep_total):
+                execution_timer.set_start()
+                result = True
+
+        if result is None\
+                and is_sleep_time:
+            bitrate_duration = self.get_bitrate_duration()
+            byte_counter = self._counter.get_key_value('single_byte')
+            if Ut.is_numeric(bitrate_duration, positive=True)\
+                    and Ut.is_int(byte_counter, positive=True):
+
+                sleep_p = sleep_time - (byte_counter * bitrate_duration)
+                if Vedirect.sleep_on_demand(sleep_p):
+                    result = True
+
+        if result is None\
+                and is_sleep_time\
+                and Vedirect.sleep_on_demand(sleep_time):
+            result = False
+        return result
+
     def read_data_callback(self,
                            callback_function,
                            options: dict or None = None
@@ -625,7 +678,7 @@ class Vedirect:
         :param options:dict: Method options see on description
         """
         run, timer = True, TimeoutHelper()
-
+        execution_time = TimeoutHelper()
         params = Vedirect.get_read_data_params(options)
 
         self._counter.add_counter_key('callback_packets', True)
@@ -661,7 +714,6 @@ class Vedirect:
                         self._counter.add_to_key('callback_packets')
                         self.helper.reset_data_read()
                         callback_function(packet)
-                        time.sleep(params.get('sleep_time'))
                         timer.set_start()
 
                     # timeout serial read
