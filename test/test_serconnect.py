@@ -104,6 +104,14 @@ class TestSerialConnection:
                 set_default=False
             )
 
+    def test_get_bit_rates(self):
+        """Test get_bit_rates method."""
+        assert self.obj.connect()
+        bit_rate = self.obj.get_bit_rates()
+        assert Ut.is_dict(bit_rate, not_null=True)
+        assert bit_rate.get('bps') == self.obj.ser.baudrate
+        assert bit_rate.get('bit_rate') == self.obj.ser.baudrate / 8
+
     def test_get_serial_ports_list(self):
         """Test get_serial_ports_list method."""
         serial_ports = self.obj.get_serial_ports_list()
