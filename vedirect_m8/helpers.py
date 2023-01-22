@@ -72,7 +72,7 @@ class CounterHelper:
         if self.counter < MAX_COUNTER_VALUE:
             self.counter = self.counter + 1
         else:
-            self.reset()
+            self.counter = 1
 
     def reset(self):
         """Set time now"""
