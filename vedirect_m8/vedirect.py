@@ -570,8 +570,6 @@ class Vedirect:
                         callback=Vedirect.raise_timeout
                     )
                 except InputReadException as ex:
-                    if Vedirect.is_max_read_error(max_block_errors, nb_block_errors):
-                        raise InputReadException(ex) from InputReadException
                     self.helper.reset_data_read()
                     if Vedirect.is_max_read_error(
                             max_block_errors,
@@ -587,8 +585,6 @@ class Vedirect:
                     self._counter.add_to_key('single_packet_errors')
                 except SerialException as ex:
                     self.helper.reset_data_read()
-                    nb_packet_errors = nb_packet_errors + 1
-                except SerialException as ex:
                     raise SerialVeException(
                         "[VeDirect:read_data_single] "
                         "Unable to read vedirect data."
@@ -676,6 +672,7 @@ class Vedirect:
                             params.get('max_loops')):
                         return True
                 except PacketReadException as ex:
+                    self.helper.reset_data_read()
                     if Vedirect.is_max_read_error(
                             params.get('max_packet_errors'),
                             self._counter.get_key_value('callback_packet_errors')):
