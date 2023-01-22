@@ -395,6 +395,18 @@ class Vedirect:
             result = True
         return result
 
+    def get_bitrate_duration(self) -> float:
+        """Flush serial cache data from serial port."""
+        result = 0.0
+        if self.has_serial_com()\
+                and Ut.is_dict(self._com.bit_rates)\
+                and Ut.is_float(self._com.bit_rates.get('real_byte_duration_ms')):
+            result = Ut.get_rounded_float(
+                self._com.bit_rates.get('real_byte_duration_ms') / 1000,
+                9
+            )
+        return result
+
     def input_read(self, byte) -> dict or None:
         """Input read from byte."""
         result = None
