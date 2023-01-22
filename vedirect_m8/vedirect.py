@@ -153,7 +153,12 @@ class VedirectReaderHelper:
         self.bytes_sum += data
         if self.is_delimiter("header1", data):
             if not self.has_free_block():
-                raise PacketReadException
+                raise PacketReadException(
+                    "[Vedirect::input_read] "
+                    "Serial input read error: "
+                    f"Packet read limit: {len(self.dict)} / {self.max_blocks} blocks"
+                    f"packet: {self.dict}"
+                )
             self.state = self.WAIT_HEADER
             self.dict[self.key] = self.value
             self.key = ''
