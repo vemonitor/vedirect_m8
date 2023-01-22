@@ -564,9 +564,6 @@ class Vedirect:
                         self.helper.reset_data_read()
                         self._counter.add_to_key('single_packet')
                         return packet
-                    # sleep to ensure reading speed not exceed serial bitrate
-                    if sleep_time > 0:
-                        time.sleep(sleep_time)
                     # timeout serial read
                     timer.is_timeout_callback(
                         timeout=timeout,
