@@ -140,6 +140,18 @@ class SerialConnectionHelper:
         """
         Set serial configuration settings to open serial connection.
 
+        Configuration settings provided can be completed with default_values.
+        To do so, set_default value must be set to True.
+
+        Configuration settings available:
+          - serial_port: The serial port path
+          - baudrate: The serial baud rate
+          - timeout: The serial timeout
+          - write_timeout: The serial write timeout
+          - exclusive: Set exclusive access mode (POSIX only).
+            A port cannot be opened in exclusive access mode
+            if it is already open in exclusive access mode.
+
         :Example :
             >>> self.init_serial_conf(
             >>>     serial_port="/tmp/vmodem0",
@@ -149,17 +161,11 @@ class SerialConnectionHelper:
             >>>     exclusive=True
             >>> )
             >>> True
-        :param serial_port: The serial port
-        :param baudrate: The serial baud rate
-        :param timeout: The serial timeout
-        :param write_timeout: The serial write timeout
-        :param exclusive: Set exclusive access mode (POSIX only).
-            A port cannot be opened in exclusive access mode
-            if it is already open in exclusive access mode.
+        :param conf: The serial configuration to open port
+        :param set_default: If True, not provided settings are overwritted by default values
         :return: a dictionary with the configuration to open a serial connection.
             Or None if a parameter is invalid.
         """
-        result = None
         if conf is not None:
             result = SerialConnectionHelper.set_serial_conf(
                 conf=conf,
@@ -577,6 +583,7 @@ class SerialConnection(SerialConnectionHelper):
             if it is already open in exclusive access mode.
           - source_name: str: This is used in logger to identify the source of call
         :param conf: The serial configuration to open port
+        :param set_default: If True, not provided settings are overwritted by default values
         :return: True if success to open a serial connection.
         Raise:
          - SerialConfException:
