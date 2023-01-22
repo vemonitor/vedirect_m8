@@ -12,6 +12,7 @@ from vedirect_m8.vedirect import Vedirect
 from vedirect_m8 import configure_logging
 from vedirect_m8.helpers import CountersHelper
 from vedirect_m8.exceptions import PacketReadException
+from vedirect_m8.exceptions import ReadTimeoutException
 
 logging.basicConfig()
 logger = logging.getLogger("vedirect")
@@ -25,14 +26,23 @@ def print_data_callback(packet_callback: dict):
     """
 
     if Ut.is_dict(packet, not_null=True):
+        nb_blocks = len(packet_callback)
         logger.info(
-            '[print_data_callback] -> callback Packet '
-            '(%s Blocks): %s.',
-            len(packet_callback),
+            '[print_data_callback] '
+            "bytes read: %s -- packet_errors: %s -- block_errors: %s \n"
+            '--> callback Packet (%s Blocks): %s.',
+            ve.get_counter_key_value('byte'),
+            ve.get_counter_key_value('packet_errors'),
+            ve.get_counter_key_value('block_errors'),
+            nb_blocks,
             packet_callback
         )
+        if nb_blocks > 18:
+            logger.critical(
+                '[print_data_callback] -> Bad packet: > 18 blocks'
+            )
     else:
-        logger.info(
+        logger.critical(
             '[print_data_callback] '
             'Bad packet received in callback function: %s',
             packet_callback
@@ -84,8 +94,17 @@ if __name__ == '__main__':
     # Victron devices send packets with maximum of 18 blocks of key/value pairs.
     # That mean you can receive many packets/second on serial port depending on your device type.
     # e.g. BMV702 from vedirect simulator sends 2 packets and 26 Blocks of key/value pairs.
+    logger.critical(
+        '[vedirect_print] '
+        'Start Vedirect instance with log level to: %s',
+        logging.getLevelName(logger.getEffectiveLevel())
+    )
     ve = Vedirect(serial_conf=serial_conf, options=options)
 
+    logger.critical(
+        '[vedirect_print] '
+        'Flush serial cache and sleep 1s '
+    )
     # flush the serial cache data and wait for new data
     ve.flush_serial_cache()
     time.sleep(1)
@@ -94,30 +113,33 @@ if __name__ == '__main__':
     # decode one packet from serial port
     packet = ve.read_data_single(
         # time max to read one packet
-        timeout=1,
+        timeout=10,
         # Define nb errors permitted on read blocks before exit (InputReadException):
         #   - -1: never exit
         #   - 0: exit on first error
         #   - x: exit after x errors
-        max_block_errors=0,
+        max_block_errors=-1,
         # Define nb errors permitted on read blocks before exit (PacketReadException):
         #   - -1: never exit
         #   - 0: exit on first error
         #   - x: exit after x errors
         max_packet_errors=-1
     )
-    logger.info(
+    logger.critical(
         '[vedirect_print] '
-        'Decode single packet from serial port: '
+        'Decode single packet from serial port: bytes read: %s -- packet_errors: %s -- block_errors: %s',
+        ve.get_counter_key_value('byte'),
+        ve.get_counter_key_value('packet_errors'),
+        ve.get_counter_key_value('block_errors')
     )
     if Ut.is_dict(packet, not_null=True):
-        logger.info(
+        logger.warning(
             '[vedirect_print] -> Packet '
             '(%s Blocks): %s.',
             len(packet),
             packet
         )
-    logger.info(
+    logger.critical(
         '[vedirect_print] '
         'Decode packets and send them to callback function: '
     )
@@ -132,6 +154,7 @@ if __name__ == '__main__':
     run = True
     packet_counter = CountersHelper()
     packet_counter.add_counter_key('packet_errors')
+    packet_counter.add_counter_key('timeout_errors')
     nb_packet_errors = 0
     while run:
         try:
@@ -141,7 +164,7 @@ if __name__ == '__main__':
                 callback_function=print_data_callback,
                 options={
                     # time max to read one packet
-                    'timeout': 1,
+                    'timeout': 5,
                     # time to sleep between read two packets from serial
                     # sleep 0.5 seem ~ 2 packets/second
                     'sleep_time': 0.5,
@@ -164,10 +187,40 @@ if __name__ == '__main__':
             )
         except PacketReadException as ex:
             # catch PacketReadException errors and count them
-            logger.info(
+            logger.warning(
                 '[vedirect_print] '
-                'Invalid packet detected (%s): %s',
+                'Invalid packet detected: bytes read: %s -- packet_errors: %s -- block_errors: %s --> '
+                "(%s): \n%s",
+                ve.get_counter_key_value('byte'),
+                ve.get_counter_key_value('packet_errors'),
+                ve.get_counter_key_value('block_errors'),
                 packet_counter.get_key_value('packet_errors'),
                 ex
             )
             packet_counter.add_to_key('packet_errors')
+            # flush the serial cache data and wait for new data
+            logger.warning(
+                '[vedirect_print] '
+                'Flush serial cache and sleep 1s '
+            )
+            ve.flush_serial_cache()
+            time.sleep(1)
+
+        except ReadTimeoutException as ex:
+            logger.warning(
+                '[vedirect_print] '
+                'Read timeout error: bytes read: %s -- packet_errors: %s -- block_errors: %s --> \n'
+                '(%s): %s',
+                ve.get_counter_key_value('byte'),
+                ve.get_counter_key_value('packet_errors'),
+                ve.get_counter_key_value('block_errors'),
+                packet_counter.get_key_value('timeout_errors'),
+                ex
+            )
+            # flush the serial cache data and wait for new data
+            logger.warning(
+                '[vedirect_print] '
+                'Flush serial cache and sleep 1s '
+            )
+            ve.flush_serial_cache()
+            time.sleep(2)
