@@ -182,7 +182,6 @@ class VedirectReaderHelper:
         else:
             self.bytes_sum = 0
             return self.dict
-        return None
 
     def run_in_hex(self, data: int) -> None:
         """ Read a hex value, aboard and wait header. """
