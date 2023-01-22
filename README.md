@@ -53,7 +53,7 @@ This will create 2 virtual serials ports connected to each other.
 
 Anything sent to ```/${HOME}/vmodem0``` will be echoed to ```/${HOME}/vmodem1``` and vice versa.
 
-In other terminal, run the Vedirectsim script with your desired device:
+In other terminal, run the Vedirect simulator script with your desired device:
 
 ```plaintext
 $ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700
@@ -86,17 +86,44 @@ That mean you can receive many packets/second on serial port depending on your d
 e.g. BMV702 from vedirect simulator sends 2 packets and 26 Blocks of key/value pairs per second.
 
 This module contain two methods for decode data from serial:
- - read_data_single: Read and decode only one packet from serial port.
- - read_data_callback: Read, decode packet and send them to callback function
+- read_data_single: Read and decode only one packet from serial port.
+- read_data_callback: Read, decode packet and send it to callback function
 
-In all cases: 
- - Read errors can be enabled, disabled or limited.
- - Packet or blocks are not formatted or verified. 
- - Only control max blocks per packet limit (if defined)
+Raises:
+  - VedirectException: when any exception is raised.
+      All extends from it.
+    - SettingInvalidException: when invalid setting is set.
+    - VeReadException: when any exception occurs on reading data.
+      All read exception extends from it.
+      - InputReadException: when error on reading serial byte
+      - PacketReadException: when error on reading serial packet (Invalid packet).
+        - if max blocks reached 
+        - or if invalid checksum 
+        - or on unexpected header (\r or \n) in key or value
+      - ReadTimeoutException: when serial read timeout exceeded.
+    - SerialConnectionException: when any exception occurs on connecting serial port.
+      All connection exception extends from it.
+      - SerialConfException: When serial connection settings is bad
+      - SerialVeException: In case the device can not be found or can not be configured.
+        From serial.SerialException
+      - OpenSerialVeException: Will be raised when the device is configured but port is not opened.
+
+Notes: 
+- Read errors can be enabled, disabled or limited. 
+- Blocks are not formatted or verified.
+
+## Vedirect App
+
+This module extends from Vedirect,
+and add ability to control packets flow.
+
+See [vedirect_app_print.py](https://github.com/mano8/vedirect_m8/blob/1cd58d8c335b8c2e830b701dc5cbb3b65d09711c/examples/vedirect_app_print.py)
+example file for detailed options.
+
 
 ## Vedirect Controller
 
-This script extends from Vedirect,
+This module extends from Vedirect,
 and add ability to automate connection to serial port.
 
 Useful if you don't know the serial port,
