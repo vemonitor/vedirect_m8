@@ -220,6 +220,7 @@ class TestVedirect:
 
     def test_input_read(self):
         """Test input_read method."""
+        # Test good packet format
         datas = [
             b'\r', b'\n', b'P', b'I', b'D', b'\t',
             b'O', b'x', b'0', b'3', b'\r'
@@ -229,16 +230,43 @@ class TestVedirect:
         assert Ut.is_dict(self.obj.helper.dict, not_null=True) \
                and self.obj.helper.dict.get('PID') == "Ox03"
         self.obj.helper.reset_data_read()
+
+        # Test InputReadException on bad byte
+        with pytest.raises(InputReadException):
+            for data in datas + [b'']:
+                self.obj.input_read(data)
+        self.obj.helper.reset_data_read()
+
+        # Test PacketReadException on unexpected header2 in key
+        with pytest.raises(PacketReadException):
+            for data in datas + [b'\n', b'P', b'\n']:
+                self.obj.input_read(data)
+        self.obj.helper.reset_data_read()
+
+        # Test PacketReadException on unexpected header1 in key
+        with pytest.raises(PacketReadException):
+            for data in datas + [b'\n', b'P', b'\r']:
+                self.obj.input_read(data)
+        self.obj.helper.reset_data_read()
+
+        # Test PacketReadException on unexpected header2 in value
+        with pytest.raises(PacketReadException):
+            for data in datas + [b'\n', b'P', b'\t', b'1', b'\n']:
+                self.obj.input_read(data)
+        self.obj.helper.reset_data_read()
+
+        # test PacketReadException in bad packet checksum
         bad_datas = [
             b'\r', b'\n', b'C', b'h', b'e', b'c', b'k', b's', b'u', b'm', b'\t',
-            b'O', b'\r', b'\n', b'\t', 'helloWorld'
+            b'O', b''
         ]
-        with pytest.raises(InputReadException):
+        with pytest.raises(PacketReadException):
             for data in bad_datas:
                 self.obj.input_read(data)
+        self.obj.helper.reset_data_read()
 
         # Test max input blocks
-        # if serial never has checksum
+        # if serial never has checksum max block limit throw PacketReadException
         with pytest.raises(PacketReadException):
             counter, key = 0, 2
             for step in range(22):
@@ -253,6 +281,8 @@ class TestVedirect:
                         key = key + 1
                     self.obj.input_read(data)
         self.obj.helper.reset_data_read()
+
+        # Test InputReadException on bad state flow
         with pytest.raises(InputReadException):
             for data in datas:
                 self.obj.input_read(data)
@@ -328,6 +358,17 @@ class TestVedirect:
         with pytest.raises(SerialConnectionException):
             assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
 
+    def test_sleep_on_read_single_loop(self):
+        """Test read_data_callback method."""
+        self.obj._counter.add_counter_key('single_byte')
+        self.obj._counter.add_to_key('single_byte')
+        self.obj._counter.add_to_key('single_byte')
+        assert self.obj.sleep_on_read_single_loop(1)
+        assert self.obj.sleep_on_read_single_loop(1, 0.3)
+        self.obj._com = None
+        assert self.obj.sleep_on_read_single_loop(1) is False
+        assert self.obj.sleep_on_read_single_loop(-2) is None
+
     def test_read_data_callback(self):
         """Test read_data_callback method."""
 
@@ -354,7 +395,7 @@ class TestVedirect:
                 self.obj.read_data_callback(callback_function=func_callback,
                                             options={
                                                 'timeout': 2,
-                                                'max_loops': 2,
+                                                'max_loops': 4,
                                                 'max_block_errors': 0
                                             })
 
@@ -368,6 +409,6 @@ class TestVedirect:
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
-            nb_packets=2,
+            nb_packets=3,
             sleep=0.5
         )
