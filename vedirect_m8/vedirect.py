@@ -626,15 +626,21 @@ class Vedirect:
             )
 
     @staticmethod
-    def get_read_data_params(options: dict or None = None):
-        """Get formatted read_data_callback parameters"""
-        result = {
+    def get_default_read_data_params(options: dict or None = None):
+        """Get default read_data parameters"""
+        return {
             'timeout': 2,
             'sleep_time': 1,
             'max_loops': None,
             'max_block_errors': 0,
             'max_packet_errors': 0
         }
+
+    @staticmethod
+    def get_read_data_params(options: dict or None = None):
+        """Get formatted read_data parameters"""
+        result = Vedirect.get_default_read_data_params()
+
         if Ut.is_dict(options, not_null=True):
 
             timeout = options.get('timeout')
