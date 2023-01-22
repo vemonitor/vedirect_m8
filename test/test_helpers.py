@@ -75,7 +75,7 @@ class TestCounterHelper:
         assert self.obj.counter == 0
         self.obj.counter = MAX_COUNTER_VALUE
         self.obj.add()
-        assert self.obj.counter == 0
+        assert self.obj.counter == 1
         assert not self.obj.is_max(0)
         assert not self.obj.is_max(None)
         assert not self.obj.is_max(-1)
