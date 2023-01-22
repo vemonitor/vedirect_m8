@@ -277,7 +277,7 @@ class VedirectController(Vedirect):
         if self.is_ready_to_search_ports():
             ports = self._com.get_serial_ports_list()
             if self.test_serial_ports(ports):
-                self.helper.init_data_read()
+                self.helper.reset_data_read()
                 return True
         return False
 

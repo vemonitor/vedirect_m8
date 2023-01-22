@@ -211,7 +211,7 @@ class TestVedirect:
     def test_init_data_read(self):
         """Test init_data_read method."""
         self.obj.helper.dict = {"a": 2, "b": 3}
-        assert self.obj.helper.init_data_read() is None
+        assert self.obj.helper.reset_data_read() is None
         assert not Ut.is_dict(self.obj.helper.dict, not_null=True)
         assert self.obj.helper.key == ''
         assert self.obj.helper.value == ''
@@ -228,7 +228,7 @@ class TestVedirect:
             self.obj.input_read(data)
         assert Ut.is_dict(self.obj.helper.dict, not_null=True) \
                and self.obj.helper.dict.get('PID') == "Ox03"
-        self.obj.helper.init_data_read()
+        self.obj.helper.reset_data_read()
         bad_datas = [
             b'\r', b'\n', b'C', b'h', b'e', b'c', b'k', b's', b'u', b'm', b'\t',
             b'O', b'\r', b'\n', b'\t', 'helloWorld'
@@ -252,7 +252,7 @@ class TestVedirect:
                         counter = 0
                         key = key + 1
                     self.obj.input_read(data)
-        self.obj.helper.init_data_read()
+        self.obj.helper.reset_data_read()
         with pytest.raises(InputReadException):
             for data in datas:
                 self.obj.input_read(data)

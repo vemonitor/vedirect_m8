@@ -105,8 +105,8 @@ class VedirectReaderHelper:
             )
         return result
 
-    def init_data_read(self):
-        """ Initialise reader properties """
+    def reset_data_read(self):
+        """ Reset reader cache properties """
         self.key = ''
         self.value = ''
         self.bytes_sum = 0
@@ -491,7 +491,7 @@ class Vedirect:
                             "Serial reader success: dict: %s",
                             packet
                         )
-                        self.helper.init_data_read()
+                        self.helper.reset_data_read()
                         return packet
 
                     # timeout serial read
@@ -502,12 +502,12 @@ class Vedirect:
                 except InputReadException as ex:
                     if Vedirect.is_max_read_error(max_block_errors, nb_block_errors):
                         raise InputReadException(ex) from InputReadException
-                    self.helper.init_data_read()
+                    self.helper.reset_data_read()
                     nb_block_errors = nb_block_errors + 1
                 except PacketReadException as ex:
                     if Vedirect.is_max_read_error(max_packet_errors, nb_packet_errors):
-                        raise PacketReadException from ex
-                    self.helper.init_data_read()
+                        raise ex
+                    self.helper.reset_data_read()
                     nb_packet_errors = nb_packet_errors + 1
                 except SerialException as ex:
                     raise SerialVeException(
@@ -582,7 +582,7 @@ class Vedirect:
                             timer.get_elapsed()
                         )
                         packet_counter.add_to_key('packets')
-                        self.helper.init_data_read()
+                        self.helper.reset_data_read()
                         callback_function(packet)
                         time.sleep(params.get('sleep_time'))
                         timer.set_start()
@@ -600,7 +600,7 @@ class Vedirect:
                             params.get('max_packet_errors'),
                             packet_counter.get_key_value('packet_errors')):
                         raise ex
-                    self.helper.init_data_read()
+                    self.helper.reset_data_read()
                     packet_counter.add_to_key('packet_errors')
 
         else:
