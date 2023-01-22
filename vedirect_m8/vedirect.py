@@ -590,6 +590,9 @@ class Vedirect:
                         "Unable to read vedirect data."
                     ) from ex
 
+                # sleep to ensure reading speed not exceed serial bitrate
+                Vedirect.sleep_on_demand(sleep_time)
+
         else:
             raise SerialConnectionException(
                 "[VeDirect:read_data_single] "
@@ -690,6 +693,15 @@ class Vedirect:
                 'Unable to read serial data. '
                 'Not connected to serial port...'
             )
+
+    @staticmethod
+    def sleep_on_demand(sleep_time: int or float) -> bool:
+        """Used to Sleep only if is valid sleep_time."""
+        result = False
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+            result = True
+        return result
 
     @staticmethod
     def get_default_read_data_params(options: dict or None = None):
