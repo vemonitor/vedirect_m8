@@ -121,6 +121,14 @@ class VedirectReaderHelper:
         """ Test if value is equal to delimiter key value"""
         return self._delimiters.get(key) == value
 
+    def is_unexpected_header(self, data: int) -> bool:
+        """ Test if byte is unexpected block header."""
+        return (self.is_state(self.IN_KEY)
+                and (self.is_delimiter("header1", data)
+                     or self.is_delimiter("header2", data)))\
+            or (self.is_state(self.IN_VALUE)
+                and self.is_delimiter("header2", data))
+
     def run_wait_header(self, data: int) -> None:
         """ Wait block header."""
         self.bytes_sum += data
@@ -412,7 +420,13 @@ class Vedirect:
         result = None
         try:
             ord_byte = ord(byte)
-
+            if self.helper.is_unexpected_header(ord_byte):
+                raise PacketReadException(
+                    "[Vedirect::input_read] "
+                    f"Unexpected byte header in packet: {byte} --> next byte: {self._com.ser.read(1)}\n"
+                    f"Packet read limit: {len(self.helper.dict)} / {self.helper.max_blocks} blocks"
+                    f"packet: {self.helper.dict}"
+                )
             if self.helper.is_delimiter("hexmarker", ord_byte)\
                     and self.helper.state != self.helper.IN_CHECKSUM:
                 self.helper.state = self.helper.HEX
