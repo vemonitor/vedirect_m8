@@ -172,16 +172,16 @@ class VedirectReaderHelper:
         self.key = ''
         self.value = ''
         self.state = self.WAIT_HEADER
-        if not self.bytes_sum % 256 == 0:
+        if self.bytes_sum % 256 == 0:
+            self.bytes_sum = 0
+        else:
             raise PacketReadException(
                 "[Vedirect::input_read] "
                 f"Checksum Packet error (!=0): {self.bytes_sum % 256} -- "
                 f"Packet Blocks : {len(self.dict)} / {self.max_blocks} -- "
                 f"packet: {self.dict}"
             )
-        else:
-            self.bytes_sum = 0
-            return self.dict
+        return self.dict
 
     def run_in_hex(self, data: int) -> None:
         """ Read a hex value, aboard and wait header. """
@@ -468,7 +468,8 @@ class Vedirect:
             if self.helper.is_unexpected_header(ord_byte):
                 raise PacketReadException(
                     "[Vedirect::input_read] "
-                    f"Unexpected byte header in packet: {byte} --> next byte: {self._com.ser.read(1)}\n"
+                    "Unexpected byte header in packet: "
+                    f"{byte} --> next byte: {self._com.ser.read(1)}\n"
                     f"Packet read limit: {len(self.helper.dict)} / {self.helper.max_blocks} blocks"
                     f"packet: {self.helper.dict}"
                 )
@@ -756,7 +757,7 @@ class Vedirect:
         return result
 
     @staticmethod
-    def get_default_read_data_params(options: dict or None = None):
+    def get_default_read_data_params():
         """Get default read_data parameters"""
         return {
             'timeout': 2,
