@@ -492,6 +492,7 @@ class Vedirect:
         nb_block_errors, nb_packet_errors = 0, 0
         max_block_errors = Ut.get_int(max_block_errors, 0)
         max_packet_errors = Ut.get_int(max_packet_errors, 0)
+        sleep_time = self.get_bitrate_duration()
         if self.is_ready():
             while run:
                 try:
@@ -505,7 +506,9 @@ class Vedirect:
                         )
                         self.helper.reset_data_read()
                         return packet
-
+                    # sleep to ensure reading speed not exceed serial bitrate
+                    if sleep_time > 0:
+                        time.sleep(sleep_time)
                     # timeout serial read
                     timer.is_timeout_callback(
                         timeout=timeout,
