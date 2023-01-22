@@ -111,9 +111,10 @@ class CountersHelper:
             result = self.counters.get(key)
         return result
 
-    def add_counter_key(self, key: str):
+    def add_counter_key(self, key: str, reset: bool = False):
         """Set time now"""
-        self.counters[key] = CounterHelper()
+        if not self.has_counter_key(key) or reset is True:
+            self.counters[key] = CounterHelper()
 
     def pop_counter_key(self, key: str):
         """Set time now"""
