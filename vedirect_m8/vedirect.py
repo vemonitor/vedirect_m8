@@ -493,12 +493,7 @@ class Vedirect:
             else:
                 raise AssertionError()
         except PacketReadException as ex:
-            raise PacketReadException(
-                "[Vedirect::input_read] "
-                "Serial input read error: "
-                f"Packet read limit: {len(self.helper.dict)} / {self.helper.max_blocks} blocks"
-                f"packet: {self.helper.dict}"
-            ) from ex
+            raise ex
         except Exception as ex:
             raise InputReadException(
                 "[Vedirect::input_read] "
