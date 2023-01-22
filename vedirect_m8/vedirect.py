@@ -426,8 +426,42 @@ class Vedirect:
             )
         return result
 
-    def input_read(self, byte) -> dict or None:
-        """Input read from byte."""
+    def get_counter_key_value(self, key: str) -> int:
+        """Get serial bite rate time in s."""
+        result = -1
+        if isinstance(self._counter, CountersHelper):
+            if key == "packet":
+                if self._counter.has_counter_key('callback_packets'):
+                    result = self._counter.get_key_value('callback_packets')
+                elif self._counter.has_counter_key('simple_packets'):
+                    result = self._counter.get_key_value('simple_packets')
+            elif key == "packet_errors":
+                if self._counter.has_counter_key('callback_packet_errors'):
+                    result = self._counter.get_key_value('callback_packet_errors')
+                elif self._counter.has_counter_key('single_packet_errors'):
+                    result = self._counter.get_key_value('single_packet_errors')
+            elif key == "block_errors":
+                if self._counter.has_counter_key('callback_block_errors'):
+                    result = self._counter.get_key_value('callback_block_errors')
+                elif self._counter.has_counter_key('single_block_errors'):
+                    result = self._counter.get_key_value('single_block_errors')
+            elif key == "byte":
+                if self._counter.has_counter_key('single_byte'):
+                    result = self._counter.get_key_value('single_byte')
+        return result
+
+    def input_read(self, byte: bytes) -> dict or None:
+        """
+        Input flow read from byte.
+
+        Raise:
+         - PacketReadException:
+           - when malformed packet, with unexpected header (\r or \n).
+           - when malformed packet, with checksum error.
+           - when malformed packet, with max blocks per packet limit.
+         - InputReadException: when any other error occurs.
+
+        """
         result = None
         try:
             ord_byte = ord(byte)
