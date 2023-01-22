@@ -173,7 +173,12 @@ class VedirectReaderHelper:
         self.value = ''
         self.state = self.WAIT_HEADER
         if not self.bytes_sum % 256 == 0:
-            self.bytes_sum = 0
+            raise PacketReadException(
+                "[Vedirect::input_read] "
+                f"Checksum Packet error (!=0): {self.bytes_sum % 256} -- "
+                f"Packet Blocks : {len(self.dict)} / {self.max_blocks} -- "
+                f"packet: {self.dict}"
+            )
         else:
             self.bytes_sum = 0
             return self.dict
