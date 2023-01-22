@@ -547,6 +547,7 @@ class SerialConnection(SerialConnectionHelper):
             set_default=set_default,
             **kwargs
         )
+        self.bit_rates = None
 
     def is_ready(self) -> bool:
         """
@@ -555,6 +556,53 @@ class SerialConnection(SerialConnectionHelper):
         :return: True if configuration settings are valid and if the serial connection is opened.
         """
         return self.is_settings() and self._is_serial_ready()
+
+    def get_bit_rates(self) -> dict or None:
+        """
+        Calculate the bit rate (bytes/s) from baud rate.
+
+        see: https://lucidar.me/en/serialib/convert-bauds-to-bytes-per-second/
+
+        Return a dict with:
+          - bps: Bits/s
+          - bit_duration_ms: Time to send one bit in ms for physically transferred bits
+          - bit_rate: raw transmission speed expressed in bytes per second
+          - real_bit_rate: is the usefully bitrate excluding the physical layer protocol
+            (start, stop and parity bits)
+          - real_byte_duration_ms: Time to send one bit in ms,
+            for transferred bits excluding the physical layer protocol
+            (start, stop and parity bits)
+        :return: Bit rate values calculated as a dict.
+        """
+        result = None
+        if self.is_ready():
+            data_bits = Ut.get_int(self.ser.bytesize, default=0)
+            if self.ser.parity == 'N':
+                parity = 0
+            else:
+                parity = 1
+            stop_bits = Ut.get_int(self.ser.stopbits, 0)
+            baudrate = Ut.get_int(self.ser.baudrate, 0)
+            if data_bits > 0\
+                    and stop_bits > 0\
+                    and baudrate > 0:
+                # In serial frame, one baud is equal to 1 bit/s.
+                # Since one byte is composed of 8 bits,
+                # we can deduce the transmission speed in bytes per second
+                # by dividing by 8:
+                bit_rate = baudrate / 8
+                # Calculate bit rates
+                real_bit_rate = (data_bits / (1 + data_bits + parity + stop_bits)) * bit_rate
+
+                result = {
+                    'bps': baudrate,
+                    'bit_duration_ms': (1/baudrate) * 1000,
+                    'bit_rate': bit_rate,
+                    'real_bit_rate': real_bit_rate,
+                    'real_byte_duration_ms': (1/real_bit_rate) * 1000,
+
+                }
+        return result
 
     def connect(self,
                 conf: dict or None = None,
@@ -618,6 +666,7 @@ class SerialConnection(SerialConnectionHelper):
                         self.get_source_name(), serial_conf
                     )
                     result = True
+                    self.bit_rates = self.get_bit_rates()
                 else:
                     raise OpenSerialVeException(
                         f'[SerialConnection::connect::{self.get_source_name()}] '
