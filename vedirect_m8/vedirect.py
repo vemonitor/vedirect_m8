@@ -25,16 +25,16 @@ import logging
 import time
 from serial import SerialException
 from ve_utils.utype import UType as Ut
-from vedirect_m8.helpers import TimeoutHelper
-from vedirect_m8.helpers import CountersHelper
+from vedirect_m8.core.helpers import TimeoutHelper
+from vedirect_m8.core.helpers import CountersHelper
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import SettingInvalidException
-from vedirect_m8.exceptions import InputReadException
-from vedirect_m8.exceptions import PacketReadException
-from vedirect_m8.exceptions import ReadTimeoutException
-from vedirect_m8.exceptions import SerialConnectionException
-from vedirect_m8.exceptions import SerialConfException
-from vedirect_m8.exceptions import SerialVeException
+from vedirect_m8.core.exceptions import SettingInvalidException
+from vedirect_m8.core.exceptions import InputReadException
+from vedirect_m8.core.exceptions import PacketReadException
+from vedirect_m8.core.exceptions import ReadTimeoutException
+from vedirect_m8.core.exceptions import SerialConnectionException
+from vedirect_m8.core.exceptions import SerialConfException
+from vedirect_m8.core.exceptions import SerialVeException
 
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"
@@ -190,7 +190,185 @@ class VedirectReaderHelper:
             self.state = self.WAIT_HEADER
 
 
-class Vedirect:
+class VedirectTools:
+    """Vedirect tools"""
+
+    def __init__(self):
+        self._counter = CountersHelper()
+
+    def get_counter_key_value(self, key: str) -> int:
+        """Get serial bite rate time in s."""
+        result = -1
+        if isinstance(self._counter, CountersHelper):
+            if key == "packet":
+                if self._counter.has_counter_key('callback_packets'):
+                    result = self._counter.get_key_value('callback_packets')
+                elif self._counter.has_counter_key('simple_packets'):
+                    result = self._counter.get_key_value('simple_packets')
+            elif key == "packet_errors":
+                if self._counter.has_counter_key('callback_packet_errors'):
+                    result = self._counter.get_key_value('callback_packet_errors')
+                elif self._counter.has_counter_key('single_packet_errors'):
+                    result = self._counter.get_key_value('single_packet_errors')
+            elif key == "block_errors":
+                if self._counter.has_counter_key('callback_block_errors'):
+                    result = self._counter.get_key_value('callback_block_errors')
+                elif self._counter.has_counter_key('single_block_errors'):
+                    result = self._counter.get_key_value('single_block_errors')
+            elif key == "byte":
+                if self._counter.has_counter_key('single_byte'):
+                    result = self._counter.get_key_value('single_byte')
+        return result
+
+    @staticmethod
+    def sleep_on_demand(sleep_time: int or float) -> bool:
+        """Used to Sleep only if is valid sleep_time."""
+        result = False
+        if sleep_time > 0:
+            time.sleep(sleep_time)
+            result = True
+        return result
+
+    @staticmethod
+    def get_default_read_data_params():
+        """Get default read_data parameters"""
+        return {
+            'timeout': 2,
+            'sleep_time': 1,
+            'max_loops': None,
+            'max_block_errors': 0,
+            'max_packet_errors': 0,
+            'max_timeout_errors': 0
+        }
+
+    @staticmethod
+    def _get_read_data_params_item(value: any,
+                                   test: bool,
+                                   error_msg: str,
+                                   default: any = None
+                                   ) -> any:
+        """Get formatted read_data parameter item"""
+        result = default
+        if test:
+            result = value
+        elif value is not None:
+            raise SettingInvalidException(
+                "[Vedirect:get_read_data_callback_params] "
+                "Invalid setting parameter, "
+                f"{error_msg} "
+            )
+        return result
+
+    @staticmethod
+    def get_read_data_params(options: dict or None = None):
+        """Get formatted read_data parameters"""
+        result = Vedirect.get_default_read_data_params()
+
+        if Ut.is_dict(options, not_null=True):
+
+            result['timeout'] = VedirectTools._get_read_data_params_item(
+                value=options.get('timeout'),
+                test=Ut.is_numeric(options.get('timeout'), positive=True),
+                error_msg="timeout must be positive int or float type.",
+                default=result.get('timeout')
+            )
+
+            result['sleep_time'] = VedirectTools._get_read_data_params_item(
+                value=options.get('sleep_time'),
+                test=Ut.is_numeric(options.get('sleep_time'), positive=True),
+                error_msg="sleep_time must be positive int or float type.",
+                default=result.get('sleep_time')
+            )
+
+            result['max_loops'] = VedirectTools._get_read_data_params_item(
+                value=options.get('max_loops'),
+                test=Ut.is_int(options.get('max_loops'), positive=True),
+                error_msg="max_loops must be positive int type.",
+                default=result.get('max_loops')
+            )
+
+            result['max_block_errors'] = VedirectTools._get_read_data_params_item(
+                value=options.get('max_block_errors'),
+                test=Ut.is_int(options.get('max_block_errors')),
+                error_msg="max_block_errors must be int type.",
+                default=result.get('max_block_errors')
+            )
+
+            result['max_packet_errors'] = VedirectTools._get_read_data_params_item(
+                value=options.get('max_packet_errors'),
+                test=Ut.is_int(options.get('max_packet_errors')),
+                error_msg="max_packet_errors must be int type.",
+                default=result.get('max_packet_errors')
+            )
+
+            result['max_timeout_errors'] = VedirectTools._get_read_data_params_item(
+                value=options.get('max_timeout_errors'),
+                test=Ut.is_int(options.get('max_timeout_errors')),
+                error_msg="max_timeout_errors must be int type.",
+                default=result.get('max_timeout_errors')
+            )
+
+        return result
+
+    @staticmethod
+    def is_max_read_error(max_value: int, counter: int) -> bool:
+        """Get sleep time value or default if invalid type or value."""
+        result = False
+        if max_value == 0:
+            result = True
+        elif max_value > 0 and 0 <= counter <= max_value:
+            result = True
+        return result
+
+    @staticmethod
+    def set_sleep_time(value: int or float, default: int or float = 0) -> int or float:
+        """Get sleep time value or default if invalid type or value."""
+        value = Ut.get_float(value, default)
+        if value <= 0:
+            value = default
+        return value
+
+    @staticmethod
+    def is_serial_com(obj: SerialConnection) -> bool:
+        """
+        Test if obj is valid SerialConnection instance.
+
+        :Example :
+            >>> Vedirect.is_serial_com(obj)
+            >>> True
+        :param obj: The object to test.
+        :return: True if obj is valid SerialConnection instance.
+        """
+        return isinstance(obj, SerialConnection) \
+               and obj.get_serial_port() is not None
+
+    @staticmethod
+    def is_timeout(elapsed: float or int, timeout: float or int = 60) -> bool:
+        """
+        Test if elapsed time is greater than timeout.
+
+        :Example :
+            >>> Vedirect.is_timeout(elapsed=45, timeout=60)
+            >>> True
+        :param elapsed: The elapsed time to test,
+        :param timeout: The timeout to evaluate.
+        :return: True if elapsed time is uppermore than timeout.
+        """
+        if elapsed >= timeout:
+            Vedirect.raise_timeout(elapsed, timeout)
+        return True
+
+    @staticmethod
+    def raise_timeout(elapsed: float or int, timeout: float or int = 60) -> bool:
+        """Raise timeout exception"""
+        raise ReadTimeoutException(
+            '[VeDirect::is_timeout] '
+            'Unable to read serial data. '
+            f'Timeout error: {elapsed}s of {timeout}s '
+        )
+
+
+class Vedirect(VedirectTools):
     """
     Used to decode the Victron Energy VE.Direct text protocol.
 
@@ -232,9 +410,9 @@ class Vedirect:
         :param options: Options parameters as dict,
         :return: Nothing
         """
+        VedirectTools.__init__(self)
         self._com = None
         self.helper = None
-        self._counter = CountersHelper()
         self.init_settings(serial_conf=serial_conf,
                            options=options
                            )
@@ -426,30 +604,6 @@ class Vedirect:
             )
         return result
 
-    def get_counter_key_value(self, key: str) -> int:
-        """Get serial bite rate time in s."""
-        result = -1
-        if isinstance(self._counter, CountersHelper):
-            if key == "packet":
-                if self._counter.has_counter_key('callback_packets'):
-                    result = self._counter.get_key_value('callback_packets')
-                elif self._counter.has_counter_key('simple_packets'):
-                    result = self._counter.get_key_value('simple_packets')
-            elif key == "packet_errors":
-                if self._counter.has_counter_key('callback_packet_errors'):
-                    result = self._counter.get_key_value('callback_packet_errors')
-                elif self._counter.has_counter_key('single_packet_errors'):
-                    result = self._counter.get_key_value('single_packet_errors')
-            elif key == "block_errors":
-                if self._counter.has_counter_key('callback_block_errors'):
-                    result = self._counter.get_key_value('callback_block_errors')
-                elif self._counter.has_counter_key('single_block_errors'):
-                    result = self._counter.get_key_value('single_block_errors')
-            elif key == "byte":
-                if self._counter.has_counter_key('single_byte'):
-                    result = self._counter.get_key_value('single_byte')
-        return result
-
     def input_read(self, byte: bytes) -> dict or None:
         """
         Input flow read from byte.
@@ -533,14 +687,16 @@ class Vedirect:
         :param max_packet_errors:int=0: Define nb errors permitted on read packets
           before exit (PacketReadException)
         :return: A dictionary of the data
-        - SerialConfException:
-           Will be raised when parameter
-           are out of range or invalid,
-           e.g. serial_port, baud rate, data bits
-         - SerialVeException:
-           In case the device can not be found or can not be configured.
-         - OpenSerialVeException:
-           Will be raised when the device is configured but port is not openned.
+
+        Raise:
+            - SerialConfException:
+               Will be raised when parameter
+               are out of range or invalid,
+               e.g. serial_port, baud rate, data bits
+             - SerialVeException:
+               In case the device can not be found or can not be configured.
+             - OpenSerialVeException:
+               Will be raised when the device is configured but port is not openned.
         """
         run, timer = True, TimeoutHelper()
         timer.set_start()
@@ -746,138 +902,3 @@ class Vedirect:
                 'Unable to read serial data. '
                 'Not connected to serial port...'
             )
-
-    @staticmethod
-    def sleep_on_demand(sleep_time: int or float) -> bool:
-        """Used to Sleep only if is valid sleep_time."""
-        result = False
-        if sleep_time > 0:
-            time.sleep(sleep_time)
-            result = True
-        return result
-
-    @staticmethod
-    def get_default_read_data_params():
-        """Get default read_data parameters"""
-        return {
-            'timeout': 2,
-            'sleep_time': 1,
-            'max_loops': None,
-            'max_block_errors': 0,
-            'max_packet_errors': 0
-        }
-
-    @staticmethod
-    def get_read_data_params(options: dict or None = None):
-        """Get formatted read_data parameters"""
-        result = Vedirect.get_default_read_data_params()
-
-        if Ut.is_dict(options, not_null=True):
-
-            timeout = options.get('timeout')
-            if Ut.is_numeric(timeout, positive=True):
-                result['timeout'] = timeout
-            elif timeout is not None:
-                raise SettingInvalidException(
-                    "[Vedirect:get_read_data_callback_params] "
-                    "Invalid timeout parameter, "
-                    "Must be positive int or float type."
-                )
-
-            sleep_time = options.get('sleep_time')
-            if Ut.is_numeric(sleep_time, positive=True):
-                result['sleep_time'] = sleep_time
-            elif sleep_time is not None:
-                raise SettingInvalidException(
-                    "[Vedirect:get_read_data_callback_params] "
-                    "Invalid sleep_time parameter, "
-                    "Must be positive int or float type."
-                )
-
-            max_loops = options.get('max_loops')
-            if Ut.is_int(max_loops, positive=True):
-                result['max_loops'] = max_loops
-            elif max_loops is not None:
-                raise SettingInvalidException(
-                    "[Vedirect:get_read_data_callback_params] "
-                    "Invalid max_loops parameter, "
-                    "Must be positive int type."
-                )
-
-            max_block_errors = options.get('max_block_errors')
-            if Ut.is_int(max_block_errors):
-                result['max_block_errors'] = max_block_errors
-            elif max_block_errors is not None:
-                raise SettingInvalidException(
-                    "[Vedirect:get_read_data_callback_params] "
-                    "Invalid max_block_errors parameter, "
-                    "Must be int type."
-                )
-
-            max_packet_errors = options.get('max_packet_errors')
-            if Ut.is_int(max_packet_errors):
-                result['max_packet_errors'] = max_packet_errors
-            elif max_packet_errors is not None:
-                raise SettingInvalidException(
-                    "[Vedirect:get_read_data_callback_params] "
-                    "Invalid max_packet_errors parameter, "
-                    "Must be int type."
-                )
-        return result
-
-    @staticmethod
-    def is_max_read_error(max_value: int, counter: int) -> bool:
-        """Get sleep time value or default if invalid type or value."""
-        result = False
-        if max_value == 0:
-            result = True
-        elif max_value > 0 and 0 <= counter <= max_value:
-            result = True
-        return result
-
-    @staticmethod
-    def set_sleep_time(value: int or float, default: int or float = 0) -> int or float:
-        """Get sleep time value or default if invalid type or value."""
-        value = Ut.get_float(value, default)
-        if value <= 0:
-            value = default
-        return value
-
-    @staticmethod
-    def is_serial_com(obj: SerialConnection) -> bool:
-        """
-        Test if obj is valid SerialConnection instance.
-
-        :Example :
-            >>> Vedirect.is_serial_com(obj)
-            >>> True
-        :param obj: The object to test.
-        :return: True if obj is valid SerialConnection instance.
-        """
-        return isinstance(obj, SerialConnection)\
-            and obj.get_serial_port() is not None
-
-    @staticmethod
-    def is_timeout(elapsed: float or int, timeout: float or int = 60) -> bool:
-        """
-        Test if elapsed time is greater than timeout.
-
-        :Example :
-            >>> Vedirect.is_timeout(elapsed=45, timeout=60)
-            >>> True
-        :param elapsed: The elapsed time to test,
-        :param timeout: The timeout to evaluate.
-        :return: True if elapsed time is uppermore than timeout.
-        """
-        if elapsed >= timeout:
-            Vedirect.raise_timeout(elapsed, timeout)
-        return True
-
-    @staticmethod
-    def raise_timeout(elapsed: float or int, timeout: float or int = 60) -> bool:
-        """Raise timeout exception"""
-        raise ReadTimeoutException(
-            '[VeDirect::is_timeout] '
-            'Unable to read serial data. '
-            f'Timeout error: {elapsed}s of {timeout}s '
-        )
