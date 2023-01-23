@@ -739,7 +739,14 @@ class Vedirect(VedirectTools):
                             params.get('max_packet_errors'),
                             self._counter.packet_errors.get_value()):
                         raise ex
-                    self._counter.add_to_key('single_packet_errors')
+                    self._counter.packet_errors.add()
+                except ReadTimeoutException as ex:
+                    self.helper.reset_data_read()
+                    if Vedirect.is_max_read_error(
+                            params.get('max_timeout_errors'),
+                            self._counter.timeout_errors.get_value()):
+                        raise ex
+                    self._counter.timeout_errors.add()
                 except SerialException as ex:
                     self.helper.reset_data_read()
                     raise SerialVeException(
