@@ -26,7 +26,7 @@ import time
 from serial import SerialException
 from ve_utils.utype import UType as Ut
 from vedirect_m8.core.helpers import TimeoutHelper
-from vedirect_m8.core.helpers import CountersHelper
+from vedirect_m8.core.helpers import CounterHelper
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.core.exceptions import SettingInvalidException
 from vedirect_m8.core.exceptions import InputReadException
@@ -190,34 +190,37 @@ class VedirectReaderHelper:
             self.state = self.WAIT_HEADER
 
 
+class VeCounters:
+    """Vedirect Counters"""
+
+    def __init__(self):
+        self.byte = CounterHelper()
+        self.packet = CounterHelper()
+        self.packet_errors = CounterHelper()
+        self.block_errors = CounterHelper()
+        self.timeout_errors = CounterHelper()
+
+
 class VedirectTools:
     """Vedirect tools"""
 
     def __init__(self):
-        self._counter = CountersHelper()
+        self._counter = VeCounters()
 
     def get_counter_key_value(self, key: str) -> int:
         """Get serial bite rate time in s."""
         result = -1
-        if isinstance(self._counter, CountersHelper):
+        if isinstance(self._counter, VeCounters):
             if key == "packet":
-                if self._counter.has_counter_key('callback_packets'):
-                    result = self._counter.get_key_value('callback_packets')
-                elif self._counter.has_counter_key('simple_packets'):
-                    result = self._counter.get_key_value('simple_packets')
+                result = self._counter.packet.get_value()
             elif key == "packet_errors":
-                if self._counter.has_counter_key('callback_packet_errors'):
-                    result = self._counter.get_key_value('callback_packet_errors')
-                elif self._counter.has_counter_key('single_packet_errors'):
-                    result = self._counter.get_key_value('single_packet_errors')
+                result = self._counter.packet_errors.get_value()
             elif key == "block_errors":
-                if self._counter.has_counter_key('callback_block_errors'):
-                    result = self._counter.get_key_value('callback_block_errors')
-                elif self._counter.has_counter_key('single_block_errors'):
-                    result = self._counter.get_key_value('single_block_errors')
+                result = self._counter.block_errors.get_value()
+            elif key == "timeout_errors":
+                result = self._counter.timeout_errors.get_value()
             elif key == "byte":
-                if self._counter.has_counter_key('single_byte'):
-                    result = self._counter.get_key_value('single_byte')
+                result = self._counter.byte.get_value()
         return result
 
     @staticmethod
@@ -262,7 +265,7 @@ class VedirectTools:
     @staticmethod
     def get_read_data_params(options: dict or None = None):
         """Get formatted read_data parameters"""
-        result = Vedirect.get_default_read_data_params()
+        result = VedirectTools.get_default_read_data_params()
 
         if Ut.is_dict(options, not_null=True):
 
@@ -340,7 +343,7 @@ class VedirectTools:
         :return: True if obj is valid SerialConnection instance.
         """
         return isinstance(obj, SerialConnection) \
-               and obj.get_serial_port() is not None
+            and obj.get_serial_port() is not None
 
     @staticmethod
     def is_timeout(elapsed: float or int, timeout: float or int = 60) -> bool:
@@ -699,45 +702,42 @@ class Vedirect(VedirectTools):
                Will be raised when the device is configured but port is not openned.
         """
         run, timer = True, TimeoutHelper()
-        timer.set_start()
-        self._counter.add_counter_key('single_byte', reset=True)
-        self._counter.add_counter_key('single_packet')
-        self._counter.add_counter_key('single_packet_errors')
-        self._counter.add_counter_key('single_block_errors', reset=True)
-        max_block_errors = Ut.get_int(max_block_errors, 0)
-        max_packet_errors = Ut.get_int(max_packet_errors, 0)
+        params = Vedirect.get_read_data_params(options)
+        self._counter.byte.reset()
+        self._counter.block_errors.reset()
         sleep_time = self.get_bitrate_duration()
+        timer.set_start()
         if self.is_ready():
             while run:
                 try:
                     timer.set_now()
                     packet = self.get_serial_packet()
-                    self._counter.add_to_key('single_byte')
+                    self._counter.byte.add()
                     if packet is not None:
                         logger.debug(
                             "Serial reader success: dict: %s",
                             packet
                         )
                         self.helper.reset_data_read()
-                        self._counter.add_to_key('single_packet')
+                        self._counter.packet.add()
                         return packet
                     # timeout serial read
                     timer.is_timeout_callback(
-                        timeout=timeout,
+                        timeout=params.get('timeout'),
                         callback=Vedirect.raise_timeout
                     )
                 except InputReadException as ex:
                     self.helper.reset_data_read()
                     if Vedirect.is_max_read_error(
-                            max_block_errors,
-                            self._counter.get_key_value('single_block_errors')):
+                            params.get('max_block_errors'),
+                            self._counter.block_errors.get_value()):
                         raise InputReadException(ex) from InputReadException
-                    self._counter.add_to_key('single_block_errors')
+                    self._counter.block_errors.add()
                 except PacketReadException as ex:
                     self.helper.reset_data_read()
                     if Vedirect.is_max_read_error(
-                            max_packet_errors,
-                            self._counter.get_key_value('single_packet_errors')):
+                            params.get('max_packet_errors'),
+                            self._counter.packet_errors.get_value()):
                         raise ex
                     self._counter.add_to_key('single_packet_errors')
                 except SerialException as ex:
@@ -795,7 +795,7 @@ class Vedirect(VedirectTools):
         if result is None\
                 and is_sleep_time:
             bitrate_duration = self.get_bitrate_duration()
-            byte_counter = self._counter.get_key_value('single_byte')
+            byte_counter = self._counter.byte.get_value()
             if Ut.is_numeric(bitrate_duration, positive=True)\
                     and Ut.is_int(byte_counter, positive=True):
 
