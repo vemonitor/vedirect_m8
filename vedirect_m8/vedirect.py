@@ -845,9 +845,6 @@ class Vedirect(VedirectTools):
         execution_time = TimeoutHelper()
         params = Vedirect.get_read_data_params(options)
 
-        self._counter.add_counter_key('callback_packets', True)
-        self._counter.add_counter_key('callback_packet_errors', True)
-
         logger.debug(
             '[Vedirect::read_data_callback] '
             'Start to decode Vedirect data from serial port . '
@@ -858,45 +855,33 @@ class Vedirect(VedirectTools):
         if self.is_ready():
 
             while run:
-                try:
-                    timer.set_now()
-                    packet = self.read_data_single(
-                        timeout=params.get('timeout'),
-                        max_block_errors=params.get('max_block_errors'),
-                        max_packet_errors=params.get('max_packet_errors')
+
+                timer.set_now()
+                packet = self.read_data_single(
+                    options=params
+                )
+
+                if packet is not None:
+                    logger.debug(
+                        "Serial reader success: packet: %s \n"
+                        "-- state: %s -- bytes_sum: %s -- time to read: %s",
+                        packet,
+                        self.helper.state,
+                        self.helper.bytes_sum,
+                        timer.get_elapsed()
                     )
-
-                    if packet is not None:
-                        logger.debug(
-                            "Serial reader success: packet: %s \n"
-                            "-- state: %s -- bytes_sum: %s -- time to read: %s",
-                            packet,
-                            self.helper.state,
-                            self.helper.bytes_sum,
-                            timer.get_elapsed()
-                        )
-                        self._counter.add_to_key('callback_packets')
-                        self.helper.reset_data_read()
-                        callback_function(packet)
-                        timer.set_start()
-
-                    # timeout serial read
-                    timer.is_timeout_callback(
-                        timeout=params.get('timeout'),
-                        callback=Vedirect.raise_timeout
-                    )
-
-                    if self._counter.is_max_key(
-                            'callback_packets',
-                            params.get('max_loops')):
-                        return True
-                except PacketReadException as ex:
                     self.helper.reset_data_read()
-                    if Vedirect.is_max_read_error(
-                            params.get('max_packet_errors'),
-                            self._counter.get_key_value('callback_packet_errors')):
-                        raise ex
-                    self._counter.add_to_key('callback_packet_errors')
+                    callback_function(packet)
+                    timer.set_start()
+
+                # timeout serial read
+                timer.is_timeout_callback(
+                    timeout=params.get('timeout'),
+                    callback=Vedirect.raise_timeout
+                )
+
+                if self._counter.packet.is_max(params.get('max_loops')):
+                    return True
 
                 self.sleep_on_read_single_loop(
                     params.get('sleep_time'),
