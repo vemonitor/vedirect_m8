@@ -1,10 +1,10 @@
 """PacketStats unittest class."""
 import pytest
 from ve_utils.utype import UType as Ut
-from vedirect_m8.packet_stats import PacketsConf
-from vedirect_m8.packet_stats import FlowPackets
-from vedirect_m8.packet_stats import PacketStats
-from vedirect_m8.exceptions import PacketReadException
+from vedirect_m8.core.packet_stats import PacketsConf
+from vedirect_m8.core.packet_stats import FlowPackets
+from vedirect_m8.core.packet_stats import PacketStats
+from vedirect_m8.core.exceptions import PacketReadException
 
 
 def get_dummy_packets_1():

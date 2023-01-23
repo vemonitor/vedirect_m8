@@ -15,10 +15,10 @@ import os
 from serial import Serial, SerialException
 import serial.tools.list_ports as serial_list_ports
 from ve_utils.usys import USys
-from vedirect_m8.serutils import SerialUtils as Ut
-from vedirect_m8.exceptions import SerialConfException
-from vedirect_m8.exceptions import OpenSerialVeException
-from vedirect_m8.exceptions import SerialVeException
+from vedirect_m8.core.serutils import SerialUtils as Ut
+from vedirect_m8.core.exceptions import SerialConfException
+from vedirect_m8.core.exceptions import OpenSerialVeException
+from vedirect_m8.core.exceptions import SerialVeException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
