@@ -111,20 +111,21 @@ if __name__ == '__main__':
 
     # - Example 1: -
     # decode one packet from serial port
-    packet = ve.read_data_single(
+    packet = ve.read_data_single({
+
         # time max to read one packet
-        timeout=10,
+        'timeout': 10,
         # Define nb errors permitted on read blocks before exit (InputReadException):
         #   - -1: never exit
         #   - 0: exit on first error
         #   - x: exit after x errors
-        max_block_errors=-1,
+        'max_block_errors': -1,
         # Define nb errors permitted on read blocks before exit (PacketReadException):
         #   - -1: never exit
         #   - 0: exit on first error
         #   - x: exit after x errors
-        max_packet_errors=-1
-    )
+        'max_packet_errors': -1
+    })
     logger.critical(
         '[vedirect_print] '
         'Decode single packet from serial port: bytes read: %s -- packet_errors: %s -- block_errors: %s',
