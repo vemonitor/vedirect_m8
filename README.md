@@ -81,7 +81,7 @@ Module used to decode the Victron Energy VE.Direct text protocol from serial por
 See [vedirect_print.py](https://github.com/mano8/vedirect_m8/blob/1cd58d8c335b8c2e830b701dc5cbb3b65d09711c/examples/vedirect_print.py)
 example file for detailed options.
 
-Victron devices send packets with maximum of 18 blocks of key/value pairs.
+Victron devices send packets with maximum of 18 blocks of key/value pairs.   
 By default, max_packet_blocks value is set to 18
 
 This module contain two methods for decode data from serial:
