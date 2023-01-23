@@ -671,24 +671,24 @@ class Vedirect(VedirectTools):
         return self.input_read(byte)
 
     def read_data_single(self,
-                         timeout: int = 60,
-                         max_block_errors: int = 0,
-                         max_packet_errors: int = 0
+                         options: dict or None = None
                          ) -> dict or None:
         """
         Read a single packet decoded from serial port and returns it as a dictionary.
+
+        Method options available:
+          - timeout:int=60: Set the timeout for the read_data_callback function
+          - max_block_errors:int=0: Define nb errors permitted on read blocks
+          before exit (InputReadException)
+          - max_packet_errors:int=1: Define nb errors permitted on read packets
+          before exit (PacketReadException)
 
         :Example :
             >>> ve = Vedirect({"serial_port": "/dev/ttyUSB1"})
             >>> ve.read_data_single(timeout=3)
             >>> {'V': '12800', 'VS': '12800', 'VM': '1280', ...}
 
-        :param self: Reference the class instance
-        :param timeout: Set the timeout for the read_data_single function
-        :param max_block_errors:int=0: Define nb errors permitted on read blocks
-          before exit (InputReadException)
-        :param max_packet_errors:int=0: Define nb errors permitted on read packets
-          before exit (PacketReadException)
+        :param options:dict: Method options see on description
         :return: A dictionary of the data
 
         Raise:
