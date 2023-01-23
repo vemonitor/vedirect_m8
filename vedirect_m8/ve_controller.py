@@ -186,7 +186,7 @@ class VedirectController(Vedirect):
                 result = {}
                 for i in range(4):
                     try:
-                        data = self.read_data_single(timeout=2)
+                        data = self.read_data_single({'timeout': 2})
                         if Ut.is_dict(data, not_null=True):
                             result.update(data)
                         time.sleep(0.1)
