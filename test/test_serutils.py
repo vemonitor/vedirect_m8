@@ -3,7 +3,7 @@ SerialUtils unittest class.
 
 Use pytest package.
 """
-from vedirect_m8.serutils import SerialUtils as Ut
+from vedirect_m8.core.serutils import SerialUtils as Ut
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"

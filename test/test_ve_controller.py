@@ -3,11 +3,11 @@ import pytest
 from ve_utils.utype import UType as Ut
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import SettingInvalidException
-from vedirect_m8.exceptions import ReadTimeoutException
-from vedirect_m8.exceptions import SerialConnectionException
-from vedirect_m8.exceptions import SerialVeException
-from vedirect_m8.exceptions import VedirectException
+from vedirect_m8.core.exceptions import SettingInvalidException
+from vedirect_m8.core.exceptions import ReadTimeoutException
+from vedirect_m8.core.exceptions import SerialConnectionException
+from vedirect_m8.core.exceptions import SerialVeException
+from vedirect_m8.core.exceptions import VedirectException
 from .serial_test_helper import SerialTestHelper
 
 

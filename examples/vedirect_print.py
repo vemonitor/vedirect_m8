@@ -7,12 +7,12 @@ import logging
 import argparse
 import time
 
-from vedirect_m8.serutils import SerialUtils as Ut
+from vedirect_m8.core.serutils import SerialUtils as Ut
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8 import configure_logging
-from vedirect_m8.helpers import CountersHelper
-from vedirect_m8.exceptions import PacketReadException
-from vedirect_m8.exceptions import ReadTimeoutException
+from vedirect_m8.core.helpers import CountersHelper
+from vedirect_m8.core.exceptions import PacketReadException
+from vedirect_m8.core.exceptions import ReadTimeoutException
 
 logging.basicConfig()
 logger = logging.getLogger("vedirect")

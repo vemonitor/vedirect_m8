@@ -16,16 +16,16 @@ import logging
 import time
 
 from ve_utils.utype import UType as Ut
-from vedirect_m8.sertest import SerialTestHelper
-from vedirect_m8.helpers import TimeoutHelper
+from vedirect_m8.core.sertest import SerialTestHelper
+from vedirect_m8.core.helpers import TimeoutHelper
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import VedirectException
-from vedirect_m8.exceptions import SettingInvalidException
-from vedirect_m8.exceptions import InputReadException
-from vedirect_m8.exceptions import ReadTimeoutException
-from vedirect_m8.exceptions import SerialConnectionException
-from vedirect_m8.exceptions import PacketReadException
+from vedirect_m8.core.exceptions import VedirectException
+from vedirect_m8.core.exceptions import SettingInvalidException
+from vedirect_m8.core.exceptions import InputReadException
+from vedirect_m8.core.exceptions import ReadTimeoutException
+from vedirect_m8.core.exceptions import SerialConnectionException
+from vedirect_m8.core.exceptions import PacketReadException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"

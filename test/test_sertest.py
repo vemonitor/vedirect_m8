@@ -1,7 +1,7 @@
 """SerialTestHelper unittest class."""
 import pytest
-from vedirect_m8.sertest import SerialTestHelper
-from vedirect_m8.exceptions import SettingInvalidException
+from vedirect_m8.core.sertest import SerialTestHelper
+from vedirect_m8.core.exceptions import SettingInvalidException
 
 
 class TestSerialTestHelper:

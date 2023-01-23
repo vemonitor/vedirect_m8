@@ -4,7 +4,7 @@ Used to get, set and analyse serial packets stats.
 import logging
 import time
 from ve_utils.utype import UType as Ut
-from vedirect_m8.exceptions import PacketReadException
+from vedirect_m8.core.exceptions import PacketReadException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
@@ -242,7 +242,15 @@ class FlowPackets(PacketsConf):
         self._error_counter = 0
 
     def is_packet_in_data_cache(self, packet: dict) -> tuple:
-        """Test if packet keys are in data cache."""
+        """
+        Test if all packet keys are in data cache.
+
+        Return a tuple with two values:
+         - True if all blocks exist in cache
+         - Number of new blocks in packet
+        :param packet: The packet of data blocks to test
+        :return: Tuple (bool: is all blocks exist, int: nb of new blocks)
+        """
         result, nb_new = False, 0
         if Ut.is_dict(packet, not_null=True):
 
@@ -291,6 +299,7 @@ class FlowPackets(PacketsConf):
         """
         Add data to cache and test if all packets and all blocks retrieved.
 
+        Return True if all
         """
         result = False
         if self.is_active()\

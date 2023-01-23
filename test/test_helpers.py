@@ -1,9 +1,9 @@
 """Helpers unittest class."""
 import time
-from vedirect_m8.helpers import TimeoutHelper
-from vedirect_m8.helpers import CounterHelper
-from vedirect_m8.helpers import CountersHelper
-from vedirect_m8.helpers import MAX_COUNTER_VALUE
+from vedirect_m8.core.helpers import TimeoutHelper
+from vedirect_m8.core.helpers import CounterHelper
+from vedirect_m8.core.helpers import CountersHelper
+from vedirect_m8.core.helpers import MAX_COUNTER_VALUE
 
 
 class TestTimeoutHelper:

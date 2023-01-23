@@ -3,13 +3,13 @@ import pytest
 from ve_utils.utype import UType as Ut
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import SettingInvalidException
-from vedirect_m8.exceptions import InputReadException
-from vedirect_m8.exceptions import PacketReadException
-from vedirect_m8.exceptions import ReadTimeoutException
-from vedirect_m8.exceptions import SerialConnectionException
-from vedirect_m8.exceptions import SerialConfException
-from vedirect_m8.exceptions import SerialVeException
+from vedirect_m8.core.exceptions import SettingInvalidException
+from vedirect_m8.core.exceptions import InputReadException
+from vedirect_m8.core.exceptions import PacketReadException
+from vedirect_m8.core.exceptions import ReadTimeoutException
+from vedirect_m8.core.exceptions import SerialConnectionException
+from vedirect_m8.core.exceptions import SerialConfException
+from vedirect_m8.core.exceptions import SerialVeException
 from .serial_test_helper import SerialTestHelper
 
 
@@ -297,12 +297,13 @@ class TestVedirect:
             'sleep_time': 3,
             'max_loops': 3,
             'max_block_errors': 3,
-            'max_packet_errors': 3
+            'max_packet_errors': 3,
+            'max_timeout_errors': 3
         }
         params = Vedirect.get_read_data_params(
             options=options
         )
-        assert Ut.is_dict(params, eq=5)
+        assert Ut.is_dict(params, eq=6)
         assert params == options
 
         with pytest.raises(SettingInvalidException):
@@ -328,6 +329,11 @@ class TestVedirect:
         with pytest.raises(SettingInvalidException):
             Vedirect.get_read_data_params(
                 {'max_packet_errors': 'a'}
+            )
+
+        with pytest.raises(SettingInvalidException):
+            Vedirect.get_read_data_params(
+                {'max_timeout_errors': 'a'}
             )
 
     def test_read_data_single(self):
