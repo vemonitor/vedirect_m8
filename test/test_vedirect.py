@@ -77,6 +77,21 @@ class TestVedirect:
         with pytest.raises(ReadTimeoutException):
             Vedirect.is_timeout(elapsed=102, timeout=60)
 
+    @staticmethod
+    def test_set_sleep_time():
+        """Test set_sleep_time method."""
+        assert Vedirect.set_sleep_time(value=1) == 1
+        assert Vedirect.set_sleep_time(value=-1, default=0) == 0
+
+    def test_get_counter_key_value(self):
+        """Test get_counter_key_value method."""
+        assert self.obj.get_counter_key_value("packet") == 0
+        assert self.obj.get_counter_key_value("packet_errors") == 0
+        assert self.obj.get_counter_key_value("block_errors") == 0
+        assert self.obj.get_counter_key_value("timeout_errors") == 0
+        assert self.obj.get_counter_key_value("byte") == 0
+        assert self.obj.get_counter_key_value("bad") == -1
+
     def test_init_serial_connection_from_object(self):
         """Test init_serial_connection_from_object method base."""
         obj = self.obj._com.serialize()
@@ -343,15 +358,19 @@ class TestVedirect:
             """Main read_data_single tests."""
             assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
             with pytest.raises(ReadTimeoutException):
-                assert Ut.is_dict(self.obj.read_data_single(timeout=0.00000000001), not_null=True)
-            assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
+                self.obj.read_data_single(
+                    options={
+                        'timeout': 0.00000000001,
+                        'max_block_errors': -1
+                    })
+
+            with pytest.raises(PacketReadException):
+                self.obj.read_data_single()
             with pytest.raises(InputReadException):
-                assert Ut.is_dict(self.obj.read_data_single(), not_null=True)
-            with pytest.raises(InputReadException):
-                assert Ut.is_dict(
-                    self.obj.read_data_single(max_block_errors=5),
-                    not_null=True
-                )
+                self.obj.read_data_single(
+                    options={
+                        'max_block_errors': 5
+                    })
 
         self.ve_sim.run_vedirect_sim_callback(
             callback=main_test,
@@ -366,9 +385,8 @@ class TestVedirect:
 
     def test_sleep_on_read_single_loop(self):
         """Test read_data_callback method."""
-        self.obj._counter.add_counter_key('single_byte')
-        self.obj._counter.add_to_key('single_byte')
-        self.obj._counter.add_to_key('single_byte')
+        self.obj._counter.byte.add()
+        self.obj._counter.byte.add()
         assert self.obj.sleep_on_read_single_loop(1)
         assert self.obj.sleep_on_read_single_loop(1, 0.3)
         self.obj._com = None
@@ -395,6 +413,14 @@ class TestVedirect:
                                             options={
                                                 'timeout': 0.000001,
                                                 'max_loops': 1,
+                                            })
+
+            with pytest.raises(PacketReadException):
+                self.obj.read_data_callback(callback_function=func_callback,
+                                            options={
+                                                'timeout': 2,
+                                                'max_loops': 4,
+                                                'max_block_errors': 0
                                             })
 
             with pytest.raises(InputReadException):
