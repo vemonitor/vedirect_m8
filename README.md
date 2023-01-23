@@ -82,8 +82,7 @@ See [vedirect_print.py](https://github.com/mano8/vedirect_m8/blob/1cd58d8c335b8c
 example file for detailed options.
 
 Victron devices send packets with maximum of 18 blocks of key/value pairs.
-That mean you can receive many packets/second on serial port depending on your device type.   
-e.g. BMV702 from vedirect simulator sends 2 packets and 26 Blocks of key/value pairs per second.
+By default, max_packet_blocks value is set to 18
 
 This module contain two methods for decode data from serial:
 - read_data_single: Read and decode only one packet from serial port.
