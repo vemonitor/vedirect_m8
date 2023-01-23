@@ -52,6 +52,34 @@ class TestVeDirectSim:
             self.obj.set_device_settings("hello")
             self.obj.set_device_settings(SerialConnection.get_virtual_home_serial_port("world.bat"))
 
+    def control_dump_file(self, device: str):
+        """"""
+        result, nb, nb_blocks = False, 0, 0
+        self.obj.set_device_settings(device)
+        if self.obj.is_ready():
+            result = True
+            self.obj.dict = {}
+            for key, value in self.obj.read_dump_file():
+                if self.obj.process_data(key, value):
+                    # checksum = self.obj.convert(self.obj.dict, get_checksum=True)
+                    nb_blocks = len(self.obj.dict)
+                    if nb_blocks > 18:
+                        # or checksum != ord(value):
+                        result = False
+                    self.obj.dict = {}
+
+                    nb = nb + 1
+        return result, nb
+
+    def test_dump_files(self):
+        """"""
+        result, nb = self.control_dump_file("bmv702")
+        assert result is True and nb > 0
+        result, nb = self.control_dump_file("bluesolar_1.23")
+        assert result is True and nb > 0
+        result, nb = self.control_dump_file("smartsolar_1.39")
+        assert result is True and nb > 0
+
     def test_read_dump_file_line(self):
         """"""
         assert self.obj.read_dump_file_lines(max_writes=1)
