@@ -319,7 +319,7 @@ class VedirectTools:
         result = False
         if max_value == 0:
             result = True
-        elif max_value > 0 and 0 <= counter <= max_value:
+        elif 0 < max_value < counter >= 0:
             result = True
         return result
 
