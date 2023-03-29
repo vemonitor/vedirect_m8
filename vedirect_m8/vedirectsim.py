@@ -129,7 +129,7 @@ class Vedirectsim:
         self.perf = PerfStats()
         self.dict = {}
 
-    def convert(self, data: dict) -> list:
+    def convert(self, data: dict, get_checksum=False) -> int or list:
         """Convert data to vedirect protocol."""
         result = list()
         for key in self.dict:
@@ -143,7 +143,10 @@ class Vedirectsim:
         result.append(ord('\n'))
         result.extend([ord(i) for i in 'Checksum'])
         result.append(ord('\t'))
-        result.append((256 - (sum(result) % 256)) % 256)
+        checksum = (256 - (sum(result) % 256)) % 256
+        result.append(checksum)
+        if get_checksum is True:
+            return checksum
         return result
 
     def send_packet(self):
