@@ -62,29 +62,82 @@ class CounterHelper:
     """CounterHelper class"""
     def __init__(self):
         self.counter = 0
+        self.total_time = 0
 
     def get_value(self):
-        """Set time now"""
+        """Get counter value"""
         return self.counter
 
-    def add(self):
-        """Set time now"""
+    def get_moy_time(self):
+        """Get moy time"""
+        result = None
+        if self.total_time > 0 and self.counter > 0:
+            result = self.total_time / self.counter
+        return result
+
+    def set_moy_time(self, start_time: float or int = 0):
+        """Get moy time"""
+        result = None
+        moy = CounterHelper.get_elapsed(start_time)
+        if Ut.is_float(moy, not_null=True):
+            self.total_time += moy
+            result = self.total_time / self.counter
+        return result
+
+    def set_timer(self,
+                  timer_active: bool = False,
+                  start_time: float or int = 0
+                  ):
+        """Set timer"""
+        if Ut.str_to_bool(timer_active):
+            self.set_moy_time(start_time)
+
+    def save_timer(self,
+                   timer_active: bool = False,
+                   start_time: float or int = 0
+                   ):
+        """Save timer"""
+        if Ut.str_to_bool(timer_active):
+            moy = CounterHelper.get_elapsed(start_time)
+            if Ut.is_float(moy, not_null=True):
+                self.total_time = moy / self.counter + 1
+
+    @staticmethod
+    def get_elapsed(start_time: float or int = 0):
+        """Get elapsed time"""
+        result = None
+        if Ut.is_float(start_time, not_null=True):
+            result = time.time() - start_time
+        return result
+
+    def add(self,
+            timer_active: bool = False,
+            start_time: float or int = 0
+            ):
+        """Add counter"""
         if self.counter < MAX_COUNTER_VALUE:
             self.counter = self.counter + 1
+            # self.set_timer(timer_active, start_time)
         else:
+            # self.save_timer(timer_active, start_time)
             self.counter = 1
 
+    def reset_timer(self):
+        """Reset the timer"""
+        self.total_time = 0
+
     def reset(self):
-        """Set time now"""
+        """Reset all properties"""
         self.counter = 0
+        self.reset_timer()
 
     def is_max(self, max_counter: int or None):
-        """Set time now"""
+        """Is counter max"""
         return Ut.is_int(max_counter) \
             and 0 < max_counter <= self.counter
 
     def is_min(self, min_counter: int or None):
-        """Set time now"""
+        """Is counter min"""
         return Ut.is_int(min_counter, positive=True) \
             and 0 <= self.counter < min_counter
 
