@@ -88,6 +88,8 @@ jobs:
           name: Get python version
           # This assumes pytest is installed via the install-package step above
           command: python --version
+      - python/install-packages:
+          pkg-manager: pip
       - run:
           name: Install vedirect_m8
           # This assumes pytest is installed via the install-package step above
