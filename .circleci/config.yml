@@ -67,16 +67,20 @@ jobs:
           name: Update packages list
           # This assumes pytest is installed via the install-package step above
           command: sudo apt-get update
+      - run:
+          name: Get python version
+          # This assumes pytest is installed via the install-package step above
+          command: python --version
       - python/install-packages:
           pkg-manager: pip
       - run:
-          name: Update pip
+          name: Update pip3
           # This assumes pytest is installed via the install-package step above
-          command: pip install --upgrade pip
+          command: pip3 install --upgrade pip3
       - run:
           name: Install vedirect_m8
           # This assumes pytest is installed via the install-package step above
-          command: pip install vedirect_m8[TEST]
+          command: pip3 install vedirect_m8[TEST]
       - qodana/scan:
           args: -l 'jetbrains/qodana-python'
   
