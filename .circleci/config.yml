@@ -60,7 +60,7 @@ jobs:
           project-token: $CODACY_PROJECT_TOKEN
   code-quality:
     machine:
-      image: 'ubuntu-2004:current'
+      image: 'cimg/python:3.9.7'
     steps:
       - checkout
       - run:
