@@ -78,9 +78,16 @@ jobs:
       - run:
           name: Update pip
           # This assumes pytest is installed via the install-package step above
-          command: pip3 install --upgrade pip3
+          command: pip install --upgrade pip
       
-      
+      - run:
+          name: Move default python to python 3
+          # This assumes pytest is installed via the install-package step above
+          command: update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+      - run:
+          name: Get python version
+          # This assumes pytest is installed via the install-package step above
+          command: python --version
       - run:
           name: Install vedirect_m8
           # This assumes pytest is installed via the install-package step above
