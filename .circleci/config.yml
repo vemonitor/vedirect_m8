@@ -60,14 +60,15 @@ jobs:
           project-token: $CODACY_PROJECT_TOKEN
   code-quality:
     machine:
-      image: 'jetbrains/qodana-python'
+      image: 'ubuntu-2004:current'
     steps:
       - checkout
       - run:
           name: Install vedirect_m8
           # This assumes pytest is installed via the install-package step above
           command: pip install vedirect_m8[TEST]
-      - qodana/scan
+      - qodana/scan:
+          args: -l 'jetbrains/qodana-python'
   
   
 # Invoke jobs via workflows
