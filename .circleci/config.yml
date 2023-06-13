@@ -74,6 +74,10 @@ jobs:
           # This assumes pytest is installed via the install-package step above
           command: python --version
       - run:
+          name: Get python3 version
+          # This assumes pytest is installed via the install-package step above
+          command: python3 --version
+      - run:
           name: Update pip
           # This assumes pytest is installed via the install-package step above
           command: pip install --upgrade pip
