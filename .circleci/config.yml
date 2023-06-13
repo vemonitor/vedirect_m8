@@ -64,6 +64,16 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Update packages list
+          # This assumes pytest is installed via the install-package step above
+          command: sudo apt-get update
+      - python/install-packages:
+          pkg-manager: pip
+      - run:
+          name: Update pip
+          # This assumes pytest is installed via the install-package step above
+          command: pip install --upgrade pip
+      - run:
           name: Install vedirect_m8
           # This assumes pytest is installed via the install-package step above
           command: pip install vedirect_m8[TEST]
