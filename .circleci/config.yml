@@ -75,8 +75,7 @@ jobs:
           name: Update pip
           # This assumes pytest is installed via the install-package step above
           command: pip install --upgrade pip
-      - python/install-packages:
-          pkg-manager: pip
+      
       
       - run:
           name: Install vedirect_m8
