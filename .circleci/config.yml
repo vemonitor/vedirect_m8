@@ -59,8 +59,7 @@ jobs:
           coverage-reports: 'coverage.xml'
           project-token: $CODACY_PROJECT_TOKEN
   code-quality:
-    machine:
-      image: 'cimg/python:3.9.7'
+    executor: my-executor
     steps:
       - checkout
       - run:
