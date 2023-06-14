@@ -79,12 +79,14 @@ jobs:
           name: Update pip
           # This assumes pytest is installed via the install-package step above
           command: pip install --upgrade pip
-      
       - run:
           name: Move default python to python 3
           # This assumes pytest is installed via the install-package step above
+          command: sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
+      - run:
+          name: Move default pip to python 3
+          # This assumes pytest is installed via the install-package step above
           command: python3 -m pip install --upgrade --force pi
-          # sudo update-alternatives --install /usr/bin/python python /usr/bin/python3 1
       - run:
           name: Get python version
           # This assumes pytest is installed via the install-package step above
