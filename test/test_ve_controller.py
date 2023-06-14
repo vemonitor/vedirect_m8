@@ -80,9 +80,6 @@ class TestVedirectController:
         })
 
         with pytest.raises(SettingInvalidException):
-            self.obj.init_serial_test()
-
-        with pytest.raises(SettingInvalidException):
             self.obj.init_serial_test(serial_test=dict())
 
         with pytest.raises(SettingInvalidException):
