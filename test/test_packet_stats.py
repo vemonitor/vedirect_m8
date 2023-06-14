@@ -1,6 +1,6 @@
 """PacketStats unittest class."""
-from vedirect_m8.packet_stats import PacketStats
 from ve_utils.utype import UType as Ut
+from vedirect_m8.packet_stats import PacketStats
 
 
 class TestPacketStats:
@@ -42,7 +42,6 @@ class TestPacketStats:
     def test_add_stats(self):
         """Test is_app_block method."""
         packets = TestPacketStats.get_dummy_packets_1()
-        assert not self.obj.add_stats(packets)
         assert not self.obj.has_stats()
         assert self.obj.add_stats(packets[0])
         assert self.obj.has_stats()

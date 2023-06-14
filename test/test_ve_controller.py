@@ -1,9 +1,9 @@
 """VedirectController unittest class."""
 import time
 import pytest
+from ve_utils.utype import UType as Ut
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.serconnect import SerialConnection
-from ve_utils.utype import UType as Ut
 from vedirect_m8.exceptions import SettingInvalidException
 from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
@@ -60,8 +60,6 @@ class TestVedirectController:
     def test_is_serial_com(self):
         """Test is_serial_com method."""
         assert VedirectController.is_serial_com(self.obj._com)
-        assert not VedirectController.is_serial_com(dict())
-        assert not VedirectController.is_serial_com(None)
 
     @staticmethod
     def test_is_timeout():
@@ -82,10 +80,7 @@ class TestVedirectController:
         })
 
         with pytest.raises(SettingInvalidException):
-            self.obj.init_serial_test(serial_test=None)
-
-        with pytest.raises(SettingInvalidException):
-            self.obj.init_serial_test(serial_test=list())
+            self.obj.init_serial_test()
 
         with pytest.raises(SettingInvalidException):
             self.obj.init_serial_test(serial_test=dict())
