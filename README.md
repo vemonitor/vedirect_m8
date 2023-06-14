@@ -9,7 +9,7 @@
 ## Sponsors :
 <a href="https://jb.gg/OpenSourceSupport" target="_blank" rel="noreferrer noopener" style="box-sizing: border-box; display: flex; justify-content: center;"> 
   <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." width="80">
-  <span style="height:20px; margin: auto 0px;">Thanks Jetbrains to Support this repository.</span>
+  <span style="height:20px; margin: auto 0;">Thanks Jetbrains to Support this repository.</span>
 </a>  
 
 
