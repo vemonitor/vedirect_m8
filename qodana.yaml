@@ -1,6 +1,6 @@
   version: 1.0
   bootstrap: |+
     set -eu
-    sudo apt install python3-pip
+    apt install python3-pip
     pip3 install -r requirements.txt
     pip3 install vedirect_m8[TEST]
