@@ -6,10 +6,11 @@
 [![codecov](https://codecov.io/gh/mano8/vedirect_m8/branch/main/graph/badge.svg?token=KkAwHvkse6)](https://codecov.io/gh/mano8/vedirect_m8)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c401bed6812d4f9bb77bfaee16cf0abe)](https://www.codacy.com/gh/mano8/vedirect_m8/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mano8/vedirect_m8&amp;utm_campaign=Badge_Grade)  
 
-<a href="https://jb.gg/OpenSourceSupport" rel="JetBrains Support"> 
-  <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." width="50">
-  <span style=margin-bottom:20px;">Thanks Jetbrains to Support this repository.</span>
-</a>
+## Sponsors :
+<a href="https://jb.gg/OpenSourceSupport" target="_blank" rel="noreferrer noopener" style="box-sizing: border-box; display: flex; justify-content: center;"> 
+  <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." width="80">
+  <span style="height:20px; margin: auto 0px;">Thanks Jetbrains to Support this repository.</span>
+</a>  
 
 
 This is a Python library for decoding the Victron Energy VE.Direct text protocol
