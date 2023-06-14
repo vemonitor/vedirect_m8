@@ -6,13 +6,18 @@
 [![codecov](https://codecov.io/gh/mano8/vedirect_m8/branch/main/graph/badge.svg?token=KkAwHvkse6)](https://codecov.io/gh/mano8/vedirect_m8)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c401bed6812d4f9bb77bfaee16cf0abe)](https://www.codacy.com/gh/mano8/vedirect_m8/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mano8/vedirect_m8&amp;utm_campaign=Badge_Grade)  
 
-## Sponsors :
-<a href="https://jb.gg/OpenSourceSupport" target="_blank" rel="noreferrer noopener" style="box-sizing: border-box; display: flex; justify-content: center;"> 
-  <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." width="80">
-  <span style="height:20px; margin: auto 0;">Thanks Jetbrains to Support this repository.</span>
-</a>  
+## Sponsors
+<p  align="center" width="100%">
+  <a href="https://jb.gg/OpenSourceSupport" target="_blank" rel="noreferrer noopener" align="center"> 
+    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." width="100" />
+  </a>
+  
+</p>
+<p  align="center" width="100%">
+  <span width="50%">Thanks Jetbrains to Support this repository.</span>
+</p>
 
-
+## Presentation
 This is a Python library for decoding the Victron Energy VE.Direct text protocol
 used in their range of MPPT solar charge controllers and battery monitors.
 
