@@ -1,5 +1,4 @@
   version: 1.0
   bootstrap: |+
     set -eu
-    apt install python3-pip
     pip3 install -r requirements.txt
