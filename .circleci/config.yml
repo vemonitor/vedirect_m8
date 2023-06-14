@@ -86,7 +86,7 @@ jobs:
       - run:
           name: Move default pip to python 3
           # This assumes pytest is installed via the install-package step above
-          command: python3 -m pip install --upgrade --force pi
+          command: python3 -m pip install --upgrade --force pip
       - run:
           name: Get python version
           # This assumes pytest is installed via the install-package step above
