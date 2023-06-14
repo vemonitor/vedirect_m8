@@ -3,3 +3,5 @@
   bootstrap: |+
     set -eu
     pip3 install -r requirements.txt
+  include:
+      - name: CheckDependencyLicenses
