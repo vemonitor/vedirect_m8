@@ -1,5 +1,5 @@
-pytest~=7.1.2
-setuptools>=65.6.3
+pytest~=7.4.0
+setuptools~=68.0.0
 pyserial>=3.5
 ve-utils>=2.5.3
 paho-mqtt>=1.6.1
