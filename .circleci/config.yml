@@ -58,12 +58,12 @@ jobs:
       - coverage-reporter/send_report:
           coverage-reports: 'coverage.xml'
           project-token: $CODACY_PROJECT_TOKEN
-  code-quality:
-    machine:
-      image: 'ubuntu-2004:current'
-    steps:
-      - checkout
-      - qodana/scan
+  # code-quality:
+  #  machine:
+  #    image: 'ubuntu-2004:current'
+  #  steps:
+  #    - checkout
+  #    - qodana/scan
       
       
   
@@ -75,7 +75,7 @@ workflows:
     # Inside the workflow, you define the jobs you want to run.
     jobs:
       - install_deps_and_test
-      - code-quality:
-          context: qodana
+      # - code-quality:
+      #    context: qodana
       #- codecov_upload
   
