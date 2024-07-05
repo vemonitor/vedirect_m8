@@ -30,6 +30,7 @@ logger = logging.getLogger("vedirect")
 
 class Vedirectsim:
     """Vedirect simulator class."""
+
     def __init__(self, serialport: str, device: str = "bmv702"):
         """Vedirectsim init instance."""
         self.serialport = serialport
@@ -52,7 +53,7 @@ class Vedirectsim:
                      'PID': '0x204', 'SER#': 'HQ141112345', 'HSDS': '0'}
         logger.info(
             "Starting vedirect simulator."
-            )
+        )
         self.set_device_settings(device)
         self.serial_connect()
 
@@ -95,18 +96,44 @@ class Vedirectsim:
             return True
         return False
 
+    def get_dump_file_path(self) -> str or None:
+        """Get dump files path if exist."""
+        result = None
+        current_script_path = os.path.dirname(
+            os.path.abspath(
+                inspect.getfile(inspect.currentframe())
+            )
+        )
+        path_order = [
+            os.path.join(current_script_path, "sim_data"),
+            os.path.join(os.path.abspath(os.getcwd()), "sim_data"),
+            os.path.join(os.path.abspath("/opt/vedirect_m8"), "sim_data"),
+            os.path.join(os.path.abspath(os.path.expanduser("~")), "sim_data"),
+        ]
+        file = "%s.dump" % self.device
+        for path in path_order:
+            current_path = os.path.join(path, file)
+            if os.path.isfile(current_path):
+                logger.debug("Dump data loaded from %s" % current_path)
+                result = current_path
+                break
+
+        if result is None:
+            raise ValueError(
+                "Fatal error, unable to locate dump file %s from paths: %s." %
+                file,
+                path_order
+            )
+        return result
+
     def set_dump_file_path(self):
         """Set the dump file path to read."""
+        result = False
         if Ut.is_str(self.device) and self.device in Vedirectsim.get_valid_devices():
-            file = "%s.dump" % self.device
-            current_path = os.path.dirname(
-                os.path.abspath(
-                    inspect.getfile(inspect.currentframe())
-                    )
-                )
-            self.dump_file_path = os.path.join(current_path, "sim_data", file)
-            return os.path.isfile(self.dump_file_path)
-        return False
+            self.dump_file_path = self.get_dump_file_path()
+            if self.dump_file_path is not None:
+                result = True
+        return result
 
     def set_device_settings(self, device: str) -> bool:
         """Set the device settings."""
