@@ -33,7 +33,6 @@ setup(name='vedirect_m8',
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
       ],
-      packages=['vedirect_m8'],
       include_package_data=True,
       install_requires=[
           'pyserial>=3.5',
