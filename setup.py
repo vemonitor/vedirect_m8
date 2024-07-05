@@ -8,7 +8,14 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(name='vedirect_m8',
-      version='1.3.0.2',
+      version='1.3.0.3',
+      packages=['vedirect_m8'],
+      package_dir={
+            'vedirect_m8': 'vedirect_m8'
+      },
+      package_data={
+            'vedirect_m8': ['sim_data/*.dump']
+      },
       description='Victron VE.Direct decoder for Python',
       long_description=README,
       long_description_content_type="text/markdown",
