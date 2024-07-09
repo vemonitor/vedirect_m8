@@ -9,8 +9,8 @@ orbs:
   # Orb commands and jobs help you with common scripting around a language/tool,
   # so you don't have to copy and paste it everywhere.
   # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/python
-  codecov: codecov/codecov@3.0.0
-  coverage-reporter: codacy/coverage-reporter@13.9.17
+  codecov: codecov/codecov@4.1.0
+  coverage-reporter: codacy/coverage-reporter@14.0.0
   python: circleci/python@2.1.1
 
 executors:
