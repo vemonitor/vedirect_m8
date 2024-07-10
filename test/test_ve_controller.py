@@ -4,7 +4,7 @@ import pytest
 from ve_utils.utype import UType as Ut
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import SettingInvalidException
+from vedirect_m8.exceptions import InputReadException, SettingInvalidException
 from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
 from vedirect_m8.exceptions import SerialVeException
@@ -138,6 +138,19 @@ class TestVedirectController:
         """Test read_data_to_test method."""
         data = self.obj.read_data_to_test()
         assert Ut.is_dict(data, not_null=True)
+
+    def test__get_test_data(self):
+        """Test _get_test_data method."""
+        self.obj.init_settings(
+                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1")},
+                source_name="TestVedirectController"
+            )
+        data = self.obj._get_test_data()
+        assert Ut.is_dict(data, not_null=True)
+
+        self.obj._com.ser.close()
+        data = self.obj._get_test_data()
+        assert data is None
 
     def test_test_serial_port(self):
         """Test test_serial_port method."""

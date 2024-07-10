@@ -180,26 +180,33 @@ class VedirectController(Vedirect):
                 )
         return result
 
+    def _get_test_data(self) -> dict:
+        """Return decoded Vedirect blocks from serial to identify the right serial port."""
+        result = None
+        try:
+            result = dict()
+            for i in range(4):
+                try:
+                    data = self.read_data_single(timeout=2)
+                    if Ut.is_dict(data, not_null=True):
+                        result.update(data)
+                    time.sleep(0.1)
+                except InputReadException:
+                    time.sleep(0.5)
+        except Exception as ex:
+            logger.debug(
+                '[VeDirect] Unable to read serial data to test'
+                'ex : %s',
+                ex
+            )
+            result = None
+        return result
+
     def read_data_to_test(self) -> dict:
         """Return decoded Vedirect blocks from serial to identify the right serial port."""
         result = None
         if self.is_ready():
-            try:
-                result = dict()
-                for i in range(4):
-                    try:
-                        data = self.read_data_single(timeout=2)
-                        if Ut.is_dict(data, not_null=True):
-                            result.update(data)
-                        time.sleep(0.1)
-                    except InputReadException:
-                        time.sleep(0.5)
-            except Exception as ex:
-                logger.debug(
-                    '[VeDirect] Unable to read serial data to test'
-                    'ex : %s',
-                    ex
-                )
+            result = self._get_test_data()
         return result
 
     def test_serial_port(self, port: str) -> bool:
