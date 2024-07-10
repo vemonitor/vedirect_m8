@@ -31,6 +31,13 @@ class TestVeDirectSim:
             self.obj.serialport = 1
             self.obj.serial_connect()
 
+    def test_get_dump_file_path(self):
+        """"""
+        assert self.obj.serial_connect()
+        with pytest.raises(ValueError):
+            self.obj.device = "bad_device"
+            self.obj.get_dump_file_path()
+
     def test_set_device_and_device_path(self):
         """"""
         assert self.obj.set_device("bmv702")
@@ -52,6 +59,13 @@ class TestVeDirectSim:
             self.obj.set_device_settings("hello")
             self.obj.set_device_settings(SerialConnection.get_virtual_home_serial_port("world.bat"))
 
+    def test_process_data(self):
+        """"""
+        self.obj.dict = {}
+        for x in range(17):
+            self.obj.dict.update({"%sKey" % x: "%sValue" % x})
+        assert self.obj.process_data(key="ZKey", value="Ax125") is True
+
     def test_read_dump_file_line(self):
         """"""
         assert self.obj.read_dump_file_lines(max_writes=1)
@@ -67,3 +81,7 @@ class TestVeDirectSim:
         assert self.obj.run(max_writes=1)
         self.obj.set_device_settings("smartsolar_1.39")
         assert self.obj.run(max_writes=1)
+
+        with pytest.raises(ValueError):
+            self.obj.ser = None
+            self.obj.run()

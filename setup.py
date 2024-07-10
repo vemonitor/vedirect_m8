@@ -8,7 +8,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(name='vedirect_m8',
-      version='1.3.0.3',
+      version='1.3.0.4',
       packages=['vedirect_m8'],
       package_dir={
             'vedirect_m8': 'vedirect_m8'

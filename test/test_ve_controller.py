@@ -93,6 +93,9 @@ class TestVedirectController:
     def test_init_settings(self):
         """Test init_settings method."""
         good_serial_port = self.obj._com._serial_port
+        self.obj.set_wait_timeout(20)
+        
+        
         assert self.obj.init_settings({'serial_port': good_serial_port},
                                       source_name="TestVedirectController"
                                       )
@@ -197,7 +200,6 @@ class TestVedirectController:
             for i in range(20):
                 if self.obj.search_serial_port():
                     tst = True
-                    print("serial port retrieved at %s" % i)
                     break
                 time.sleep(0.8)
             assert tst
@@ -223,17 +225,27 @@ class TestVedirectController:
         def func_callback(data: dict or None):
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
+        
+        def isError_callback(data: None):
+            """Callback function."""
+            assert data is None
 
-        time.sleep(4)
-        self.obj.set_wait_timeout(3600)
+        self.obj.set_wait_timeout(30)
         self.obj.read_data_callback(callback_function=func_callback,
                                     timeout=20,
                                     max_loops=1
                                     )
 
         with pytest.raises(ReadTimeoutException):
-            self.obj.set_wait_timeout(3600)
+            self.obj.set_wait_timeout(30)
             self.obj.read_data_callback(callback_function=func_callback,
                                         timeout=0.000001,
                                         max_loops=1
                                         )
+
+        self.obj._com = None
+        data = self.obj.read_data_callback(callback_function=isError_callback,
+            timeout=20,
+            max_loops=1
+        )
+        assert data is None
