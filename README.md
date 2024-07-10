@@ -7,17 +7,6 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c401bed6812d4f9bb77bfaee16cf0abe)](https://www.codacy.com/gh/mano8/vedirect_m8/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mano8/vedirect_m8&amp;utm_campaign=Badge_Grade)
 [![Downloads](https://static.pepy.tech/badge/vedirect_m8)](https://pepy.tech/project/vedirect_m8)
 
-## Sponsors
-<p  align="center" width="100%">
-  <a href="https://jb.gg/OpenSourceSupport" target="_blank" rel="noreferrer noopener" align="center"> 
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." width="100" />
-  </a>
-  
-</p>
-<p  align="center" width="100%">
-  <span width="50%">Thanks Jetbrains to Support this repository.</span>
-</p>
-
 ## Description
 This is a Python library for decoding the Victron Energy VE.Direct text protocol
 used in their range of MPPT solar charge controllers and battery monitors.
@@ -77,6 +66,7 @@ Or if you need to see the inputs sent on serial port :
 ```plaintext
 $ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700 --debug
 ```
+
 Device option must be ``bmv700, bluesolar_1.23, or smartsolar_1.39``.
 
 Then, in other terminal, attach the decoder to /${HOME}/vmodem1:
