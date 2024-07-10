@@ -43,7 +43,7 @@ jobs:
         socat -d -d PTY,raw,echo=0,link=/${HOME}/vmodem0 PTY,raw,echo=0,link=/${HOME}/vmodem1 &
     - name: Run VeDirectSim
       run: |
-        python vedirectsim.py --port /${HOME}/vmodem0 --device bmv702 &
+        python ./examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv702 &
     - name: Test with pytest
       run: |
         coverage run -m pytest -s --cov=./ --cov-report=xml
