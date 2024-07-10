@@ -1,22 +1,11 @@
 # VeDirect M8
-
-[![CircleCI](https://circleci.com/gh/mano8/vedirect_m8.svg?style=svg)](https://app.circleci.com/pipelines/github/mano8/vedirect_m8)
+![CI/CD](https://github.com/vemonitor/vedirect_m8/actions/workflows/python-package.yml/badge.svg?branch=main)
 [![PyPI package](https://img.shields.io/pypi/v/vedirect_m8.svg)](https://pypi.org/project/vedirect_m8/)
 [![Known Vulnerabilities](https://snyk.io/test/github/mano8/vedirect_m8/badge.svg)](https://snyk.io/test/github/mano8/vedirect_m8)
-[![codecov](https://codecov.io/gh/mano8/vedirect_m8/branch/main/graph/badge.svg?token=KkAwHvkse6)](https://codecov.io/gh/mano8/vedirect_m8)
+[![codecov](https://codecov.io/gh/vemonitor/vedirect_m8/graph/badge.svg?token=KkAwHvkse6)](https://codecov.io/gh/vemonitor/vedirect_m8)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/c401bed6812d4f9bb77bfaee16cf0abe)](https://www.codacy.com/gh/mano8/vedirect_m8/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mano8/vedirect_m8&amp;utm_campaign=Badge_Grade)
 [![Downloads](https://static.pepy.tech/badge/vedirect_m8)](https://pepy.tech/project/vedirect_m8)
 
-## Sponsors
-<p  align="center" width="100%">
-  <a href="https://jb.gg/OpenSourceSupport" target="_blank" rel="noreferrer noopener" align="center"> 
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo." width="100" />
-  </a>
-  
-</p>
-<p  align="center" width="100%">
-  <span width="50%">Thanks Jetbrains to Support this repository.</span>
-</p>
 
 ## Description
 This is a Python library for decoding the Victron Energy VE.Direct text protocol
