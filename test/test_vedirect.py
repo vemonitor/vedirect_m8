@@ -187,6 +187,18 @@ class TestVedirect:
                 self.obj.input_read(x)
                 self.obj.state = 12
 
+    def test_read_global_packet(self):
+        """Test read_serial_packet method."""
+        data = self.obj.read_global_packet()
+        assert Ut.is_dict(data, not_null=True)
+
+        self.obj.init_serial_connection(
+            {"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem0")},
+            source_name="TestVedirect"
+        )
+        with pytest.raises(InputReadException):
+            self.obj.read_global_packet()
+
     def test_read_data_single(self):
         """Test read_data_single method."""
         data = self.obj.read_data_single()

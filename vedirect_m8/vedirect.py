@@ -388,6 +388,33 @@ class Vedirect:
         byte = self._com.ser.read(1)
         return self.input_read(byte)
 
+    def read_global_packet(self, timeout: int = 60) -> dict or None:
+        """
+        """
+        run, now, tim = True, time.time(), 0
+        try:
+            while run:
+                packet, tim = None, time.time()
+
+                packet = self.get_serial_packet()
+
+                if packet is not None:
+                    logger.debug(
+                        "Serial reader success: dict: %s",
+                        packet
+                    )
+                    self.init_data_read()
+                    return packet
+
+                # timeout serial read
+                Vedirect.is_timeout(tim-now, timeout)
+        except SerialException as ex:
+            raise SerialVeException(
+                "[VeDirect:read_data_single] "
+                "Unable to read vedirect data : %s." %
+                ex
+            ) from SerialException
+
     def read_data_single(self, timeout: int = 60) -> dict or None:
         """
         Read a single block decoded from serial port and returns it as a dictionary.
@@ -409,37 +436,13 @@ class Vedirect:
          - OpenSerialVeException:
            Will be raised when the device is configured but port is not openned.
         """
-        run, now, tim = True, time.time(), 0
         if self.is_ready():
-            try:
-                while run:
-                    packet, tim = None, time.time()
-
-                    packet = self.get_serial_packet()
-
-                    if packet is not None:
-                        logger.debug(
-                            "Serial reader success: dict: %s",
-                            packet
-                        )
-                        self.init_data_read()
-                        return packet
-
-                    # timeout serial read
-                    Vedirect.is_timeout(tim-now, timeout)
-            except SerialException as ex:
-                raise SerialVeException(
-                    "[VeDirect:read_data_single] "
-                    "Unable to read vedirect data : %s." %
-                    ex
-                ) from SerialException
+            return self.read_global_packet(timeout)
         else:
             raise SerialConnectionException(
                 "[VeDirect:read_data_single] "
                 "Unable to read vedirect data, serial port is closed."
             )
-
-        return None
 
     def read_data_callback(self,
                            callback_function,
