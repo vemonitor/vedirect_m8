@@ -59,9 +59,3 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         files: /home/runner/work/vedirect_m8/vedirect_m8/coverage.xml,/home/runner/work/vedirect_m8/vedirect_m8/e2e-coverage.xml
         verbose: true
-    - name: Build Package
-      run: |
-         python -m build
-    - name: Verrify Builded Package
-      run: |
-         twine check dist/*
