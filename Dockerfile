@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements-dev.txt
 RUN apt-get -y update
 
 # update package list
-RUN apt-get -y install socat
+RUN apt-get install -y --no-install-recommends socat
 
 # copy the content of the local directory to the working directory
 COPY . .
