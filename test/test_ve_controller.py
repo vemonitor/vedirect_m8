@@ -93,6 +93,9 @@ class TestVedirectController:
     def test_init_settings(self):
         """Test init_settings method."""
         good_serial_port = self.obj._com._serial_port
+        self.obj.set_wait_timeout(20)
+        
+        
         assert self.obj.init_settings({'serial_port': good_serial_port},
                                       source_name="TestVedirectController"
                                       )
