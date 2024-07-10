@@ -66,16 +66,8 @@ class Vedirectsim:
         """Test if is serial ready and connection opened."""
         return isinstance(self.ser, serial.Serial) and self.ser.is_open
 
-    def serial_connect(self) -> bool:
-        """Connect to serial port."""
-        self.ser = serial.Serial(
-            port=self.serialport,
-            baudrate=19200,
-            timeout=0,
-            rtscts=False,
-            dsrdtr=False
-        )
-        self.ser.write_timeout = 0
+    def has_serial_connection(self) -> bool:
+        """Test if is serial ready and connection opened."""
         if self.is_serial_ready():
             logger.info(
                 "Connected to serial port %s",
@@ -86,6 +78,18 @@ class Vedirectsim:
             "Fatal error, unable to connect on serial port %s." %
             self.serialport
         )
+
+    def serial_connect(self) -> bool:
+        """Connect to serial port."""
+        self.ser = serial.Serial(
+            port=self.serialport,
+            baudrate=19200,
+            timeout=0,
+            rtscts=False,
+            dsrdtr=False
+        )
+        self.ser.write_timeout = 5
+        return self.has_serial_connection()
 
     def set_device(self, device: str):
         """Set the vedirect device to simulate."""
@@ -189,7 +193,7 @@ class Vedirectsim:
         )
         sleep_time = 0
         if 0 < write_time < 0.05:
-            sleep_time = round(0.05 - round(write_time, 3) - 0.0025, 3)
+            sleep_time = abs(round(0.05 - round(write_time, 3) - 0.0025, 3))
             time.sleep(sleep_time)
         if logger.level <= 10:
             write_time = self.perf.get_elapsed(
@@ -209,6 +213,7 @@ class Vedirectsim:
             )
 
         self.dict = dict()
+        return packet_write
 
     def process_data(self, key: str, value: str):
         """Process read data."""

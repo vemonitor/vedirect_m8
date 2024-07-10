@@ -3,7 +3,7 @@ import serial
 
 from vedirect_m8.vedirectsim import Vedirectsim
 from vedirect_m8.serconnect import SerialConnection
-
+from ve_utils.utime import PerfStats
 
 class TestVeDirectSim:
 
@@ -22,17 +22,25 @@ class TestVeDirectSim:
         """"""
         assert self.obj.is_ready()
 
+    def test_has_serial_connection(self):
+        """"""
+        self.obj.serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
+        assert self.obj.serial_connect() is True
+        assert self.obj.has_serial_connection() is True
+        with pytest.raises(serial.SerialException):
+            self.obj.ser = None
+            self.obj.has_serial_connection()
+
     def test_serial_connect(self):
         """"""
         assert self.obj.serial_connect()
         with pytest.raises((serial.SerialException, serial.SerialTimeoutException)):
             self.obj.serialport = "bad_port"
             self.obj.serial_connect()
-            self.obj.serialport = 1
-            self.obj.serial_connect()
 
     def test_get_dump_file_path(self):
         """"""
+        self.obj.serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
         assert self.obj.serial_connect()
         with pytest.raises(ValueError):
             self.obj.device = "bad_device"
@@ -40,6 +48,7 @@ class TestVeDirectSim:
 
     def test_set_device_and_device_path(self):
         """"""
+        self.obj.serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
         assert self.obj.set_device("bmv702")
         assert self.obj.set_dump_file_path()
         assert self.obj.set_device("bluesolar_1.23")
@@ -58,6 +67,33 @@ class TestVeDirectSim:
         with pytest.raises(ValueError):
             self.obj.set_device_settings("hello")
             self.obj.set_device_settings(SerialConnection.get_virtual_home_serial_port("world.bat"))
+
+    def test_send_packet(self):
+        """"""
+        self.obj.perf = PerfStats()
+        self.obj.perf.start_perf_key("writes")
+        self.obj.dict = dict()
+        self.obj.ser.write_timeout = 3
+        for x in range(18):
+            self.obj.dict.update({"%sKey" % x: "%sValue" % x})
+        assert self.obj.send_packet() is True
+
+        self.obj.dict = dict()
+        self.obj.ser.write_timeout = 3
+        for x in range(1):
+            self.obj.dict.update({"%sKey" % x: "%sValue" % x})
+        assert self.obj.send_packet() is True
+
+        self.obj.dict = dict()
+        for x in range(150):
+            self.obj.dict.update({"%sKey" % x: "%sValue" % x})
+        self.obj.ser.write_timeout = 0.00000002
+        assert self.obj.send_packet() is False
+
+        self.obj.ser.write_timeout = 3
+        self.obj.ser.close()
+        with pytest.raises(serial.serialutil.PortNotOpenError):
+            self.obj.send_packet()
 
     def test_process_data(self):
         """"""
