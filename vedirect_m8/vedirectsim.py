@@ -119,9 +119,10 @@ class Vedirectsim:
 
         if result is None:
             raise ValueError(
-                "Fatal error, unable to locate dump file %s from paths: %s." %
-                file,
-                path_order
+                "Fatal error, unable to locate dump file %s from paths: %s." % (
+                    file,
+                    path_order
+                )
             )
         return result
 
