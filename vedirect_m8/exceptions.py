@@ -85,4 +85,3 @@ class OpenSerialVeException(SerialConnectionException):
     Serial Vedirect device configured but connection not opened.
     Extends: VeCoreException, SerialConnexionException
     """
-

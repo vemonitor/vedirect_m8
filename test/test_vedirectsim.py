@@ -5,6 +5,7 @@ from vedirect_m8.vedirectsim import Vedirectsim
 from vedirect_m8.serconnect import SerialConnection
 from ve_utils.utime import PerfStats
 
+
 class TestVeDirectSim:
 
     def setup_method(self):

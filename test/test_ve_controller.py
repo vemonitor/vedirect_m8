@@ -4,7 +4,7 @@ import pytest
 from ve_utils.utype import UType as Ut
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import InputReadException, SettingInvalidException
+from vedirect_m8.exceptions import SettingInvalidException
 from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
 from vedirect_m8.exceptions import SerialVeException
@@ -93,19 +93,20 @@ class TestVedirectController:
     def test_init_settings(self):
         """Test init_settings method."""
         good_serial_port = self.obj._com._serial_port
-        self.obj.set_wait_timeout(20)
-        
-        
-        assert self.obj.init_settings({'serial_port': good_serial_port},
-                                      source_name="TestVedirectController"
-                                      )
+        self.obj.set_wait_timeout(20) 
+
+        assert self.obj.init_settings(
+            {'serial_port': good_serial_port},
+            source_name="TestVedirectController"
+        )
 
         # test with bad serial port format
         # now on bad serial port scan, test and connect valid port.
         # Don't raise exception if valid port available.
-        self.obj.init_settings({"serial_port": "/etc/bad_port"},
-                               source_name="TestVedirect"
-                               )
+        self.obj.init_settings(
+            {"serial_port": "/etc/bad_port"},
+            source_name="TestVedirect"
+        )
 
         # test with bad serial port type
         # now on bad serial port scan, test and connect valid port.
@@ -238,7 +239,7 @@ class TestVedirectController:
         def func_callback(data: dict or None):
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
-        
+
         def isError_callback(data: None):
             """Callback function."""
             assert data is None
@@ -251,13 +252,15 @@ class TestVedirectController:
 
         with pytest.raises(ReadTimeoutException):
             self.obj.set_wait_timeout(30)
-            self.obj.read_data_callback(callback_function=func_callback,
-                                        timeout=0.000001,
-                                        max_loops=1
-                                        )
+            self.obj.read_data_callback(
+                callback_function=func_callback,
+                timeout=0.000001,
+                max_loops=1
+            )
 
         self.obj._com = None
-        data = self.obj.read_data_callback(callback_function=isError_callback,
+        data = self.obj.read_data_callback(
+            callback_function=isError_callback,
             timeout=20,
             max_loops=1
         )
