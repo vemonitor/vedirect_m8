@@ -17,7 +17,7 @@ This is a forked version of a package originally created by Janne Kario
 
 To install directly from GitHub:
 
-``$ python3 -m pip install "git+https://github.com/mano8/vedirect_m8"``
+``python3 -m pip install "git+https://github.com/mano8/vedirect_m8"``
 
 To install from PypI :
 
@@ -38,16 +38,16 @@ using a pair of virtual serial ports.
 First you need install socat on your machine.
 On debian systems type on your terminal :
 
-```plaintext
-$ sudo apt-get install socat
+```bash
+ sudo apt-get install socat
 ```
 
 Next install the vedirect_m8 package ``see above``.
 
 Now, to create a pair of virtual serial ports issue the following command:
 
-```plaintext
-$ socat -d -d PTY,raw,echo=0,link=/${HOME}/vmodem0 PTY,raw,echo=0,link=/${HOME}/vmodem1
+```bash
+ socat -d -d PTY,raw,echo=0,link=/${HOME}/vmodem0 PTY,raw,echo=0,link=/${HOME}/vmodem1
 ```
 
 This will create 2 virtual serials ports connected to each other.
@@ -56,22 +56,22 @@ Anything sent to ```/${HOME}/vmodem0``` will be echoed to ```/${HOME}/vmodem1```
 
 In other terminal, run the vedirectsim script with your desired device:
 
-```plaintext
-$ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700
+```bash
+ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700
 ```
 
 Or if you need to see the inputs sent on serial port :
 
-```plaintext
-$ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700 --debug
+```bash
+ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700 --debug
 ```
 
 Device option must be ``bmv700, bluesolar_1.23, or smartsolar_1.39``.
 
 Then, in other terminal, attach the decoder to /${HOME}/vmodem1:
 
-```plaintext
-$ python examples/vedirect_print.py --port /${HOME}/vmodem1
+```bash
+ python examples/vedirect_print.py --port /${HOME}/vmodem1
 ```
 
 All the inputs from the selected device file, are encoded to the vmodem0 serial port,
@@ -108,7 +108,7 @@ Must be used only on static keys values egg ```PID```, ```SER#``` or , ```FW```.
 
 Example for the bmv702 device from sim_data directory:
 
-```plaintext
+```python
 'serialTest':{
     'PID_test': { 
         "typeTest": "value",
@@ -140,9 +140,9 @@ The configuration must contain the following parameters :
 
 Example for the bmv702 device from sim_data directory:
 
-```plaintext
+```json
 "serialTest": {
-    'KeysTest': {
+    "KeysTest": {
         "typeTest": "value",
         "keys": ["V", "I", "P", "CE", "SOC", "H18"]
     }
