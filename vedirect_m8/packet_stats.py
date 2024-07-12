@@ -2,6 +2,7 @@
 Used to get, set and analyse serial packets stats.
 """
 import logging
+from typing import Optional
 from ve_utils.utype import UType as Ut
 
 __author__ = "Eli Serra"
@@ -181,7 +182,7 @@ class PacketStats:
         return result
 
     @staticmethod
-    def is_equal_packet_stats(stat: dict, last_stat: dict or None) -> bool:
+    def is_equal_packet_stats(stat: dict, last_stat: Optional[dict]) -> bool:
         """Test if actual packet stats is equal to registered packet stats."""
         return Ut.is_dict(stat, not_null=True)\
             and stat.get('nb') > 0\
@@ -189,7 +190,7 @@ class PacketStats:
             and stat.get('keys') == last_stat.get('keys')
 
     @staticmethod
-    def is_index_linear(index: int, last_index: int or None) -> bool:
+    def is_index_linear(index: int, last_index: Optional[int]) -> bool:
         """Test if actual index is equal to last index."""
         last_index = Ut.get_int(last_index, default=index)
         return last_index == index

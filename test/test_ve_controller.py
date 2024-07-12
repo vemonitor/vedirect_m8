@@ -1,6 +1,7 @@
 """VedirectController unittest class."""
 import time
 import pytest
+from typing import Optional
 from ve_utils.utype import UType as Ut
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.serconnect import SerialConnection
@@ -236,7 +237,7 @@ class TestVedirectController:
     def test_read_data_callback(self):
         """Test read_data_callback method."""
 
-        def func_callback(data: dict or None):
+        def func_callback(data: Optional[dict]):
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
 
