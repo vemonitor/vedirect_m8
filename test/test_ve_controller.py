@@ -234,8 +234,21 @@ class TestVedirectController:
         data = self.obj.read_data_single()
         assert Ut.is_dict(data, not_null=True)
 
+    def test_run_callback_on_packet(self):
+        """Test run_callback_on_packet method."""
+        def func_callback(data: Optional[dict]):
+            """Callback function."""
+            assert Ut.is_dict(data, not_null=True)
+        self.obj._com.ser.close()
+        self.obj.set_wait_timeout(30)
+        res = self.obj.run_callback_on_packet(callback_function=func_callback,
+                                    timeout=20,
+                                    max_loops=1
+                                    )
+        assert res is True
+
     def test_read_data_callback(self):
-        """Test read_data_callback method."""
+        """Test run_callback_on_packet method."""
 
         def func_callback(data: Optional[dict]):
             """Callback function."""
@@ -246,10 +259,11 @@ class TestVedirectController:
             assert data is None
 
         self.obj.set_wait_timeout(30)
-        self.obj.read_data_callback(callback_function=func_callback,
-                                    timeout=20,
-                                    max_loops=1
-                                    )
+        self.obj.run_callback_on_packet(
+            callback_function=func_callback,
+            timeout=20,
+            max_loops=1
+        )
 
         with pytest.raises(ReadTimeoutException):
             self.obj.set_wait_timeout(30)
