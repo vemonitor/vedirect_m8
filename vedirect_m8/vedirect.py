@@ -466,8 +466,10 @@ class Vedirect:
 
                 if packet is not None:
                     logger.debug(
-                        "Serial reader success: packet: %s "
-                        "-- state: %s -- bytes_sum: %s ",
+                        "Serial reader success: "
+                        "packet: %s -- "
+                        "state: %s -- "
+                        "bytes_sum: %s ",
                         packet, self.state, self.bytes_sum
                     )
                     now = tim

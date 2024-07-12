@@ -20,7 +20,7 @@ from ve_utils.utype import UType as Ut
 from vedirect_m8.sertest import SerialTestHelper
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import SettingInvalidException
+from vedirect_m8.exceptions import SerialVeException, SettingInvalidException
 from vedirect_m8.exceptions import InputReadException
 from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
@@ -323,9 +323,54 @@ class VedirectController(Vedirect):
             "Exception : %s" % exception
         )
 
+    def run_callback_on_packet(self, 
+                               callback_function,
+                               timeout: int = 60,
+                               max_loops: Optional[int] = None
+                               ) -> Optional[dict]:
+        """
+        """
+        run, now, tim, i = True, time.time(), 0, 0
+        while run:
+            tim = time.time()
+            try:
+                packet = self.get_serial_packet()
+            except (
+                    InputReadException,
+                    serial.SerialException,
+                    serial.SerialTimeoutException
+                    ) as ex:
+                if self._wait_connection is True\
+                        and self.wait_or_search_serial_connection(
+                            exception=ex,
+                            timeout=self._wait_timeout
+                        ):
+                    now = tim = time.time()
+                    packet = self.get_serial_packet()
+
+            if packet is not None:
+                logger.debug(
+                    "Serial reader success: "
+                    "packet: %s -- "
+                    "state: %s -- "
+                    "bytes_sum: %s ",
+                    packet, self.state, self.bytes_sum
+                )
+                self.init_data_read()
+                callback_function(packet)
+                now = tim
+                i = i+1
+                packet = None
+
+            # timeout serial read
+            Vedirect.is_timeout(tim - now, timeout)
+
+            if Ut.is_int(max_loops) and i >= max_loops:
+                return True
+
     def read_data_callback(self,
                            callback_function,
-                           timeout: Union[int, float] = 60,
+                           timeout: Union[int, float] = 180,
                            max_loops: Optional[int] = None
                            ) -> Optional[dict]:
         """
@@ -333,55 +378,21 @@ class VedirectController(Vedirect):
 
         :param self: Reference the class instance
         :param callback_function:function: Pass a function to the read_data_callback function
-        :param timeout:int=60: Set the timeout for the read_data_callback function
+        :param timeout:int=180: Set the timeout for the read_data_callback function
         :param max_loops:int or None=None: Limit the number of loops
         :return: A dictionary
         :doc-author: Trelent
         """
-        run, now, tim, i = True, time.time(), 0, 0
-        packet = None
         if self.is_ready():
-            while run:
-                tim = time.time()
-                try:
-                    packet = self.get_serial_packet()
-                except (
-                        InputReadException,
-                        serial.SerialException,
-                        serial.SerialTimeoutException
-                        ) as ex:
-                    if self._wait_connection is True\
-                            and self.wait_or_search_serial_connection(
-                                exception=ex,
-                                timeout=self._wait_timeout
-                            ):
-                        now = tim = time.time()
-                        packet = self.get_serial_packet()
-
-                if packet is not None:
-                    logger.debug(
-                        "Serial reader success: "
-                        "packet: %s -- "
-                        "state: %s -- "
-                        "bytes_sum: %s ",
-                        packet, self.state, self.bytes_sum
-                    )
-                    self.init_data_read()
-                    callback_function(packet)
-                    now = tim
-                    i = i+1
-                    packet = None
-
-                # timeout serial read
-                Vedirect.is_timeout(tim - now, timeout)
-
-                if Ut.is_int(max_loops) and i >= max_loops:
-                    return True
+            return self.run_callback_on_packet(
+                callback_function=callback_function,
+                timeout=timeout,
+                max_loops=max_loops
+            )
         else:
             logger.error(
                 '[VeDirect::read_data_callback] '
                 'Unable to read serial data. '
                 'Not connected to serial port...')
 
-        callback_function(None)
         return None
