@@ -1,8 +1,9 @@
 """Vedirect unittest class."""
 import pytest
+
+from ve_utils.utype import UType as Ut
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
-from ve_utils.utype import UType as Ut
 from vedirect_m8.exceptions import SettingInvalidException
 from vedirect_m8.exceptions import InputReadException
 from vedirect_m8.exceptions import PacketReadException

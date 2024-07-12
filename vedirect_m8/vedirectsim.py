@@ -14,6 +14,7 @@ import inspect
 import os
 import time
 import serial
+from typing import Optional
 from ve_utils.utype import UType as Ut
 from ve_utils.utime import PerfStats
 
@@ -99,7 +100,7 @@ class Vedirectsim:
             return True
         return False
 
-    def get_dump_file_path(self) -> str or None:
+    def get_dump_file_path(self) -> Optional[str]:
         """Get dump files path if exist."""
         result = None
         current_script_path = os.path.dirname(
@@ -227,7 +228,7 @@ class Vedirectsim:
                 result = True
         return result
 
-    def is_max_writes(self, max_writes: int or None = None):
+    def is_max_writes(self, max_writes: Optional[int] = None):
         """Test if max serial writes."""
         return Ut.is_int(max_writes) and self.block_counter >= max_writes
 
@@ -240,7 +241,7 @@ class Vedirectsim:
                     if Ut.is_tuple(values, eq=2):
                         yield values
 
-    def read_dump_file_lines(self, max_writes: int or None = None) -> bool:
+    def read_dump_file_lines(self, max_writes: Optional[int] = None) -> bool:
         """Read file lines."""
         result = False
         if self.is_ready():
@@ -263,7 +264,7 @@ class Vedirectsim:
 
         return result
 
-    def run(self, max_writes: int or None = None) -> bool:
+    def run(self, max_writes: Optional[int] = None) -> bool:
         """Run the simulator."""
         if self.is_ready():
             running = True

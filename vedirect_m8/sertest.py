@@ -6,6 +6,7 @@ Test decoded serial vedirect data to identify a valid serial port.
  .. raises: SettingInvalidException
 """
 import logging
+from typing import Optional
 from vedirect_m8.serutils import SerialUtils as Ut
 from vedirect_m8.exceptions import SettingInvalidException
 
@@ -39,7 +40,7 @@ class SerialTestHelper:
      .. seealso: VedirectController
      .. raises: SettingInvalidException
     """
-    def __init__(self, serial_tests: dict or None = None):
+    def __init__(self, serial_tests: Optional[dict] = None):
         """
         Constructor of SerialTestHelper class.
         :param serial_tests: The serialTests configuration settings

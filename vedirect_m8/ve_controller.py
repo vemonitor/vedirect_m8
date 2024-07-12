@@ -15,7 +15,7 @@ at start, and or when reading serial data.
 import logging
 import time
 import serial
-
+from typing import Optional, Union
 from ve_utils.utype import UType as Ut
 from vedirect_m8.sertest import SerialTestHelper
 from vedirect_m8.vedirect import Vedirect
@@ -55,8 +55,8 @@ class VedirectController(Vedirect):
                  source_name: str = 'VedirectController',
                  auto_start: bool = True,
                  wait_connection: bool = True,
-                 wait_timeout: int or float = 3600,
-                 max_packet_blocks: int or None = 18
+                 wait_timeout: Union[int, float] = 3600,
+                 max_packet_blocks: Optional[int] = 18
                  ):
         """
         Constructor of VedirectController class.
@@ -100,11 +100,11 @@ class VedirectController(Vedirect):
         """Test if class Vedirect is ready."""
         return self.has_serial_com() and self.has_serial_test()
 
-    def set_wait_timeout(self, wait_timeout: int or float):
+    def set_wait_timeout(self, wait_timeout: Union[int, float]):
         """Test if class Vedirect is ready."""
         self._wait_timeout = Ut.get_float(wait_timeout, 3600)
 
-    def get_wait_timeout(self) -> float or int:
+    def get_wait_timeout(self) -> Union[int, float]:
         """Test if class Vedirect is ready."""
         return self._wait_timeout
 
@@ -273,8 +273,8 @@ class VedirectController(Vedirect):
         return False
 
     def wait_or_search_serial_connection(self,
-                                         exception: Exception or None = None,
-                                         timeout: int or float = 18400
+                                         exception: Optional[Exception] = None,
+                                         timeout: Union[int, float] = 18400
                                          ) -> bool:
         """
         Wait or search for a new serial connection.
@@ -325,9 +325,9 @@ class VedirectController(Vedirect):
 
     def read_data_callback(self,
                            callback_function,
-                           timeout: int or float = 60,
-                           max_loops: int or None = None
-                           ) -> dict or None:
+                           timeout: Union[int, float] = 60,
+                           max_loops: Optional[int] = None
+                           ) -> Optional[dict]:
         """
         Read data from the serial port and returns it to a callback function.
 

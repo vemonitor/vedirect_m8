@@ -18,6 +18,7 @@ This is a forked version of script originally created by Janne Kario.
 import logging
 import time
 from serial import SerialException
+from typing import Optional, Union
 from ve_utils.utype import UType as Ut
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.exceptions import SettingInvalidException
@@ -67,7 +68,7 @@ class Vedirect:
                  serial_conf: dict,
                  source_name: str = 'Vedirect',
                  auto_start: bool = True,
-                 max_packet_blocks: int or None = 18
+                 max_packet_blocks: Optional[int] = 18
                  ):
         """
         Constructor of Vedirect class.
@@ -110,7 +111,7 @@ class Vedirect:
         return self.max_blocks is None\
             or len(self.dict) <= self.max_blocks
 
-    def set_max_packet_blocks(self, value: int or None) -> bool:
+    def set_max_packet_blocks(self, value: Optional[int]) -> bool:
         """
         Set max blocks by packet value.
 
@@ -155,7 +156,7 @@ class Vedirect:
         """Test if class Vedirect is ready"""
         return self.is_serial_ready()
 
-    def get_serial_port(self) -> str or None:
+    def get_serial_port(self) -> Optional[str]:
         """Test if class Vedirect is ready"""
         return self._com.get_serial_port()
 
@@ -310,7 +311,7 @@ class Vedirect:
         self.state = self.WAIT_HEADER
         self.dict = {}
 
-    def input_read(self, byte) -> dict or None:
+    def input_read(self, byte) -> Optional[dict]:
         """Input read from byte."""
         try:
             ord_byte = ord(byte)
@@ -378,7 +379,7 @@ class Vedirect:
                 byte
             ) from ex
 
-    def get_serial_packet(self) -> dict or None:
+    def get_serial_packet(self) -> Optional[dict]:
         """
         Return Ve Direct block packet from serial reader.
 
@@ -388,7 +389,7 @@ class Vedirect:
         byte = self._com.ser.read(1)
         return self.input_read(byte)
 
-    def read_global_packet(self, timeout: int = 60) -> dict or None:
+    def read_global_packet(self, timeout: int = 60) -> Optional[dict]:
         """
         """
         run, now, tim = True, time.time(), 0
@@ -415,7 +416,7 @@ class Vedirect:
                 ex
             ) from SerialException
 
-    def read_data_single(self, timeout: int = 60) -> dict or None:
+    def read_data_single(self, timeout: int = 60) -> Optional[dict]:
         """
         Read a single block decoded from serial port and returns it as a dictionary.
 
@@ -447,7 +448,7 @@ class Vedirect:
     def read_data_callback(self,
                            callback_function,
                            timeout: int = 60,
-                           max_loops: int or None = None
+                           max_loops: Optional[int] = None
                            ):
         """
         Read data from the serial port and returns it to a callback function.
@@ -455,7 +456,7 @@ class Vedirect:
         :param self: Reference the class instance
         :param callback_function:function: Pass a function to the read_data_callback function
         :param timeout:int=60: Set the timeout for the read_data_callback function
-        :param max_loops:int or None=None: Limit the number of loops
+        :param max_loops:Optional[int]=None: Limit the number of loops
         """
         run, now, tim, i = True, time.time(), 0, 0
         if self.is_ready():
@@ -501,7 +502,7 @@ class Vedirect:
             and obj.get_serial_port() is not None
 
     @staticmethod
-    def is_timeout(elapsed: float or int, timeout: float or int = 60) -> bool:
+    def is_timeout(elapsed: Union[int, float], timeout: Union[int, float] = 60) -> bool:
         """
         Test if elapsed time is greater than timeout.
 

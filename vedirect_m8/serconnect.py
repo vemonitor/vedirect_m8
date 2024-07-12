@@ -14,6 +14,7 @@ import logging
 import os
 from serial import Serial, SerialException
 import serial.tools.list_ports as serial_list_ports
+from typing import Optional, Union
 from ve_utils.usys import USys
 from vedirect_m8.serutils import SerialUtils as Ut
 from vedirect_m8.exceptions import SerialConfException
@@ -46,9 +47,9 @@ class SerialConnection:
             - Flow Control None
     """
     def __init__(self,
-                 serial_port: str or None = None,
+                 serial_port: Optional[str] = None,
                  baud: int = 19200,
-                 timeout: int or float = 0,
+                 timeout: Union[int, float] = 0,
                  source_name: str = 'void'
                  ):
         """
@@ -76,11 +77,11 @@ class SerialConnection:
                             timeout=timeout,
                             source_name=source_name)
 
-    def get_serial_port(self) -> str or None:
+    def get_serial_port(self) -> Optional[str]:
         """Return serial_port value from instance."""
         return self._serial_port
 
-    def set_serial_port(self, serial_port: str or None) -> bool:
+    def set_serial_port(self, serial_port: Optional[str]) -> bool:
         """
         Set serial_port value.
 
@@ -95,7 +96,7 @@ class SerialConnection:
             return True
         return False
 
-    def set_baud(self, baud: int or None) -> bool:
+    def set_baud(self, baud: Optional[int]) -> bool:
         """
         Set baud value.
 
@@ -110,11 +111,11 @@ class SerialConnection:
             return True
         return False
 
-    def get_timeout(self) -> int or float:
+    def get_timeout(self) -> Union[int, float]:
         """Return timeout value from instance."""
         return self._timeout
 
-    def set_timeout(self, timeout: int or float or None) -> bool:
+    def set_timeout(self, timeout: Optional[Union[int, float]]) -> bool:
         """
         Set timeout value.
 
@@ -129,7 +130,7 @@ class SerialConnection:
             return True
         return False
 
-    def set_source_name(self, source_name: str or None) -> bool:
+    def set_source_name(self, source_name: Optional[str]) -> bool:
         """
         Set source_name value.
 
@@ -173,9 +174,9 @@ class SerialConnection:
                                                timeout=self._timeout)
 
     def _init_settings(self,
-                       serial_port: str or None = None,
+                       serial_port: Optional[str] = None,
                        baud: int = 19200,
-                       timeout: int or float or None = 0,
+                       timeout: Optional[Union[int, float]] = 0,
                        source_name: str = 'void'
                        ) -> bool:
         """
@@ -202,12 +203,12 @@ class SerialConnection:
         return self.is_settings()
 
     def _set_serial_conf(self,
-                         serial_port: str or None = "default",
-                         baud: int or None = None,
-                         timeout: int or float or None = -1,
-                         write_timeout: int or float or None = -1,
+                         serial_port: Optional[str] = "default",
+                         baud: Optional[int] = None,
+                         timeout: Optional[Union[int, float]] = -1,
+                         write_timeout: Optional[Union[int, float]] = -1,
                          exclusive: bool = False
-                         ) -> dict or None:
+                         ) -> Optional[dict]:
         """
         Set serial configuration settings to open serial connection.
 
@@ -256,10 +257,10 @@ class SerialConnection:
         return result
 
     def connect(self,
-                serial_port: str or None = "default",
-                baud: int or None = None,
-                timeout: int or float or None = -1,
-                write_timeout: int or float or None = -1,
+                serial_port: Optional[str] = "default",
+                baud: Optional[int] = None,
+                timeout: Optional[Union[int, float]] = -1,
+                write_timeout: Optional[Union[int, float]] = -1,
                 exclusive: bool = False
                 ) -> bool:
         """
@@ -442,7 +443,7 @@ class SerialConnection:
         return result
 
     @staticmethod
-    def get_default_serial_conf(conf: dict or None) -> dict:
+    def get_default_serial_conf(conf: Optional[dict]) -> dict:
         """Get serial configuration data with default values."""
         result = {
             "serial_port": None,
@@ -456,9 +457,9 @@ class SerialConnection:
         return result
 
     @staticmethod
-    def is_serial_conf(serial_port: str or None,
+    def is_serial_conf(serial_port: Optional[str],
                        baud: int,
-                       timeout: int or float) -> bool:
+                       timeout: Union[int, float]) -> bool:
         """
         Test if valid serial configuration settings.
 
@@ -479,7 +480,7 @@ class SerialConnection:
             and SerialConnection.is_timeout(timeout)
 
     @staticmethod
-    def is_serial_conf_data(conf: dict or None) -> bool:
+    def is_serial_conf_data(conf: Optional[dict]) -> bool:
         """
         Test if valid serial configuration settings.
 
@@ -511,7 +512,7 @@ class SerialConnection:
         return [os.path.expanduser('~')]
 
     @staticmethod
-    def get_virtual_home_serial_port(port: str) -> str or None:
+    def get_virtual_home_serial_port(port: str) -> Optional[str]:
         """
         Return the virtual serial port path from user home directory.
 
@@ -606,7 +607,7 @@ class SerialConnection:
            ]
 
     @staticmethod
-    def is_timeout(timeout: int or float or None) -> bool:
+    def is_timeout(timeout: Optional[Union[int, float]]) -> bool:
         """
         Test if is valid serial read timeout.
 
@@ -628,7 +629,7 @@ class SerialConnection:
         return (Ut.is_numeric(timeout) and timeout >= 0) or timeout is None
 
     @staticmethod
-    def is_serial_port(serial_port: str or None) -> bool:
+    def is_serial_port(serial_port: Optional[str]) -> bool:
         """
         Test if is valid serial port.
 
