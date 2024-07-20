@@ -211,7 +211,7 @@ class Vedirectsim:
                 self.dict
             )
 
-        self.dict = dict()
+        self.dict = {}
         return packet_write
 
     def process_data(self, key: str, value: str):

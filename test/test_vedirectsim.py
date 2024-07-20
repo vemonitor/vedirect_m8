@@ -13,6 +13,10 @@ def helper_manager_fixture():
     class HelperManager:
         """Json Helper test manager fixture Class"""
         def __init__(self):
+            self.init_object()
+        
+        def init_object(self):
+            """Init Object"""
             serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
             device = "bmv702"
 
@@ -46,6 +50,7 @@ class TestVeDirectSim:
 
     def test_get_dump_file_path(self, helper_manager):
         """Test get_dump_file_path method."""
+        helper_manager.init_object()
         helper_manager.obj.serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
         assert helper_manager.obj.serial_connect()
         with pytest.raises(ValueError):
@@ -78,6 +83,7 @@ class TestVeDirectSim:
 
     def test_send_packet(self, helper_manager):
         """Test send_packet method."""
+        helper_manager.init_object()
         helper_manager.obj.perf = PerfStats()
         helper_manager.obj.perf.start_perf_key("writes")
         helper_manager.obj.dict = dict()
@@ -112,6 +118,7 @@ class TestVeDirectSim:
 
     def test_read_dump_file_line(self, helper_manager):
         """Test read_dump_file_lines method."""
+        helper_manager.init_object()
         assert helper_manager.obj.read_dump_file_lines(max_writes=1)
         helper_manager.obj.set_device_settings("bluesolar_1.23")
         assert helper_manager.obj.read_dump_file_lines(max_writes=1)
@@ -120,6 +127,7 @@ class TestVeDirectSim:
 
     def test_run(self, helper_manager):
         """Test run method."""
+        helper_manager.init_object()
         assert helper_manager.obj.run(max_writes=1)
         helper_manager.obj.set_device_settings("bluesolar_1.23")
         assert helper_manager.obj.run(max_writes=1)

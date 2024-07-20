@@ -9,6 +9,10 @@ def helper_manager_fixture():
     class HelperManager:
         """Json Helper test manager fixture Class"""
         def __init__(self):
+            self.init_object()
+
+        def init_object(self):
+            """Init Object"""
             self.obj = PacketStats()
 
     return HelperManager()
@@ -44,6 +48,7 @@ class TestPacketStats:
 
     def test_add_stats(self, helper_manager):
         """Test is_app_block method."""
+        helper_manager.init_object()
         packets = TestPacketStats.get_dummy_packets_1()
         assert not helper_manager.obj.has_stats()
         assert helper_manager.obj.add_stats(packets[0])
@@ -53,6 +58,7 @@ class TestPacketStats:
 
     def test_is_packet_in_stats(self, helper_manager):
         """Test is_app_block method."""
+        helper_manager.init_object()
         packets = TestPacketStats.get_dummy_packets_1()
         assert not helper_manager.obj.has_stats()
         assert helper_manager.obj.add_stats(packets[0])
@@ -86,6 +92,7 @@ class TestPacketStats:
 
     def test_set_loop_packet_stats(self, helper_manager):
         """Test set_loop_packet_stats method."""
+        helper_manager.init_object()
         packets_1 = TestPacketStats.get_dummy_packets_1()
         packets_2 = TestPacketStats.get_dummy_packets_2()
         nb_packets_1 = len(packets_1)
@@ -101,6 +108,7 @@ class TestPacketStats:
 
     def test_count_linear_index(self, helper_manager):
         """Test set_packet_stats method."""
+        helper_manager.init_object()
         packets = TestPacketStats.get_dummy_packets_1()
 
         assert helper_manager.obj.add_stats(packets[0])

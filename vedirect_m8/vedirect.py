@@ -454,6 +454,7 @@ class Vedirect:
         :param timeout:int=60: Set the timeout for the read_data_callback function
         :param max_loops:Optional[int]=None: Limit the number of loops
         """
+        result = False
         run, now, tim, i = True, time.time(), 0, 0
         if self.is_ready():
             while run:
@@ -476,7 +477,8 @@ class Vedirect:
                 # timeout serial read
                 Vedirect.is_timeout(tim-now, timeout)
                 if isinstance(max_loops, int) and 0 < max_loops <= i:
-                    return True
+                    result = True
+                    run = False
                 time.sleep(0.1)
         else:
             raise SerialConnectionException(
@@ -484,6 +486,7 @@ class Vedirect:
                 'Unable to read serial data. '
                 'Not connected to serial port...'
             )
+        return result
 
     @staticmethod
     def is_serial_com(obj: SerialConnection) -> bool:

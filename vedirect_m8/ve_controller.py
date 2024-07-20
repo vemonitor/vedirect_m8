@@ -182,7 +182,7 @@ class VedirectController(Vedirect):
         """Return decoded Vedirect blocks from serial to identify the right serial port."""
         result = None
         try:
-            result = dict()
+            result = {}
             for i in range(4):
                 try:
                     data = self.read_data_single(timeout=2)
@@ -213,8 +213,9 @@ class VedirectController(Vedirect):
         if SerialConnection.is_serial_port(port):
             timeout, serial_port = self._com.get_timeout(), self._com.get_serial_port()
             is_port_open = self._com.is_serial_ready() and port == self._com.ser.port
-            if not is_port_open:
-                self._com.ser.close()
+            if is_port_open is False:
+                if self._com.is_serial_ready():
+                    self._com.ser.close()
                 self._com.connect(**{"serial_port": port, 'timeout': 0})
 
             if self._com.is_serial_ready():
@@ -373,6 +374,7 @@ class VedirectController(Vedirect):
 
             if Ut.is_int(max_loops) and i >= max_loops:
                 result = True
+                run = False
         return result
 
     def read_data_callback(self,

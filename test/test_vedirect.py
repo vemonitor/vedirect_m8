@@ -20,6 +20,10 @@ def helper_manager_fixture():
     class HelperManager:
         """Json Helper test manager fixture Class"""
         def __init__(self):
+            self.init_object()
+
+        def init_object(self):
+            """Init Object"""
             conf = {
                 'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
                 'baud': 19200,
@@ -59,6 +63,7 @@ class TestVedirect:
 
     def test_is_serial_com(self, helper_manager):
         """Test is_serial_com method."""
+        helper_manager.init_object()
         assert Vedirect.is_serial_com(helper_manager.obj._com)
         assert not Vedirect.is_serial_com(dict())
         assert not Vedirect.is_serial_com(None)
@@ -74,6 +79,7 @@ class TestVedirect:
 
     def test_init_serial_connection_from_object(self, helper_manager):
         """Test init_serial_connection_from_object method base."""
+        helper_manager.init_object()
         obj = helper_manager.obj._com.serialize()
         obj = SerialConnection(**obj)
         assert helper_manager.obj.init_serial_connection_from_object(obj)
@@ -104,6 +110,7 @@ class TestVedirect:
 
     def test_init_serial_connection(self, helper_manager):
         """Test init_serial_connection method."""
+        helper_manager.init_object()
         assert helper_manager.obj.init_serial_connection(
             {"serial_port": helper_manager.obj._com._serial_port},
             source_name="TestVedirect"
@@ -130,6 +137,7 @@ class TestVedirect:
 
     def test_init_settings(self, helper_manager):
         """Test init_settings method."""
+        helper_manager.init_object()
         assert helper_manager.obj.init_settings(
             {"serial_port": helper_manager.obj._com._serial_port},
             source_name="TestVedirect"
@@ -156,6 +164,7 @@ class TestVedirect:
 
     def test_init_data_read(self, helper_manager):
         """Test init_data_read method."""
+        helper_manager.init_object()
         packet = helper_manager.obj.read_data_single()
         assert Ut.is_dict(packet, not_null=True)
         helper_manager.obj.init_data_read()
@@ -203,6 +212,7 @@ class TestVedirect:
 
     def test_read_global_packet(self, helper_manager):
         """Test read_serial_packet method."""
+        helper_manager.init_object()
         data = helper_manager.obj.read_global_packet()
         assert Ut.is_dict(data, not_null=True)
 
@@ -215,6 +225,7 @@ class TestVedirect:
 
     def test_read_data_single(self, helper_manager):
         """Test read_data_single method."""
+        helper_manager.init_object()
         data = helper_manager.obj.read_data_single()
         assert Ut.is_dict(data, not_null=True)
         helper_manager.obj._com = None
@@ -223,25 +234,28 @@ class TestVedirect:
 
     def test_read_data_callback(self, helper_manager):
         """Test read_data_callback method."""
-
+        helper_manager.init_object()
         def func_callback(data: Optional[dict]):
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
 
-        helper_manager.obj.read_data_callback(callback_function=func_callback,
-                                    timeout=20,
-                                    max_loops=1
-                                    )
+        helper_manager.obj.read_data_callback(
+            callback_function=func_callback,
+            timeout=20,
+            max_loops=1
+        )
 
         with pytest.raises(ReadTimeoutException):
-            helper_manager.obj.read_data_callback(callback_function=func_callback,
-                                        timeout=0.1,
-                                        max_loops=1
-                                        )
+            helper_manager.obj.read_data_callback(
+                callback_function=func_callback,
+                timeout=0.1,
+                max_loops=1
+            )
 
         with pytest.raises(SerialConnectionException):
             helper_manager.obj._com = None
-            helper_manager.obj.read_data_callback(callback_function=func_callback,
-                                        timeout=20,
-                                        max_loops=1
-                                        )
+            helper_manager.obj.read_data_callback(
+                callback_function=func_callback,
+                timeout=20,
+                max_loops=1
+            )

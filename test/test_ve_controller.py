@@ -18,6 +18,10 @@ def helper_manager_fixture():
     class HelperManager:
         """Json Helper test manager fixture Class"""
         def __init__(self):
+            self.init_object()
+
+        def init_object(self):
+            """Init Object"""
             conf = {
                 'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
                 'baud': 19200,
@@ -62,6 +66,7 @@ class TestVedirectController:
 
     def test_is_serial_com(self, helper_manager):
         """Test is_serial_com method."""
+        helper_manager.init_object()
         assert VedirectController.is_serial_com(helper_manager.obj._com)
 
     @staticmethod
@@ -95,6 +100,7 @@ class TestVedirectController:
 
     def test_init_settings(self, helper_manager):
         """Test init_settings method."""
+        helper_manager.init_object()
         good_serial_port = helper_manager.obj._com._serial_port
         helper_manager.obj.set_wait_timeout(20)
 
@@ -140,11 +146,13 @@ class TestVedirectController:
 
     def test_read_data_to_test(self, helper_manager):
         """Test read_data_to_test method."""
+        helper_manager.init_object()
         data = helper_manager.obj.read_data_to_test()
         assert Ut.is_dict(data, not_null=True)
 
     def test__get_test_data(self, helper_manager):
         """Test _get_test_data method."""
+        helper_manager.init_object()
         helper_manager.obj.init_settings(
                 {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1")},
                 source_name="TestVedirectController"
@@ -158,6 +166,7 @@ class TestVedirectController:
 
     def test_test_serial_port(self, helper_manager):
         """Test test_serial_port method."""
+        helper_manager.init_object()
         assert helper_manager.obj.test_serial_port(
             port=helper_manager.obj.get_serial_port()
         )
@@ -180,6 +189,7 @@ class TestVedirectController:
 
     def test_test_serial_ports(self, helper_manager):
         """Test test_serial_ports method."""
+        helper_manager.init_object()
         ports = helper_manager.obj._com.get_serial_ports_list()
         assert helper_manager.obj.test_serial_ports(ports)
         helper_manager.obj._ser_test = None
@@ -188,6 +198,7 @@ class TestVedirectController:
 
     def test_wait_or_search_serial_connection(self, helper_manager):
         """Test wait_or_search_serial_connection method."""
+        helper_manager.init_object()
         assert helper_manager.obj.wait_or_search_serial_connection(
             timeout=2
         )
@@ -207,6 +218,7 @@ class TestVedirectController:
 
     def test_search_serial_port(self, helper_manager):
         """Test search_serial_port method."""
+        helper_manager.init_object()
         try:
             helper_manager.obj.init_serial_connection(
                 {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
@@ -226,6 +238,7 @@ class TestVedirectController:
 
     def test_init_data_read(self, helper_manager):
         """Test init_data_read method."""
+        helper_manager.init_object()
         packet = helper_manager.obj.read_data_single()
         assert Ut.is_dict(packet, not_null=True)
         # init_data_read() is now called in read_data_single()
@@ -233,25 +246,28 @@ class TestVedirectController:
 
     def test_read_data_single(self, helper_manager):
         """Test read_data_single method."""
+        helper_manager.init_object()
         data = helper_manager.obj.read_data_single()
         assert Ut.is_dict(data, not_null=True)
 
     def test_run_callback_on_packet(self, helper_manager):
         """Test run_callback_on_packet method."""
+        helper_manager.init_object()
         def func_callback(data: Optional[dict]):
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
         helper_manager.obj._com.ser.close()
-        helper_manager.obj.set_wait_timeout(30)
-        res = helper_manager.obj.run_callback_on_packet(callback_function=func_callback,
-                                    timeout=20,
-                                    max_loops=1
-                                    )
+        helper_manager.obj.set_wait_timeout(10)
+        res = helper_manager.obj.run_callback_on_packet(
+            callback_function=func_callback,
+            timeout=10,
+            max_loops=1
+        )
         assert res is True
 
     def test_read_data_callback(self, helper_manager):
         """Test run_callback_on_packet method."""
-
+        helper_manager.init_object()
         def func_callback(data: Optional[dict]):
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
@@ -260,7 +276,7 @@ class TestVedirectController:
             """Callback function."""
             assert data is None
 
-        helper_manager.obj.set_wait_timeout(30)
+        helper_manager.obj.set_wait_timeout(10)
         helper_manager.obj.run_callback_on_packet(
             callback_function=func_callback,
             timeout=20,
