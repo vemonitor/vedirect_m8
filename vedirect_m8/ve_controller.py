@@ -14,13 +14,13 @@ at start, and or when reading serial data.
 """
 import logging
 import time
-import serial
 from typing import Optional, Union
+import serial
 from ve_utils.utype import UType as Ut
 from vedirect_m8.sertest import SerialTestHelper
 from vedirect_m8.vedirect import Vedirect
 from vedirect_m8.serconnect import SerialConnection
-from vedirect_m8.exceptions import SerialVeException, SettingInvalidException
+from vedirect_m8.exceptions import SettingInvalidException
 from vedirect_m8.exceptions import InputReadException
 from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
@@ -124,15 +124,13 @@ class VedirectController(Vedirect):
                 raise SettingInvalidException(
                     "[Vedirect::init_serial_test] "
                     "Unable to init SerialTestHelper, "
-                    "bad parameters : %s." %
-                    serial_test
+                    f"bad parameters : {serial_test}."
                 )
             return True
         raise SettingInvalidException(
             "[Vedirect::init_serial_test] "
             "Unable to init SerialTestHelper, "
-            "bad parameters : %s." %
-            serial_test
+            f"bad parameters : {serial_test}."
         )
 
     def init_settings(self,
@@ -176,15 +174,15 @@ class VedirectController(Vedirect):
                 raise SerialConnectionException(
                     "[VedirectController::init_settings] "
                     "Unable to retrieve valid serial port to read. "
-                    "waiting: %ss." % self._wait_timeout
-                )
+                    f"waiting: {self._wait_timeout}s."
+                ) from ex
         return result
 
     def _get_test_data(self) -> dict:
         """Return decoded Vedirect blocks from serial to identify the right serial port."""
         result = None
         try:
-            result = dict()
+            result = {}
             for i in range(4):
                 try:
                     data = self.read_data_single(timeout=2)
@@ -214,7 +212,13 @@ class VedirectController(Vedirect):
         result = False
         if SerialConnection.is_serial_port(port):
             timeout, serial_port = self._com.get_timeout(), self._com.get_serial_port()
-            if self._com.connect(**{"serial_port": port, 'timeout': 0}):
+            is_port_open = self._com.is_serial_ready() and port == self._com.ser.port
+            if is_port_open is False:
+                if self._com.is_serial_ready():
+                    self._com.ser.close()
+                self._com.connect(**{"serial_port": port, 'timeout': 0})
+
+            if self._com.is_serial_ready():
                 data = self.read_data_to_test()
                 if self._ser_test.run_serial_tests(data):
                     self._com.ser.timeout = timeout
@@ -296,6 +300,9 @@ class VedirectController(Vedirect):
         .. raises:: TimeoutException, VedirectException
         :doc-author: Trelent
         """
+        if not isinstance(exception, Exception):
+            exception = Exception
+
         if self.is_ready_to_search_ports():
             logger.info(
                 "[VeDirect::wait_or_search_serial_connection] "
@@ -313,23 +320,23 @@ class VedirectController(Vedirect):
                     raise ReadTimeoutException(
                         "[VeDirect::wait_or_search_serial_connection] "
                         "Unable to connect to any serial item. "
-                        "Timeout error : %s. Exception : %s" %
-                        (timeout, exception)
-                    )
+                        f"Timeout error : {timeout}."
+                    ) from exception
                 time.sleep(5)
         raise SerialConnectionException(
             "[VeDirect::wait_or_search_serial_connection] "
             "Unable to connect to any serial item. "
-            "Exception : %s" % exception
-        )
+        ) from exception
 
-    def run_callback_on_packet(self, 
+    def run_callback_on_packet(self,
                                callback_function,
                                timeout: int = 60,
                                max_loops: Optional[int] = None
                                ) -> Optional[dict]:
         """
+        Run Callback function on Serial Packet
         """
+        result = False
         run, now, tim, i = True, time.time(), 0, 0
         while run:
             tim = time.time()
@@ -366,7 +373,9 @@ class VedirectController(Vedirect):
             Vedirect.is_timeout(tim - now, timeout)
 
             if Ut.is_int(max_loops) and i >= max_loops:
-                return True
+                result = True
+                run = False
+        return result
 
     def read_data_callback(self,
                            callback_function,

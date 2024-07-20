@@ -1,4 +1,5 @@
 # VeDirect M8
+
 ![CI/CD](https://github.com/vemonitor/vedirect_m8/actions/workflows/python-package.yml/badge.svg?branch=main)
 [![PyPI package](https://img.shields.io/pypi/v/vedirect_m8.svg)](https://pypi.org/project/vedirect_m8/)
 [![Known Vulnerabilities](https://snyk.io/test/github/mano8/vedirect_m8/badge.svg)](https://snyk.io/test/github/mano8/vedirect_m8)
@@ -7,6 +8,7 @@
 [![Downloads](https://static.pepy.tech/badge/vedirect_m8)](https://pepy.tech/project/vedirect_m8)
 
 ## Description
+
 This is a Python library for decoding the Victron Energy VE.Direct text protocol
 used in their range of MPPT solar charge controllers and battery monitors.
 
@@ -197,7 +199,7 @@ sending vedirect encoded data containing at least:
   whose values are respectively ```0x203``` and ```308```.
 
 When the script is initialized, it first tries to connect to the
-```/${HOME}/vmodem1``` serial port. 
+```/${HOME}/vmodem1``` serial port.
 
 If the connection fails, it waits for an available serial port
 that matches all the tests above.

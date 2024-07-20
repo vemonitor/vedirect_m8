@@ -153,7 +153,7 @@ class PacketStats:
         return result
 
     def set_loop_packet_stats(self, index: int, packet: dict) -> bool:
-        """"""
+        """Set Loop Packet Stats"""
         result = False
         stats_packet = self.set_packet_stats(
             index=index,

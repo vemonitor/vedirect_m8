@@ -13,8 +13,8 @@ import logging
 import inspect
 import os
 import time
-import serial
 from typing import Optional
+import serial
 from ve_utils.utype import UType as Ut
 from ve_utils.utime import PerfStats
 
@@ -76,8 +76,7 @@ class Vedirectsim:
             )
             return True
         raise serial.SerialException(
-            "Fatal error, unable to connect on serial port %s." %
-            self.serialport
+            f"Fatal error, unable to connect on serial port {self.serialport}."
         )
 
     def serial_connect(self) -> bool:
@@ -114,20 +113,20 @@ class Vedirectsim:
             os.path.join(os.path.abspath("/opt/vedirect_m8"), "sim_data"),
             os.path.join(os.path.abspath(os.path.expanduser("~")), "sim_data"),
         ]
-        file = "%s.dump" % self.device
+        file = f"{self.device}.dump"
         for path in path_order:
             current_path = os.path.join(path, file)
             if os.path.isfile(current_path):
-                logger.debug("Dump data loaded from %s" % current_path)
+                logger.debug(
+                    "Dump data loaded from %s",
+                     current_path
+                )
                 result = current_path
                 break
 
         if result is None:
             raise ValueError(
-                "Fatal error, unable to locate dump file %s from paths: %s." % (
-                    file,
-                    path_order
-                )
+                f"Fatal error, unable to locate dump file {file} from paths: {path_order}."
             )
         return result
 
@@ -150,9 +149,8 @@ class Vedirectsim:
             )
             return True
         raise ValueError(
-            "Fatal error, unable to set device settings on %s."
-            "Valid devices are : (bmv702, bluesolar_1.23, smartsolar_1.39) " %
-            device
+            f"Fatal error, unable to set device settings on {device}."
+            "Valid devices are : (bmv702, bluesolar_1.23, smartsolar_1.39) "
         )
 
     def convert(self, data: dict) -> list:
@@ -213,7 +211,7 @@ class Vedirectsim:
                 self.dict
             )
 
-        self.dict = dict()
+        self.dict = {}
         return packet_write
 
     def process_data(self, key: str, value: str):
@@ -235,7 +233,7 @@ class Vedirectsim:
     def read_dump_file(self):
         """Read dump file."""
         if self.is_ready():
-            with open(self.dump_file_path) as lines:
+            with open(self.dump_file_path, encoding='utf-8') as lines:
                 for line in lines:
                     values = Vedirectsim.get_key_value_from_line(line)
                     if Ut.is_tuple(values, eq=2):
@@ -295,10 +293,9 @@ class Vedirectsim:
                     break
             return running
         raise ValueError(
-            "Fatal error, unable to set device settings on %s."
+            f"Fatal error, unable to set device settings on {self.device}."
             "Valid devices are : (bmv702, bluesolar_1.23, smartsolar_1.39). "
-            "Or can be path file error: %s" %
-            (self.device, self.dump_file_path)
+            f"Or can be path file error: {self.dump_file_path}"
         )
 
     @staticmethod

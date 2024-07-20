@@ -6,7 +6,7 @@ __copyright__ = "Copyright 2015, Janne Kario"
 __deprecated__ = False
 __license__ = "MIT"
 __status__ = "Production"
-__version__ = "1.3.0.5"
+__version__ = "1.3.1"
 
 
 class AppFilter(logging.Filter):
@@ -16,7 +16,7 @@ class AppFilter(logging.Filter):
 
     def filter(self, record):
         """Logger app version."""
-        record.app_version = "vedirect-%s" % __version__
+        record.app_version = "vedirect-{__version__}"
         return True
 
 
