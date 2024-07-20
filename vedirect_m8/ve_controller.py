@@ -212,7 +212,12 @@ class VedirectController(Vedirect):
         result = False
         if SerialConnection.is_serial_port(port):
             timeout, serial_port = self._com.get_timeout(), self._com.get_serial_port()
-            if self._com.connect(**{"serial_port": port, 'timeout': 0}):
+            is_port_open = self._com.is_serial_ready() and port == self._com.ser.port
+            if not is_port_open:
+                self._com.ser.close()
+                self._com.connect(**{"serial_port": port, 'timeout': 0})
+
+            if self._com.is_serial_ready():
                 data = self.read_data_to_test()
                 if self._ser_test.run_serial_tests(data):
                     self._com.ser.timeout = timeout
