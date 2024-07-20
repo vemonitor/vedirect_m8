@@ -1,3 +1,4 @@
+"""Setup Package"""
 import pathlib
 from setuptools import setup
 
@@ -8,7 +9,7 @@ HERE = pathlib.Path(__file__).parent
 README = (HERE / "README.md").read_text()
 
 setup(name='vedirect_m8',
-      version='1.3.0.5',
+      version='1.3.1',
       packages=['vedirect_m8'],
       package_dir={
             'vedirect_m8': 'vedirect_m8'
