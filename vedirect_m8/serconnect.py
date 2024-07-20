@@ -12,9 +12,9 @@ Contain method to scan all available ports.
 """
 import logging
 import os
+from typing import Optional, Union
 from serial import Serial, SerialException
 import serial.tools.list_ports as serial_list_ports
-from typing import Optional, Union
 from ve_utils.usys import USys
 from vedirect_m8.serutils import SerialUtils as Ut
 from vedirect_m8.exceptions import SerialConfException
@@ -231,13 +231,13 @@ class SerialConnection:
         :return: a dictionary with the configuration to open a serial connection.
             Or None if a parameter is invalid.
         """
-        if (not serial_port == "default"
+        if (serial_port != "default"
                 and not SerialConnection.is_serial_port(serial_port))\
                 or (baud is not None
                     and not SerialConnection.is_baud(baud))\
-                or (not timeout == -1
+                or (timeout != -1
                     and not SerialConnection.is_timeout(timeout))\
-                or (not write_timeout == -1
+                or (write_timeout != -1
                     and not SerialConnection.is_timeout(write_timeout)):
             result = None
         else:
@@ -318,32 +318,28 @@ class SerialConnection:
                     result = True
                 else:
                     raise OpenSerialVeException(
-                        '[SerialConnection::connect::%s] '
-                        'Unable to open serial connection. args: %s' %
-                        (self._source_name, serial_conf)
+                        f'[SerialConnection::connect::{self._source_name}] '
+                        f'Unable to open serial connection. args: {serial_conf}'
                     )
 
             except SerialException as ex:
                 raise SerialVeException(
-                    '[SerialConnection::connect::%s] '
+                    f'[SerialConnection::connect::{self._source_name}] '
                     'Exception when attempting to open serial connection. '
-                    ' args: %s - ex : %s' %
-                    (self._source_name, serial_conf, ex)
+                    f' args: {serial_conf} - ex : {ex}'
                 ) from SerialException
             except ValueError as ex:
                 raise SerialConfException(
-                    '[SerialConnection::connect::%s] '
+                    f'[SerialConnection::connect::{self._source_name}] '
                     'Parameter are out of range, e.g. baud rate, data bits. '
-                    ' args: %s - ex : %s' %
-                    (self._source_name, serial_conf, ex)
+                    f' args: {serial_conf} - ex : {ex}'
                 ) from ValueError
 
         else:
             raise SerialConfException(
-                '[SerialConnection::connect::%s] '
+                f'[SerialConnection::connect::{self._source_name}] '
                 'Unable to open serial connection. '
-                'Invalid configuration : %s' %
-                (self._source_name, serial_conf)
+                f'Invalid configuration : {serial_conf}'
             )
 
         return result

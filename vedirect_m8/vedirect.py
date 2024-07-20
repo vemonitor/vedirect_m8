@@ -17,8 +17,8 @@ This is a forked version of script originally created by Janne Kario.
 """
 import logging
 import time
-from serial import SerialException
 from typing import Optional, Union
+from serial import SerialException
 from ve_utils.utype import UType as Ut
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.exceptions import SettingInvalidException
@@ -215,8 +215,7 @@ class Vedirect:
             raise SerialConfException(
                 "[Vedirect::init_serial_connection_from_object] "
                 "Unable to init init_serial_connection_from_object, "
-                "bad parameters : %s" %
-                serial_connection
+                f"bad parameters : {serial_connection}"
             )
         return result
 
@@ -363,20 +362,16 @@ class Vedirect:
                     self.state = self.WAIT_HEADER
             else:
                 raise AssertionError()
-        except PacketReadException:
+        except PacketReadException as ex:
             raise PacketReadException(
                 "[Vedirect::input_read] "
                 "Serial input read error: "
-                "Packet has limit of %s/%s blocks" % (
-                    len(self.dict),
-                    self.max_blocks
-                )
-            )
+                f"Packet has limit of {len(self.dict)}/{self.max_blocks} blocks"
+            ) from ex
         except Exception as ex:
             raise InputReadException(
                 "[Vedirect::input_read] "
-                "Serial input read error on byte : %s" %
-                byte
+                f"Serial input read error on byte : {byte}"
             ) from ex
 
     def get_serial_packet(self) -> Optional[dict]:
@@ -391,6 +386,7 @@ class Vedirect:
 
     def read_global_packet(self, timeout: int = 60) -> Optional[dict]:
         """
+        Read Global packet from serial
         """
         run, now, tim = True, time.time(), 0
         try:
@@ -412,9 +408,9 @@ class Vedirect:
         except SerialException as ex:
             raise SerialVeException(
                 "[VeDirect:read_data_single] "
-                "Unable to read vedirect data : %s." %
-                ex
-            ) from SerialException
+                "Unable to read vedirect data."
+            ) from ex
+        return None
 
     def read_data_single(self, timeout: int = 60) -> Optional[dict]:
         """

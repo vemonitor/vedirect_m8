@@ -16,7 +16,7 @@ class AppFilter(logging.Filter):
 
     def filter(self, record):
         """Logger app version."""
-        record.app_version = "vedirect-%s" % __version__
+        record.app_version = "vedirect-{__version__}"
         return True
 
 

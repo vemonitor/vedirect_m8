@@ -14,7 +14,11 @@ __version__ = "1.0.0"
 
 
 class TestSerialUtils:
+    """
+    SerialUtils unittest class.
 
+    Use pytest package.
+    """
     @staticmethod
     def test_is_key_pattern():
         """Test is_key_pattern method."""
