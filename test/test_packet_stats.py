@@ -2,6 +2,7 @@
 from ve_utils.utype import UType as Ut
 import pytest
 from vedirect_m8.packet_stats import PacketStats
+from vedirect_m8.exceptions import SettingInvalidException
 
 
 @pytest.fixture(name="helper_manager", scope="class")
@@ -26,9 +27,9 @@ class TestPacketStats:
     def get_dummy_packets_1():
         """Test is_app_block method."""
         return [
-            {"c": 2, "d": 3},
-            {"e": 4, "f": 5, "g": 6, "h": 7},
-            {"i": 8, "j": 9, "k": 10}
+            {"cc": 2, "dd": 3},
+            {"ee": 4, "ff": 5, "gg": 6, "hh": 7},
+            {"ii": 8, "jj": 9, "kk": 10}
         ]
 
     @staticmethod
@@ -41,12 +42,93 @@ class TestPacketStats:
         ]
 
     def test_nb_packets(self, helper_manager):
-        """Test is_app_block method."""
+        """Test nb_packets methods."""
         packets = TestPacketStats.get_dummy_packets_1()
         assert helper_manager.obj.add_stats(packets[0])
         assert Ut.is_int(helper_manager.obj.get_nb_packets())
         assert Ut.is_int(helper_manager.obj._set_nb_packets(32))
         assert Ut.is_int(helper_manager.obj.init_nb_packets())
+
+    def test_accepted_keys(self, helper_manager):
+        """Test accepted_keys methods."""
+        helper_manager.init_object()
+        packets = TestPacketStats.get_dummy_packets_1()
+        nb_packets = len(packets)
+        # test valid packet keys
+        assert helper_manager.obj.set_accepted_keys(
+            values=['cc', 'dd', 'ee', 'ff', 'gg', 'hh', 'ii', 'jj', 'kk']
+        )
+
+        for i in range(nb_packets):
+            assert helper_manager.obj.is_accepted_packet_keys(
+                packets[i]
+            ) is True
+
+        # test invalid packet keys
+        assert helper_manager.obj.set_accepted_keys(
+            values=['dd', 'ee', 'ff', 'hh', 'ii', 'jj']
+        )
+
+        for i in range(nb_packets):
+            assert helper_manager.obj.is_accepted_packet_keys(
+                packets[i]
+            ) is False
+        # test get_accepted_keys
+        data = helper_manager.obj.get_accepted_keys()
+        assert data == ['dd', 'ee', 'ff', 'hh', 'ii', 'jj']
+
+        # test None packet keys
+        assert helper_manager.obj.set_accepted_keys(
+            values=None
+        ) is False
+
+        for i in range(nb_packets):
+            assert helper_manager.obj.is_accepted_packet_keys(
+                packets[i]
+            ) is True
+
+        # test get_accepted_keys
+        data = helper_manager.obj.get_accepted_keys()
+        assert data is None
+
+    def test_set_accepted_keys_error(self, helper_manager):
+        """Test accepted_keys methods."""
+        helper_manager.init_object()
+        # test exception packet keys
+        with pytest.raises(SettingInvalidException):
+            helper_manager.obj.set_accepted_keys(
+                values=['dd', 'ee$', 'ff', 'hh', 'ii', 'jj']
+            )
+
+        with pytest.raises(SettingInvalidException):
+            helper_manager.obj.set_accepted_keys(
+                values=['dd', 'aaaaaaaaaaaaaaaaaaaa!', 'ff', 'hh', 'ii', 'jj']
+            )
+
+        with pytest.raises(SettingInvalidException):
+            helper_manager.obj.set_accepted_keys(
+                values=['dd', '%20aa%20', 'ff', 'hh', 'ii', 'jj']
+            )
+
+    def test_reset_global_stats(self, helper_manager):
+        """Test is_app_block method."""
+        assert helper_manager.obj.is_read_stats() is True
+        assert helper_manager.obj.has_nb_bad_packets() is True
+        assert helper_manager.obj.has_serial_read_errors() is True
+        assert helper_manager.obj.add_nb_bad_packets() > 0
+        assert helper_manager.obj.add_serial_read_errors() > 0
+        assert helper_manager.obj.set_linear_flow(False) is False
+
+        assert helper_manager.obj.get_nb_bad_packets() == 1
+        assert helper_manager.obj.get_serial_read_errors() == 1
+        assert helper_manager.obj.is_linear_flow() is False
+        assert helper_manager.obj.is_read_stats() is False
+
+        helper_manager.obj.reset_global_stats()
+        assert helper_manager.obj.is_read_stats() is True
+        assert helper_manager.obj.get_nb_bad_packets() == 0
+        assert helper_manager.obj.get_serial_read_errors() == 0
+        assert helper_manager.obj.is_linear_flow() is True
 
     def test_add_stats(self, helper_manager):
         """Test is_app_block method."""
@@ -55,18 +137,6 @@ class TestPacketStats:
         assert not helper_manager.obj.has_stats()
         assert helper_manager.obj.add_stats(packets[0])
         assert helper_manager.obj.has_stats()
-        helper_manager.obj.reset_stats()
-        assert not helper_manager.obj.has_stats()
-
-    def test_is_packet_in_stats(self, helper_manager):
-        """Test is_app_block method."""
-        helper_manager.init_object()
-        packets = TestPacketStats.get_dummy_packets_1()
-        assert not helper_manager.obj.has_stats()
-        assert helper_manager.obj.add_stats(packets[0])
-        assert helper_manager.obj.add_stats(packets[1])
-        assert helper_manager.obj.is_packet_in_stats(packets[0])
-        assert not helper_manager.obj.is_packet_in_stats(packets[2])
         helper_manager.obj.reset_stats()
         assert not helper_manager.obj.has_stats()
 
@@ -100,13 +170,16 @@ class TestPacketStats:
         nb_packets_1 = len(packets_1)
         nb_packets_2 = len(packets_2)
         for i in range(nb_packets_1):
-            assert helper_manager.obj.set_loop_packet_stats(i, packets_1[i])
+            assert helper_manager.obj.set_loop_packet_stats(
+                index=i,
+                packet=packets_1[i]
+            )
 
         for y in range(9):
             for i in range(nb_packets_2):
                 assert helper_manager.obj.set_loop_packet_stats(
-                    i,
-                    packets_2[i]
+                    index=i,
+                    packet=packets_2[i]
                 )
         stats = helper_manager.obj.get_packet_stats_by_index(0)
         assert stats.get('nb_resets') == 1
