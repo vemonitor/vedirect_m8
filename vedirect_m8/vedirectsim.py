@@ -20,10 +20,7 @@ from ve_utils.utime import PerfStats
 
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"
-__deprecated__ = False
 __license__ = "MIT"
-__status__ = "Production"
-__version__ = "1.0.0"
 
 logging.basicConfig()
 logger = logging.getLogger("vedirect")

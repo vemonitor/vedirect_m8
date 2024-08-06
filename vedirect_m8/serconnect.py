@@ -23,10 +23,7 @@ from vedirect_m8.exceptions import SerialVeException
 
 __author__ = "Eli Serra"
 __copyright__ = "Copyright 2020, Eli Serra"
-__deprecated__ = False
 __license__ = "MIT"
-__status__ = "Production"
-__version__ = "2.0.0"
 
 logging.basicConfig()
 logger = logging.getLogger("vedirect")
