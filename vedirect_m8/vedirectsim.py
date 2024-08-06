@@ -119,21 +119,23 @@ class Vedirectsim:
             if os.path.isfile(current_path):
                 logger.debug(
                     "Dump data loaded from %s",
-                     current_path
+                    current_path
                 )
                 result = current_path
                 break
 
         if result is None:
             raise ValueError(
-                f"Fatal error, unable to locate dump file {file} from paths: {path_order}."
+                "Fatal error: "
+                f"Unable to locate dump file {file} from paths: {path_order}."
             )
         return result
 
     def set_dump_file_path(self):
         """Set the dump file path to read."""
         result = False
-        if Ut.is_str(self.device) and self.device in Vedirectsim.get_valid_devices():
+        if Ut.is_str(self.device)\
+                and self.device in Vedirectsim.get_valid_devices():
             self.dump_file_path = self.get_dump_file_path()
             if self.dump_file_path is not None:
                 result = True
@@ -249,7 +251,8 @@ class Vedirectsim:
                 time.sleep(0.01)
                 if self.is_max_writes(max_writes):
                     logger.info(
-                        "End read dump file lines on max serial writes : %s/%s",
+                        "End read dump file lines on max serial writes : "
+                        "%s/%s",
                         self.block_counter, max_writes
                     )
                     result = True

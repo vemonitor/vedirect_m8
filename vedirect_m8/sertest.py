@@ -83,8 +83,10 @@ class SerialTestHelper:
         Run value test on serial_data.
 
         Evaluates if the value_test is valid,
-        if serial_data is a dictionary, and if serial_data contain a key value_test key value.
-        Then evaluate if serial_data key value is equal to the value_test value.
+        if serial_data is a dictionary,
+        and if serial_data contain a key value_test key value.
+        Then evaluate if serial_data key value is equal
+        to the value_test value.
 
         :Example :
             >>> SerialTestHelper.run_value_test(
@@ -95,8 +97,10 @@ class SerialTestHelper:
                 },\n
                 serial_data = {"PID": "0x204"})
             >>> True
-        :param value_test: The value test to evaluate on serial_data.
-        :param serial_data: The serial data decoded from serial vedirect device.
+        :param value_test:
+            The value test to evaluate on serial_data.
+        :param serial_data:
+            The serial data decoded from serial vedirect device.
         :return: True if value test success on serial_data.
         """
         if SerialTestHelper.is_value_test(value_test)\
@@ -181,6 +185,7 @@ class SerialTestHelper:
         tst = False
         if Ut.is_dict(data, not_null=True):
             tst = True
+            valid_type_tests = SerialTestHelper.get_valid_type_tests()
             for key, item in data.items():
                 if Ut.is_key_pattern(key)\
                         and Ut.is_dict(item, not_null=True):
@@ -191,13 +196,15 @@ class SerialTestHelper:
                             and not SerialTestHelper.is_value_test(item):
                         tst = False
                     elif type_test == "columns"\
-                            and not SerialTestHelper.is_columns_list_test(item):
+                            and not SerialTestHelper.is_columns_list_test(
+                                item):
                         tst = False
-                    elif type_test not in SerialTestHelper.get_valid_type_tests():
+                    elif type_test not in valid_type_tests:
                         raise SettingInvalidException(
                             "[SerialTestHelper::validate_serial_tests] "
-                            f"unrecognized typeTest {type_test}, from key {key}."
-                            f"typeTest must be in : {SerialTestHelper.get_valid_type_tests()}"
+                            f"unrecognized typeTest {type_test}, "
+                            f"from key {key}."
+                            f"typeTest must be in : {valid_type_tests}"
                         )
                 else:
                     raise SettingInvalidException(
@@ -247,10 +254,14 @@ class SerialTestHelper:
                 type_test = item.get("typeTest")
 
                 if type_test == "value"\
-                        and not SerialTestHelper.run_value_test(item, serial_data):
+                        and not SerialTestHelper.run_value_test(
+                            value_test=item,
+                            serial_data=serial_data):
                     tst = False
 
                 elif type_test == "columns"\
-                        and not SerialTestHelper.run_columns_test(item, serial_data):
+                        and not SerialTestHelper.run_columns_test(
+                            columns_test=item,
+                            serial_data=serial_data):
                     tst = False
         return tst

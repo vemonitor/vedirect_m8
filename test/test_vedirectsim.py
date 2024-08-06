@@ -6,18 +6,20 @@ from vedirect_m8.vedirectsim import Vedirectsim
 from vedirect_m8.serconnect import SerialConnection
 
 
-
 @pytest.fixture(name="helper_manager", scope="class")
 def helper_manager_fixture():
     """Json Schema test manager fixture"""
     class HelperManager:
         """Json Helper test manager fixture Class"""
+
         def __init__(self):
             self.init_object()
-        
+
         def init_object(self):
             """Init Object"""
-            serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
+            serial_port = SerialConnection.get_virtual_home_serial_port(
+                "vmodem0"
+            )
             device = "bmv702"
 
             self.obj = Vedirectsim(serial_port, device)
@@ -34,7 +36,10 @@ class TestVeDirectSim:
 
     def test_has_serial_connection(self, helper_manager):
         """Test has_serial_connection method."""
-        helper_manager.obj.serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
+        serial_port = SerialConnection.get_virtual_home_serial_port(
+            "vmodem0"
+        )
+        helper_manager.obj.serial_port = serial_port
         assert helper_manager.obj.serial_connect() is True
         assert helper_manager.obj.has_serial_connection() is True
         with pytest.raises(serial.SerialException):
@@ -44,14 +49,19 @@ class TestVeDirectSim:
     def test_serial_connect(self, helper_manager):
         """Test serial_connect method."""
         assert helper_manager.obj.serial_connect()
-        with pytest.raises((serial.SerialException, serial.SerialTimeoutException)):
+        with pytest.raises((
+                serial.SerialException,
+                serial.SerialTimeoutException)):
             helper_manager.obj.serialport = "bad_port"
             helper_manager.obj.serial_connect()
 
     def test_get_dump_file_path(self, helper_manager):
         """Test get_dump_file_path method."""
         helper_manager.init_object()
-        helper_manager.obj.serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
+        serial_port = SerialConnection.get_virtual_home_serial_port(
+            "vmodem0"
+        )
+        helper_manager.obj.serial_port = serial_port
         assert helper_manager.obj.serial_connect()
         with pytest.raises(ValueError):
             helper_manager.obj.device = "bad_device"
@@ -59,7 +69,10 @@ class TestVeDirectSim:
 
     def test_set_device_and_device_path(self, helper_manager):
         """Test set_device and set_dump_file_path methods."""
-        helper_manager.obj.serial_port = SerialConnection.get_virtual_home_serial_port("vmodem0")
+        serial_port = SerialConnection.get_virtual_home_serial_port(
+            "vmodem0"
+        )
+        helper_manager.obj.serial_port = serial_port
         assert helper_manager.obj.set_device("bmv702")
         assert helper_manager.obj.set_dump_file_path()
         assert helper_manager.obj.set_device("bluesolar_1.23")
@@ -114,7 +127,8 @@ class TestVeDirectSim:
         helper_manager.obj.dict = {}
         for x in range(17):
             helper_manager.obj.dict.update({f"{x}Key": f"{x}Value"})
-        assert helper_manager.obj.process_data(key="ZKey", value="Ax125") is True
+        assert helper_manager.obj.process_data(
+            key="ZKey", value="Ax125") is True
 
     def test_read_dump_file_line(self, helper_manager):
         """Test read_dump_file_lines method."""

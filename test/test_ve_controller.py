@@ -23,7 +23,9 @@ def helper_manager_fixture():
         def init_object(self):
             """Init Object"""
             conf = {
-                'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
+                'serial_port': SerialConnection.get_virtual_home_serial_port(
+                    "vmodem1"
+                ),
                 'baud': 19200,
                 'timeout': 0
             }
@@ -41,6 +43,7 @@ def helper_manager_fixture():
             )
 
     return HelperManager()
+
 
 class TestVedirectController:
     """VedirectController unittest class."""
@@ -129,7 +132,9 @@ class TestVedirectController:
         # now on bad serial port scan, test and connect valid port.
         # Don't raise exception if valid port available.
         helper_manager.obj.init_settings(
-            {"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")},
+            {"serial_port": SerialConnection.get_virtual_home_serial_port(
+                "vmodem255"
+                )},
             source_name="TestVedirect"
         )
 
@@ -140,7 +145,8 @@ class TestVedirectController:
             helper_manager.obj._ser_test = None
             helper_manager.obj.set_wait_timeout(0.5)
             helper_manager.obj.init_settings(
-                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
+                {'serial_port': SerialConnection.get_virtual_home_serial_port(
+                    "vmodem255")},
                 source_name="TestVedirectController"
             )
 
@@ -154,7 +160,8 @@ class TestVedirectController:
         """Test _get_test_data method."""
         helper_manager.init_object()
         helper_manager.obj.init_settings(
-                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1")},
+                {'serial_port': SerialConnection.get_virtual_home_serial_port(
+                    "vmodem1")},
                 source_name="TestVedirectController"
             )
         data = helper_manager.obj._get_test_data()
@@ -221,7 +228,8 @@ class TestVedirectController:
         helper_manager.init_object()
         try:
             helper_manager.obj.init_serial_connection(
-                {'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem255")},
+                {'serial_port': SerialConnection.get_virtual_home_serial_port(
+                    "vmodem255")},
                 source_name="TestVedirectController"
             )
         except VedirectException:
@@ -253,6 +261,7 @@ class TestVedirectController:
     def test_run_callback_on_packet(self, helper_manager):
         """Test run_callback_on_packet method."""
         helper_manager.init_object()
+
         def func_callback(data: Optional[dict]):
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)
@@ -268,6 +277,7 @@ class TestVedirectController:
     def test_read_data_callback(self, helper_manager):
         """Test run_callback_on_packet method."""
         helper_manager.init_object()
+
         def func_callback(data: Optional[dict]):
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)

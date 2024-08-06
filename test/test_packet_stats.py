@@ -3,6 +3,7 @@ from ve_utils.utype import UType as Ut
 import pytest
 from vedirect_m8.packet_stats import PacketStats
 
+
 @pytest.fixture(name="helper_manager", scope="class")
 def helper_manager_fixture():
     """Json Schema test manager fixture"""
@@ -16,6 +17,7 @@ def helper_manager_fixture():
             self.obj = PacketStats()
 
     return HelperManager()
+
 
 class TestPacketStats:
     """PacketStats unittest class."""
@@ -102,7 +104,10 @@ class TestPacketStats:
 
         for y in range(9):
             for i in range(nb_packets_2):
-                assert helper_manager.obj.set_loop_packet_stats(i, packets_2[i])
+                assert helper_manager.obj.set_loop_packet_stats(
+                    i,
+                    packets_2[i]
+                )
         stats = helper_manager.obj.get_packet_stats_by_index(0)
         assert stats.get('nb_resets') == 1
 

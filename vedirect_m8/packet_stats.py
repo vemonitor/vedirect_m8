@@ -57,7 +57,7 @@ class PacketStats:
 
     def reset_stats(self) -> None:
         """Reset packet _stats class property."""
-        self._stats = list()
+        self._stats = []
 
     def add_stats(self, packet: dict) -> bool:
         """
@@ -77,7 +77,9 @@ class PacketStats:
         packet_stats = PacketStats.get_stats_from_packet(packet)
         if Ut.is_dict(packet_stats, not_null=True):
             for i, last_stat in enumerate(self._stats):
-                if PacketStats.is_equal_packet_stats(stat=packet_stats, last_stat=last_stat):
+                if PacketStats.is_equal_packet_stats(
+                        stat=packet_stats,
+                        last_stat=last_stat):
                     result = i
         return result
 

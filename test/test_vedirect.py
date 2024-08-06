@@ -25,7 +25,9 @@ def helper_manager_fixture():
         def init_object(self):
             """Init Object"""
             conf = {
-                'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
+                'serial_port': SerialConnection.get_virtual_home_serial_port(
+                    "vmodem1"
+                ),
                 'baud': 19200,
                 'timeout': 0,
             }
@@ -102,7 +104,9 @@ class TestVedirect:
 
         # test with bad serial port connection
         obj = SerialConnection(
-            serial_port=SerialConnection.get_virtual_home_serial_port("vmodem255"),
+            serial_port=SerialConnection.get_virtual_home_serial_port(
+                "vmodem255"
+            ),
             source_name="TestVedirect"
         )
         with pytest.raises(SerialVeException):
@@ -118,20 +122,23 @@ class TestVedirect:
 
         # test with bad serial port format
         with pytest.raises(SerialConfException):
-            helper_manager.obj.init_serial_connection({"serial_port": "/etc/bad_port"},
-                                            source_name="TestVedirect"
-                                            )
+            helper_manager.obj.init_serial_connection(
+                {"serial_port": "/etc/bad_port"},
+                source_name="TestVedirect"
+            )
 
         # test with bad serial port type
         with pytest.raises(SerialConfException):
-            helper_manager.obj.init_serial_connection({"serial_port": 32},
-                                            source_name="TestVedirect"
-                                            )
+            helper_manager.obj.init_serial_connection(
+                {"serial_port": 32},
+                source_name="TestVedirect"
+            )
 
         # test with bad serial port connection
         with pytest.raises(SerialVeException):
             helper_manager.obj.init_serial_connection(
-                {"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")},
+                {"serial_port": SerialConnection.get_virtual_home_serial_port(
+                    "vmodem255")},
                 source_name="TestVedirectBadPort"
             )
 
@@ -145,20 +152,23 @@ class TestVedirect:
 
         # test with bad serial port format
         with pytest.raises(SerialConfException):
-            helper_manager.obj.init_settings({"serial_port": "/etc/bad_port"},
-                                   source_name="TestVedirect"
-                                   )
+            helper_manager.obj.init_settings(
+                {"serial_port": "/etc/bad_port"},
+                source_name="TestVedirect"
+            )
 
         # test with bad serial port type
         with pytest.raises(SerialConfException):
-            helper_manager.obj.init_settings({"serial_port": 32},
-                                   source_name="TestVedirect"
-                                   )
+            helper_manager.obj.init_settings(
+                {"serial_port": 32},
+                source_name="TestVedirect"
+            )
 
         # test with bad serial port connection
         with pytest.raises(SerialVeException):
             helper_manager.obj.init_settings(
-                {"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem255")},
+                {"serial_port": SerialConnection.get_virtual_home_serial_port(
+                    "vmodem255")},
                 source_name="TestVedirect"
             )
 
@@ -182,8 +192,8 @@ class TestVedirect:
             and helper_manager.obj.dict.get('PID') == "Ox03"
         helper_manager.obj.init_data_read()
         bad_datas = [
-            b'\r', b'\n', b'C', b'h', b'e', b'c', b'k', b's', b'u', b'm', b'\t',
-            b'O', b'\r', b'\n', b'\t', 'helloWorld'
+            b'\r', b'\n', b'C', b'h', b'e', b'c', b'k', b's', b'u', b'm',
+            b'\t', b'O', b'\r', b'\n', b'\t', 'helloWorld'
         ]
         with pytest.raises(InputReadException):
             for x in bad_datas:
@@ -217,7 +227,8 @@ class TestVedirect:
         assert Ut.is_dict(data, not_null=True)
 
         helper_manager.obj.init_serial_connection(
-            {"serial_port": SerialConnection.get_virtual_home_serial_port("vmodem0")},
+            {"serial_port": SerialConnection.get_virtual_home_serial_port(
+                "vmodem0")},
             source_name="TestVedirect"
         )
         with pytest.raises(InputReadException):
@@ -235,6 +246,7 @@ class TestVedirect:
     def test_read_data_callback(self, helper_manager):
         """Test read_data_callback method."""
         helper_manager.init_object()
+
         def func_callback(data: Optional[dict]):
             """Callback function."""
             assert Ut.is_dict(data, not_null=True)

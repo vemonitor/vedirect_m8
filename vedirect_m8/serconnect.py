@@ -151,7 +151,9 @@ class SerialConnection:
         """
         Test if the object is ready.
 
-        :return: True if configuration settings are valid and if the serial connection is opened.
+        :return:
+            True if configuration settings are valid
+            and if the serial connection is opened.
         """
         return self.is_settings() and self.is_serial_ready()
 
@@ -159,7 +161,9 @@ class SerialConnection:
         """
         Test if is serial connection is ready.
 
-        :return: True if self._ser is an instance of Serial and if the serial connection is opened.
+        :return:
+            True if self._ser is an instance of Serial
+            and if the serial connection is opened.
         """
         return isinstance(self.ser, Serial) and self.ser.isOpen()
 
@@ -228,7 +232,8 @@ class SerialConnection:
         :param exclusive: Set exclusive access mode (POSIX only).
             A port cannot be opened in exclusive access mode
             if it is already open in exclusive access mode.
-        :return: a dictionary with the configuration to open a serial connection.
+        :return:
+            a dictionary with the configuration to open a serial connection.
             Or None if a parameter is invalid.
         """
         if (serial_port != "default"
@@ -292,7 +297,8 @@ class SerialConnection:
          - SerialVeException:
            In case the device can not be found or can not be configured.
          - OpenSerialVeException:
-           Will be raised when the device is configured but port is not openned.
+           Will be raised when the device is configured
+           but port is not opened.
         """
         serial_conf = self._set_serial_conf(
             serial_port=serial_port,
@@ -311,7 +317,8 @@ class SerialConnection:
                 self.ser = Serial(**serial_conf)
                 if self.ser.isOpen():
                     logger.info(
-                        '[SerialConnection::connect::%s] New Serial connection established. '
+                        '[SerialConnection::connect::%s] '
+                        'New Serial connection established. '
                         'args : %s.',
                         self._source_name, serial_conf
                     )
@@ -319,7 +326,8 @@ class SerialConnection:
                 else:
                     raise OpenSerialVeException(
                         f'[SerialConnection::connect::{self._source_name}] '
-                        f'Unable to open serial connection. args: {serial_conf}'
+                        'Unable to open serial connection. args: '
+                        f'{serial_conf}'
                     )
 
             except SerialException as ex:
@@ -349,14 +357,15 @@ class SerialConnection:
         Get all available ports on the machine.
 
         First get available virtual serial ports on /tmp/ directory.
-        Then use serial.tools.list_ports.comports() to get available serial ports.
+        Then use serial.tools.list_ports.comports()
+        to get available serial ports.
 
         :Example :
             >>> self.get_serial_ports_list()
             >>> ['/tmp/vmodem0', '/tmp/vmodem1', '/dev/ttyUSB1']
         :return: List of serial ports and virtual serial ports available.
         """
-        result = list()
+        result = []
         try:
             # scan unix virtual serial ports ports
             result = self.get_unix_virtual_serial_ports_list()
@@ -393,7 +402,7 @@ class SerialConnection:
 
         :return: List of virtual serial ports available.
         """
-        result = list()
+        result = []
         try:
             if USys.is_op_sys_type('unix'):
                 for path in SerialConnection._get_virtual_ports_paths():
@@ -430,7 +439,7 @@ class SerialConnection:
         result = None
         if path != "/dev" and os.path.exists(path):
             # get list files from path
-            result = list()
+            result = []
             for entry in os.scandir(path):
                 if not os.path.isdir(entry.path) \
                         and Ut.is_serial_port_name_pattern(entry.name):
@@ -447,7 +456,10 @@ class SerialConnection:
             "timeout": 0
         }
         if Ut.is_dict(conf, not_null=True):
-            serial_conf = Ut.get_items_from_dict(conf, ["serial_port", "baud", "timeout"])
+            serial_conf = Ut.get_items_from_dict(
+                data=conf,
+                list_keys=["serial_port", "baud", "timeout"]
+            )
             if Ut.is_dict(serial_conf, not_null=True):
                 result.update(serial_conf)
         return result
@@ -592,7 +604,9 @@ class SerialConnection:
             >>> SerialConnection.is_baud(baud=1200)
             >>> True
         :param baud: The baudrate value to test.
-        :return: True if the baudrate value is valid and is an integer instance.
+        :return:
+            True if the baudrate value is valid
+            and is an integer instance.
         """
         return Ut.is_int(baud)\
             and baud in [
@@ -607,14 +621,19 @@ class SerialConnection:
         """
         Test if is valid serial read timeout.
 
-        Possible values for the parameter timeout which controls the behavior of read():
-         - timeout = None: wait forever / until requested number of bytes are received.
-         - timeout = 0: non-blocking mode, return immediately in any case,
-           returning zero or more, up to the requested number of bytes
-         - timeout = x: set timeout to x seconds (float allowed)
-           returns immediately when the requested number of bytes are available,
-           otherwise wait until the timeout expires
-           and return all bytes that were received until then.
+        Possible values for the parameter timeout
+        which controls the behavior of read():
+         - timeout = None:
+            wait forever / until requested number of bytes are received.
+         - timeout = 0:
+            non-blocking mode, return immediately in any case,
+            returning zero or more, up to the requested number of bytes
+         - timeout = x:
+            set timeout to x seconds (float allowed)
+            returns immediately when the requested
+            number of bytes are available,
+            otherwise wait until the timeout expires
+            and return all bytes that were received until then.
 
         :Example :
             >>> SerialConnection.is_timeout(timeout=0)
@@ -655,7 +674,9 @@ class SerialConnection:
         Test if is valid serial path.
 
         For win32 systems path must be null (None or "").
-        For unix systems path must be /dev or in get_virtual_ports_paths() method.
+        For unix systems path must be
+            - /dev
+            - or in get_virtual_ports_paths() method.
         :Example :
             >>> SerialConnection.is_serial_path(serial_port="/tmp")
             >>> True
