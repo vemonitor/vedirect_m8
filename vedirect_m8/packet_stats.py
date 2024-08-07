@@ -38,7 +38,7 @@ class PacketStats:
             default=self._nb_packets + 1
         )
 
-    MAX_STAT_PACKETS, NB_PACKETS_SCAN = 20, 10
+    MAX_STAT_PACKETS, MAX_COUNTER_VALUE, NB_PACKETS_SCAN = 20, 1000, 10
 
     def get_nb_packets(self) -> int:
         """Get number of packets available on serial reader."""
@@ -131,7 +131,8 @@ class PacketStats:
 
     def add_nb_bad_packets(self) -> int:
         """Increment to nb_bad_packets counter."""
-        if Ut.is_int(self._nb_bad_packets, mini=0):
+        if Ut.is_int(self._nb_bad_packets, mini=0)\
+                and self._nb_bad_packets < self.MAX_COUNTER_VALUE:
             self._nb_bad_packets += 1
         else:
             self._nb_bad_packets = 1
@@ -147,7 +148,8 @@ class PacketStats:
 
     def add_serial_read_errors(self) -> int:
         """Increment to read_errors counter."""
-        if Ut.is_int(self._serial_read_errors, mini=0):
+        if Ut.is_int(self._serial_read_errors, mini=0)\
+                and self._serial_read_errors < self.MAX_COUNTER_VALUE:
             self._serial_read_errors += 1
         else:
             self._serial_read_errors = 1
