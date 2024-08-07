@@ -126,4 +126,3 @@ if __name__ == '__main__':
             "Packets Stats: %s",
             ve.packets_stats
         )
-        
