@@ -31,10 +31,7 @@ from vedirect_m8.exceptions import SerialVeException
 
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"
-__deprecated__ = False
 __license__ = "MIT"
-__status__ = "Production"
-__version__ = "1.0.0"
 
 logging.basicConfig()
 logger = logging.getLogger("vedirect")
@@ -80,9 +77,12 @@ class Vedirect:
             >>> sc.read_data_single()
             >>> {"ser_key1": "ser_value1", ...}
         :param self: Refer to the object instance itself,
-        :param serial_conf: dict: The serial connection configuration,
-        :param source_name: This is used in logger to identify the source of call,
-        :param auto_start: bool: Define if serial connection must be established automatically.
+        :param serial_conf: dict:
+            The serial connection configuration,
+        :param source_name:
+            This is used in logger to identify the source of call,
+        :param auto_start: bool:
+            Define if serial connection must be established automatically.
         :return: Nothing
         """
         self._com = None
@@ -199,13 +199,17 @@ class Vedirect:
         :Example :
             >>> self.init_serial_connection_from_object(serial_connection)
             >>> True
-        :param self: Refer to the object itself,
-        :param serial_connection: The SerialConnection object,
-        :param auto_start: bool: Define if serial connection must be established automatically.
+        :param self:
+            Refer to the object itself,
+        :param serial_connection:
+            The SerialConnection object,
+        :param auto_start: bool:
+            Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
         """
         result = False
-        if Vedirect.is_serial_com(serial_connection) and serial_connection.is_settings():
+        if Vedirect.is_serial_com(serial_connection)\
+                and serial_connection.is_settings():
             self._com = serial_connection
             if auto_start is False \
                     or (auto_start is True
@@ -241,10 +245,14 @@ class Vedirect:
         :Example :
             >>> self.init_serial_connection({"serial_port": "/dev/ttyUSB1"})
             >>> True
-        :param self: Refer to the object itself,
-        :param serial_conf: dict: dict: The serial connection configuration,
-        :param source_name: str: This is used in logger to identify the source of call,
-        :param auto_start: bool: Define if serial connection must be established automatically.
+        :param self:
+            Refer to the object itself,
+        :param serial_conf: dict:
+            The serial connection configuration,
+        :param source_name: str:
+            This is used in logger to identify the source of call,
+        :param auto_start: bool:
+            Define if serial connection must be established automatically.
         :return: True if connection to serial port success.
         """
         result = False
@@ -284,11 +292,16 @@ class Vedirect:
         :Example :
             >>> self.init_settings({"serial_port": "/dev/ttyUSB1"})
             >>> True
-        :param self: Refer to the object itself,
-        :param serial_conf: dict: The serial connection configuration,
-        :param source_name: This is used in logger to identify the source of call,
-        :param auto_start: bool: Define if serial connection must be established automatically.
-        :return: True if connection to serial port success.
+        :param self:
+            Refer to the object itself,
+        :param serial_conf: dict:
+            The serial connection configuration,
+        :param source_name:
+            This is used in logger to identify the source of call,
+        :param auto_start: bool:
+            Define if serial connection must be established automatically.
+        :return:
+            True if connection to serial port success.
 
         Raise:
          - SerialConfException: if serial_port, baud or timeout are not valid.
@@ -366,7 +379,8 @@ class Vedirect:
             raise PacketReadException(
                 "[Vedirect::input_read] "
                 "Serial input read error: "
-                f"Packet has limit of {len(self.dict)}/{self.max_blocks} blocks"
+                "Packet has limit of "
+                f"{len(self.dict)}/{self.max_blocks} blocks"
             ) from ex
         except Exception as ex:
             raise InputReadException(
@@ -379,7 +393,9 @@ class Vedirect:
         Return Ve Direct block packet from serial reader.
 
         Read a byte from serial and decode him with vedirect protocol.
-        :return: A dictionary of vedirect block data or None if block not entirely decoded.
+        :return:
+            A dict of vedirect block data
+            or None if block not entirely decoded.
         """
         byte = self._com.ser.read(1)
         return self.input_read(byte)
@@ -414,7 +430,8 @@ class Vedirect:
 
     def read_data_single(self, timeout: int = 60) -> Optional[dict]:
         """
-        Read a single block decoded from serial port and returns it as a dictionary.
+        Read a single block decoded from serial port
+        and returns it as a dictionary.
 
         :Example :
             >>> ve = Vedirect({"serial_port": "/dev/ttyUSB1"})
@@ -431,7 +448,8 @@ class Vedirect:
          - SerialVeException:
            In case the device can not be found or can not be configured.
          - OpenSerialVeException:
-           Will be raised when the device is configured but port is not openned.
+           Will be raised when the device is configured
+           but port is not openned.
         """
         if self.is_ready():
             return self.read_global_packet(timeout)
@@ -449,9 +467,12 @@ class Vedirect:
         """
         Read data from the serial port and returns it to a callback function.
 
-        :param self: Reference the class instance
-        :param callback_function:function: Pass a function to the read_data_callback function
-        :param timeout:int=60: Set the timeout for the read_data_callback function
+        :param self:
+            Reference the class instance
+        :param callback_function:function:
+            Pass a function to the read_data_callback function
+        :param timeout:int=60:
+            Set the timeout for the read_data_callback function
         :param max_loops:Optional[int]=None: Limit the number of loops
         """
         result = False
@@ -503,7 +524,9 @@ class Vedirect:
             and obj.get_serial_port() is not None
 
     @staticmethod
-    def is_timeout(elapsed: Union[int, float], timeout: Union[int, float] = 60) -> bool:
+    def is_timeout(elapsed: Union[int, float],
+                   timeout: Union[int, float] = 60
+                   ) -> bool:
         """
         Test if elapsed time is greater than timeout.
 

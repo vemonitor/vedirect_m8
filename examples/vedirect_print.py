@@ -1,18 +1,21 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
+"""simple vedirect module example"""
 import argparse
 from vedirect_m8.vedirect import Vedirect
 
 
 def print_data_callback(packet):
+    """Callback function executed on every readed packet."""
     print(packet)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process VE.Direct protocol')
     parser.add_argument('--port', help='Serial port')
-    parser.add_argument('--timeout', help='Serial port read timeout', type=int, default='60')
+    parser.add_argument(
+        '--timeout',
+        help='Serial port read timeout',
+        type=int, default='60'
+    )
     args = parser.parse_args()
     conf = {
         "serial_port": args.port,

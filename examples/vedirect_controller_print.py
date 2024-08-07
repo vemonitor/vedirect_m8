@@ -3,9 +3,9 @@
 import logging
 import argparse
 import sys
+from ve_utils.utype import UType as Ut
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8 import configure_logging
-from ve_utils.utype import UType as Ut
 
 logging.basicConfig()
 logger = logging.getLogger("vedirect")
@@ -13,9 +13,11 @@ logger = logging.getLogger("vedirect")
 
 def get_device_serial_tests(device):
     """Return the serial test corresponding of the device."""
-    if Ut.is_str(device) and device in ["bmv702", "bluesolar_1.23", "smartsolar_1.39"]:
+    result = None
+    if Ut.is_str(device)\
+            and device in ["bmv702", "bluesolar_1.23", "smartsolar_1.39"]:
         if device == "bmv702":
-            return {
+            result = {
                 'PID_test': {
                     "typeTest": "value",
                     "key": "PID",
@@ -23,7 +25,7 @@ def get_device_serial_tests(device):
                 },
             }
         elif device == "bluesolar_1.23":
-            return {
+            result = {
                 'PID_test': {
                     "typeTest": "value",
                     "key": "PID",
@@ -31,13 +33,14 @@ def get_device_serial_tests(device):
                 },
             }
         elif device == "smartsolar_1.39":
-            return {
+            result = {
                 'PID_test': {
                     "typeTest": "value",
                     "key": "PID",
                     "value": "0xA05F"
                 },
             }
+    return result
 
 
 def parse_args(args):
@@ -49,11 +52,28 @@ def parse_args(args):
     :return: return parser
     """
     # create arguments
-    arg_parser = argparse.ArgumentParser(description='Process VE.Direct protocol')
-    arg_parser.add_argument('--device', help='[bmv702, bluesolar_1.23, smartsolar_1.39]')
-    arg_parser.add_argument('--port', help='Serial port')
-    arg_parser.add_argument('--timeout', help='Serial port read timeout', type=int, default='60')
-    arg_parser.add_argument('--debug', action='store_true', help='Show debug output')
+    arg_parser = argparse.ArgumentParser(
+        description='Process VE.Direct protocol'
+    )
+    arg_parser.add_argument(
+        '--device',
+        help='[bmv702, bluesolar_1.23, smartsolar_1.39]'
+    )
+    arg_parser.add_argument(
+        '--port',
+        help='Serial port'
+    )
+    arg_parser.add_argument(
+        '--timeout',
+        help='Serial port read timeout',
+        type=int,
+        default='60'
+        )
+    arg_parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='Show debug output'
+    )
 
     # parse arguments from script parameters
     return arg_parser.parse_args(args)
@@ -61,7 +81,10 @@ def parse_args(args):
 
 def print_data_callback(packet):
     """Print received packet."""
-    logger.info("%s\n" % packet)
+    logger.info(
+        "%s\n",
+        packet
+    )
 
 
 if __name__ == '__main__':

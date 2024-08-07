@@ -18,10 +18,16 @@ def parse_args(args):
     :param args: arguments passed from the command line
     :return: return parser
     """
-    parser_arguments = argparse.ArgumentParser(description='A simple VE.Direct simulator')
+    parser_arguments = argparse.ArgumentParser(
+        description='A simple VE.Direct simulator'
+    )
     parser_arguments.add_argument('--port', help='Serial port')
     parser_arguments.add_argument('--device', help='Serial port')
-    parser_arguments.add_argument('--debug', action='store_true', help='Show debug output')
+    parser_arguments.add_argument(
+        '--debug',
+        action='store_true',
+        help='Show debug output'
+    )
 
     # parse arguments from script parameters
     return parser_arguments.parse_args(args)

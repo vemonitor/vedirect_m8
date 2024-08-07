@@ -20,7 +20,7 @@ __version__ = "1.0.0"
 
 
 class TestSerialConnection:
-
+    """SerialConnection unittest class."""
     def setup_method(self):
         """
         Setup any state tied to the execution of the given function.
@@ -28,7 +28,8 @@ class TestSerialConnection:
         Invoked for every test function in the module.
         """
         conf = {
-            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem1"),
+            'serial_port': SerialConnection.get_virtual_home_serial_port(
+                "vmodem1"),
             'baud': 19200,
             'timeout': 0,
         }
@@ -56,7 +57,8 @@ class TestSerialConnection:
     def test_set_serial_conf(self):
         """Test set_serial_conf method."""
         conf = {
-            'serial_port': SerialConnection.get_virtual_home_serial_port("vmodem0"),
+            'serial_port': SerialConnection.get_virtual_home_serial_port(
+                "vmodem0"),
             'baud': 19200,
             'timeout': 0,
             'write_timeout': 0,
@@ -137,7 +139,11 @@ class TestSerialConnection:
             SerialConnection.get_virtual_home_serial_port(1),
             SerialConnection.get_virtual_home_serial_port(dict())
         ]
-        tests = [x for x in virtual_ports if SerialConnection._is_virtual_serial_port(x)]
+        tests = [
+            x
+            for x in virtual_ports
+            if SerialConnection._is_virtual_serial_port(x)
+        ]
         assert len(tests) == 2
 
     @staticmethod
@@ -150,7 +156,11 @@ class TestSerialConnection:
             "/r/",
             "\\r"
         ]
-        tests = [x for x in ports if SerialConnection._split_serial_port(x)[0] == 'r']
+        tests = [
+            x
+            for x in ports
+            if SerialConnection._split_serial_port(x)[0] == 'r'
+        ]
         assert len(tests) == 3
 
     @staticmethod
