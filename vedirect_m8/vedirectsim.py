@@ -219,7 +219,7 @@ class Vedirectsim:
         if Ut.is_str(key, not_null=True):
             if key != 'Checksum':
                 self.dict.update({key: value})
-                if len(self.dict) == 18:
+                if len(self.dict) == 17:
                     result = True
             elif Ut.is_dict(self.dict, not_null=True):
                 result = True
