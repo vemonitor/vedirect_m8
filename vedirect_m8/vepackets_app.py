@@ -287,6 +287,7 @@ class VePacketsApp(VedirectController):
                     raise VedirectException(
                         "[Vedirect::input_read] "
                         "Serial input read error"
+                        f"{read_errors} is >= {max_read_error}"
                     ) from ex
                 logger.debug(
                     "[VedirectApp::read_data] "
