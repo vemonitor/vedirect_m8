@@ -115,6 +115,7 @@ class TestPacketStats:
         # test init state
         assert helper_manager.obj.has_good_read_stats() is True
         assert helper_manager.obj.has_nb_bad_packets() is True
+        assert helper_manager.obj.has_serial_reconnection() is True
         assert helper_manager.obj.has_serial_read_errors() is True
         # Add max_red_error value
         assert helper_manager.obj.set_max_read_error(
@@ -123,10 +124,12 @@ class TestPacketStats:
         # Add two global read errors and set linear_flow to False
         assert helper_manager.obj.add_nb_bad_packets() == 1
         assert helper_manager.obj.add_serial_read_errors() == 1
+        assert helper_manager.obj.add_serial_reconnection() == 1
         assert helper_manager.obj.set_linear_flow(False) is False
         # test success set values
         assert helper_manager.obj.get_nb_bad_packets() == 1
         assert helper_manager.obj.get_serial_read_errors() == 1
+        assert helper_manager.obj.get_serial_reconnection() == 1
         assert helper_manager.obj.is_linear_flow() is False
         # Test has_reached_max_errors
         assert helper_manager.obj.has_reached_max_errors(
@@ -134,6 +137,14 @@ class TestPacketStats:
         ) is False
         # Test new global state
         assert helper_manager.obj.has_good_read_stats() is False
+
+        # Add more global read errors
+        # serial_reconnection has no effect
+        assert helper_manager.obj.add_serial_reconnection() == 2
+        # Test has_reached_max_errors
+        assert helper_manager.obj.has_reached_max_errors(
+            raise_exception=False
+        ) is False
 
         # Add more global read errors
         assert helper_manager.obj.add_nb_bad_packets() == 2
@@ -152,6 +163,7 @@ class TestPacketStats:
         assert helper_manager.obj.has_good_read_stats() is True
         assert helper_manager.obj.get_nb_bad_packets() == 0
         assert helper_manager.obj.get_serial_read_errors() == 0
+        assert helper_manager.obj.get_serial_reconnection() == 0
         assert helper_manager.obj.is_linear_flow() is True
 
     def test_add_stats(self, helper_manager):

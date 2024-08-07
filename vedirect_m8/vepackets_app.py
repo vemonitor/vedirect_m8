@@ -190,6 +190,7 @@ class VePacketsApp(VedirectController):
                 ex
             )
             logger.info("Searching for available serial port.")
+            self.packets_stats.add_serial_reconnection()
             if self.search_available_serial_port(
                     caller_name=caller_name,
                     raise_exception=False
