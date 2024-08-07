@@ -40,7 +40,8 @@ def helper_manager_fixture():
                 source_name="PyTest",
                 auto_start=True,
                 wait_connection=True,
-                wait_timeout=5
+                wait_timeout=5,
+                max_read_error=50
             )
 
         def read_serial_data(self):
