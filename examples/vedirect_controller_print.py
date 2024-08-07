@@ -13,10 +13,11 @@ logger = logging.getLogger("vedirect")
 
 def get_device_serial_tests(device):
     """Return the serial test corresponding of the device."""
+    result = None
     if Ut.is_str(device)\
             and device in ["bmv702", "bluesolar_1.23", "smartsolar_1.39"]:
         if device == "bmv702":
-            return {
+            result = {
                 'PID_test': {
                     "typeTest": "value",
                     "key": "PID",
@@ -24,7 +25,7 @@ def get_device_serial_tests(device):
                 },
             }
         elif device == "bluesolar_1.23":
-            return {
+            result = {
                 'PID_test': {
                     "typeTest": "value",
                     "key": "PID",
@@ -32,13 +33,14 @@ def get_device_serial_tests(device):
                 },
             }
         elif device == "smartsolar_1.39":
-            return {
+            result = {
                 'PID_test': {
                     "typeTest": "value",
                     "key": "PID",
                     "value": "0xA05F"
                 },
             }
+    return result
 
 
 def parse_args(args):
