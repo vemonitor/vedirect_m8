@@ -6,7 +6,7 @@ __copyright__ = "Copyright 2015, Janne Kario"
 __deprecated__ = False
 __license__ = "MIT"
 __status__ = "Production"
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 
 
 class AppFilter(logging.Filter):
@@ -35,7 +35,8 @@ def configure_logging(debug: bool = False):
     logger.setLevel(logging.INFO)
 
     formatter = logging.Formatter(
-        '%(asctime)s.%(msecs)03d :: %(app_version)s :: %(message)s', "%Y-%m-%d %H:%M:%S"
+        '%(asctime)s.%(msecs)03d :: %(app_version)s :: %(message)s',
+        "%Y-%m-%d %H:%M:%S"
     )
     syslog.setFormatter(formatter)
 
