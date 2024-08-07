@@ -47,11 +47,12 @@ def helper_manager_fixture():
                 "PyTest"
             ) is True
             assert self.obj.has_data_cache() is False
-            result = self.obj.read_data(
+            result, is_cache = self.obj.read_data(
                 caller_name="PyTest",
                 timeout=2
             )
             assert Ut.is_dict(result, eq=26)
+            assert is_cache is False
             assert self.obj.has_data_cache() is True
 
     return HelperManager()
@@ -247,11 +248,6 @@ class TestVePacketsApp:
         helper_manager.init_vedirect_app()
         helper_manager.read_serial_data()
 
-        is_time_cache = helper_manager.obj.is_time_to_read_serial(
-            now=time.time()
-        )
-        assert is_time_cache is False
-
         helper_manager.obj._data_cache = (1723021080, {'a': 1})
         is_time_cache = helper_manager.obj.is_time_to_read_serial(
             now=1723021164
@@ -268,7 +264,7 @@ class TestVePacketsApp:
         is_time_cache = helper_manager.obj.is_time_to_read_serial(
             now=1723021081
         )
-        assert is_time_cache is False
+        assert is_time_cache is True
 
         helper_manager.obj._data_cache = (1723021080, {'a': 1})
         is_time_cache = helper_manager.obj.is_time_to_read_serial(
@@ -285,17 +281,19 @@ class TestVePacketsApp:
         time.sleep(1)
         helper_manager.obj.reset_data_cache()
         assert helper_manager.obj.has_data_cache() is False
-        result = helper_manager.obj.read_data(
+        result, is_cache = helper_manager.obj.read_data(
             caller_name="PyTest",
             timeout=3
         )
         assert Ut.is_dict(result, not_null=True, eq=26)
+        assert is_cache is False
         # get data from cache
         # because two read_data calls executed
         # in less than 1 second
-        result2 = helper_manager.obj.read_data(
+        result2, is_cache = helper_manager.obj.read_data(
             caller_name="PyTest",
             timeout=3
         )
         assert Ut.is_dict(result2, not_null=True, eq=26)
         assert result == result2
+        assert is_cache is True

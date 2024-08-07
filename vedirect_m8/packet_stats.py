@@ -14,7 +14,100 @@ logging.basicConfig()
 logger = logging.getLogger("vedirect")
 
 
-class PacketStats:
+class PacketGlobalStats:
+    """
+    Used to get, set and analyse serial packets stats.
+    """
+    def __init__(self):
+        self._max_packets_ever = 0
+        self._nb_bad_packets = 0
+        self._serial_read_errors = 0
+        self._serial_reconnection = 0
+        self._is_linear_flow = True
+
+    MAX_COUNTER_VALUE = 1000
+
+    def reset_global_counters(self):
+        """Reset global counters."""
+        self._max_packets_ever = 0
+        self._nb_bad_packets = 0
+        self._serial_read_errors = 0
+        self._serial_reconnection = 0
+
+    def reset_global_stats(self):
+        """Reset global stats."""
+        self.reset_global_counters()
+        self._is_linear_flow = True
+
+    def has_nb_bad_packets(self) -> int:
+        """Test if instance has nb_bad_packets."""
+        return Ut.is_int(self._serial_read_errors, mini=0)
+
+    def get_nb_bad_packets(self) -> int:
+        """Get nb_bad_packets counter."""
+        return self._nb_bad_packets
+
+    def add_nb_bad_packets(self) -> int:
+        """Increment to nb_bad_packets counter."""
+        if Ut.is_int(self._nb_bad_packets, mini=0)\
+                and self._nb_bad_packets < self.MAX_COUNTER_VALUE:
+            self._nb_bad_packets += 1
+        else:
+            self._nb_bad_packets = 1
+        return self._nb_bad_packets
+
+    def has_serial_read_errors(self) -> int:
+        """Test if instance has read errors."""
+        return Ut.is_int(self._serial_read_errors, mini=0)
+
+    def get_serial_read_errors(self) -> int:
+        """Get read_errors counter."""
+        return self._serial_read_errors
+
+    def add_serial_read_errors(self) -> int:
+        """Increment to read_errors counter."""
+        if Ut.is_int(self._serial_read_errors, mini=0)\
+                and self._serial_read_errors < self.MAX_COUNTER_VALUE:
+            self._serial_read_errors += 1
+        else:
+            self._serial_read_errors = 1
+        return self._serial_read_errors
+
+    def has_serial_reconnection(self) -> int:
+        """Test if instance has serial_reconnection."""
+        return Ut.is_int(self._serial_reconnection, mini=0)
+
+    def get_serial_reconnection(self) -> int:
+        """Get serial_reconnection counter."""
+        return self._serial_reconnection
+
+    def add_serial_reconnection(self) -> int:
+        """Increment to serial_reconnection counter."""
+        if Ut.is_int(self._serial_reconnection, mini=0)\
+                and self._serial_reconnection < self.MAX_COUNTER_VALUE:
+            self._serial_reconnection += 1
+        else:
+            self._serial_reconnection = 1
+        return self._serial_reconnection
+
+    def set_linear_flow(self, value: bool) -> bool:
+        """Increment to read_errors counter."""
+        self._is_linear_flow = value is True
+        return self._is_linear_flow is True
+
+    def is_linear_flow(self) -> int:
+        """Get number of packets available on serial reader."""
+        return self._is_linear_flow is True
+
+    def has_good_read_stats(self) -> int:
+        """Get number of packets available on serial reader."""
+        return self.is_linear_flow()\
+            and self.get_serial_read_errors() == 0\
+            and self.get_nb_bad_packets() == 0\
+            and self.get_serial_reconnection() == 0
+
+
+class PacketStats(PacketGlobalStats):
     """
     Used to get, set and analyse serial packets stats.
     """
@@ -23,12 +116,9 @@ class PacketStats:
                  accepted_keys: Optional[list] = None,
                  max_read_error: int = 30
                  ):
+        PacketGlobalStats.__init__(self)
         self._nb_packets = 10
         self._max_read_error = 11
-        self._max_packets_ever = 0
-        self._nb_bad_packets = 0
-        self._serial_read_errors = 0
-        self._is_linear_flow = True
         self._stats = []
         self._accepted_keys = None
         self._set_nb_packets(nb_packets)
@@ -38,7 +128,7 @@ class PacketStats:
             default=self._nb_packets + 1
         )
 
-    MAX_STAT_PACKETS, MAX_COUNTER_VALUE, NB_PACKETS_SCAN = 20, 1000, 10
+    MAX_STAT_PACKETS, NB_PACKETS_SCAN = 20, 10
 
     def get_nb_packets(self) -> int:
         """Get number of packets available on serial reader."""
@@ -107,73 +197,15 @@ class PacketStats:
                 if packet_key not in self._accepted_keys:
                     result = False
             if result is False:
-                self._nb_bad_packets += 1
+                self.add_nb_bad_packets()
         return result
 
-    def reset_global_counters(self):
-        """Reset global counters."""
-        self._max_packets_ever = 0
-        self._nb_bad_packets = 0
-        self._serial_read_errors = 0
-
-    def reset_global_stats(self):
-        """Reset global stats."""
-        self.reset_global_counters()
-        self._is_linear_flow = True
-
-    def has_nb_bad_packets(self) -> int:
-        """Test if instance has nb_bad_packets."""
-        return Ut.is_int(self._serial_read_errors, mini=0)
-
-    def get_nb_bad_packets(self) -> int:
-        """Get nb_bad_packets counter."""
-        return self._nb_bad_packets
-
-    def add_nb_bad_packets(self) -> int:
-        """Increment to nb_bad_packets counter."""
-        if Ut.is_int(self._nb_bad_packets, mini=0)\
-                and self._nb_bad_packets < self.MAX_COUNTER_VALUE:
-            self._nb_bad_packets += 1
-        else:
-            self._nb_bad_packets = 1
-        return self._nb_bad_packets
-
-    def has_serial_read_errors(self) -> int:
-        """Test if instance has read errors."""
-        return Ut.is_int(self._serial_read_errors, mini=0)
-
-    def get_serial_read_errors(self) -> int:
-        """Get read_errors counter."""
-        return self._serial_read_errors
-
-    def add_serial_read_errors(self) -> int:
-        """Increment to read_errors counter."""
-        if Ut.is_int(self._serial_read_errors, mini=0)\
-                and self._serial_read_errors < self.MAX_COUNTER_VALUE:
-            self._serial_read_errors += 1
-        else:
-            self._serial_read_errors = 1
-        return self._serial_read_errors
-
-    def set_linear_flow(self, value: bool) -> bool:
-        """Increment to read_errors counter."""
-        self._is_linear_flow = value is True
-        return self._is_linear_flow is True
-
-    def is_linear_flow(self) -> int:
-        """Get number of packets available on serial reader."""
-        return self._is_linear_flow is True
-
-    def has_good_read_stats(self) -> int:
-        """Get number of packets available on serial reader."""
-        return self.is_linear_flow()\
-            and self.get_serial_read_errors() == 0\
-            and self.get_nb_bad_packets() == 0
-
-    def has_reached_max_errors(self, raise_exception: bool = True) -> int:
+    def has_reached_max_errors(self,
+                               raise_exception: bool = True
+                               ) -> int:
         """Get number of packets available on serial reader."""
         result = False
-        max_read_error = self.get_max_read_error()
+        max_read_error = Ut.get_int(self.get_max_read_error(), default=-1)
         if max_read_error > 0:
             max_seial_read = self.get_serial_read_errors() >= max_read_error
             max_bad_packets = self.get_nb_bad_packets() >= max_read_error
@@ -199,9 +231,6 @@ class PacketStats:
         if self.has_stats():
             nb_packets = len(self._stats)
             self._set_nb_packets(nb_packets)
-            max_ever = max(nb_packets, self._max_packets_ever)
-            if max_ever != self._max_packets_ever:
-                self._max_packets_ever = max_ever
         return self._nb_packets
 
     def has_stats(self) -> bool:
@@ -282,7 +311,7 @@ class PacketStats:
                 "nb_resets": nb_resets,
                 "has_accepted_keys": self.has_accepted_keys(),
                 "is_accepted_keys": is_accepted_keys,
-                "nb_bad_packets": self._nb_bad_packets
+                "nb_bad_packets": self.get_nb_bad_packets()
             }
             stats_equal.update(index_stats)
             result = stats_equal
@@ -310,7 +339,7 @@ class PacketStats:
                 "nb_resets": nb_resets,
                 "has_accepted_keys": self.has_accepted_keys(),
                 "is_accepted_keys": is_accepted_keys,
-                "nb_bad_packets": self._nb_bad_packets
+                "nb_bad_packets": self.get_nb_bad_packets()
             }
             if not is_linear:
                 stats_packet.update(new_stats)
