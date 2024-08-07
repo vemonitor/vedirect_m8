@@ -104,6 +104,12 @@ if __name__ == '__main__':
             "Start Reading 10 items on serial"
         )
     for i in range(10):
+        # On i == 0 we read serial data
+        # Then on i == 1 we read cache data
+        # because interval is less than 1s
+        if i > 1:
+            time.sleep(1)
+
         data = ve.read_data(
             caller_name="VeExample",
             timeout=2
@@ -120,8 +126,4 @@ if __name__ == '__main__':
             "Packets Stats: %s",
             ve.packets_stats
         )
-        # On i == 0 we read serial data
-        # Then on i == 1 we read cache data
-        # because interval is less than 1s
-        if i > 1:
-            time.sleep(1)
+        
