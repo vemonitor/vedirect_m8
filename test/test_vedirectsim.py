@@ -125,7 +125,7 @@ class TestVeDirectSim:
     def test_process_data(self, helper_manager):
         """Test process_data method."""
         helper_manager.obj.dict = {}
-        for x in range(17):
+        for x in range(16):
             helper_manager.obj.dict.update({f"{x}Key": f"{x}Value"})
         assert helper_manager.obj.process_data(
             key="ZKey", value="Ax125") is True

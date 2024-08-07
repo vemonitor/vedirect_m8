@@ -3,8 +3,8 @@ import logging
 import time
 from typing import Optional, Union
 from ve_utils.utype import UType as Ut
-from vedirect_m8.exceptions import InputReadException
-from vedirect_m8.exceptions import SerialVeTimeoutException
+from vedirect_m8.exceptions import VeReadException
+from vedirect_m8.exceptions import SerialConnectionException
 from vedirect_m8.exceptions import VedirectException
 from vedirect_m8.ve_controller import VedirectController
 from vedirect_m8.packet_stats import PacketStats
@@ -189,7 +189,11 @@ class VePacketsApp(VedirectController):
                 self.get_serial_port(),
                 ex
             )
-            logger.info("Searching for available serial port.")
+        if result is False:
+            logger.info(
+                "Disconnected from Serial Port. "
+                "Searching for valid and available serial port."
+            )
             self.packets_stats.add_serial_reconnection()
             if self.search_available_serial_port(
                     caller_name=caller_name,
@@ -231,10 +235,7 @@ class VePacketsApp(VedirectController):
             try:
                 timeout = Ut.get_int(timeout, default=2)
                 result = self.read_data_single(timeout=timeout)
-            except (
-                    VedirectException,
-                    SerialVeTimeoutException
-            ) as ex:
+            except (SerialConnectionException) as ex:
                 # Here we try the actual serial connexion
                 # And if fails try to search and connect to new serial port
                 self.try_to_reconnect(
@@ -266,11 +267,27 @@ class VePacketsApp(VedirectController):
             read_errors = self.packets_stats.get_serial_read_errors()
             try:
                 tmp = self.read_serial_data(caller_name, timeout)
-            except InputReadException as ex:
+                if self.update_data_cache(tmp):
+                    self.packets_stats.set_loop_packet_stats(
+                        index=i,
+                        packet=tmp  # type: ignore
+                    )
+                    blocks.append(len(tmp))  # type: ignore
+                    time.sleep(0.005)
+                else:
+                    self.packets_stats.add_serial_read_errors()
+                    logger.debug(
+                        "[VedirectApp::read_data] "
+                        "Serial read Error n° %s",
+                        read_errors
+                    )
+
+            except VeReadException as ex:
                 if read_errors >= max_read_error:
                     raise VedirectException(
                         "[Vedirect::input_read] "
                         "Serial input read error"
+                        f"{read_errors} is >= {max_read_error}"
                     ) from ex
                 logger.debug(
                     "[VedirectApp::read_data] "
@@ -279,16 +296,6 @@ class VePacketsApp(VedirectController):
                     ex
                 )
                 self.packets_stats.add_serial_read_errors()
-
-            if self.update_data_cache(tmp):
-                self.packets_stats.set_loop_packet_stats(
-                    index=i,
-                    packet=tmp  # type: ignore
-                )
-                blocks.append(len(tmp))  # type: ignore
-                time.sleep(0.005)
-            else:
-                errors = errors + 1
 
         if self.has_data_cache():
             self.packets_stats.init_nb_packets()
@@ -383,7 +390,7 @@ class VePacketsApp(VedirectController):
     def read_data(self,
                   caller_name: str,
                   timeout: int = 2
-                  ) -> Optional[dict]:
+                  ) -> tuple:
         """Read data"""
         result, is_cache = None, False
         now = time.time()

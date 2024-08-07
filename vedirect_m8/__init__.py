@@ -1,12 +1,13 @@
 """Vedirect init logger entry."""
 import logging
+from vedirect_m8.version import VERSION
 # Version of realpython-reader package
 __author__ = "Janne Kario, Eli Serra"
 __copyright__ = "Copyright 2015, Janne Kario"
 __deprecated__ = False
 __license__ = "MIT"
 __status__ = "Production"
-__version__ = "1.3.2.2"
+__version__ = VERSION
 
 
 class AppFilter(logging.Filter):

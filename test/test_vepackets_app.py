@@ -4,7 +4,9 @@ import pytest
 from ve_utils.utype import UType as Ut
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.vepackets_app import VePacketsApp
+from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
+from vedirect_m8.exceptions import VedirectException
 
 
 @pytest.fixture(name="helper_manager", scope="class")
@@ -38,7 +40,8 @@ def helper_manager_fixture():
                 source_name="PyTest",
                 auto_start=True,
                 wait_connection=True,
-                wait_timeout=5
+                wait_timeout=5,
+                max_read_error=50
             )
 
         def read_serial_data(self):
@@ -215,25 +218,25 @@ class TestVePacketsApp:
         )
         assert Ut.is_dict(result, not_null=True, max_items=19)
         # Try SerialVeTimeoutException
-        result = helper_manager.obj.read_serial_data(
-            caller_name="PyTest",
-            timeout=0.0001
-        )
-        assert result is None
+        with pytest.raises(ReadTimeoutException):
+            helper_manager.obj.read_serial_data(
+                caller_name="PyTest",
+                timeout=0.0001
+            )
         # Try search new valid serial port
         helper_manager.obj._com._serial_port = "/dev/vmodem8"
         helper_manager.obj._com.ser.close()
-        result = helper_manager.obj.read_serial_data(
-            caller_name="PyTest",
-            timeout=0.0001
-        )
-        assert result is None
+        with pytest.raises(VedirectException):
+            helper_manager.obj.read_serial_data(
+                caller_name="PyTest",
+                timeout=0.0001
+            )
 
     def test_get_all_packets(self, helper_manager):
         """Test get_all_packets method """
         helper_manager.init_vedirect_app()
         helper_manager.read_serial_data()
-
+        time.sleep(1)
         helper_manager.obj.reset_data_cache()
         assert helper_manager.obj.has_data_cache() is False
         result = helper_manager.obj.get_all_packets(
