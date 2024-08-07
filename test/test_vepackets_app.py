@@ -236,7 +236,7 @@ class TestVePacketsApp:
         """Test get_all_packets method """
         helper_manager.init_vedirect_app()
         helper_manager.read_serial_data()
-
+        time.sleep(1)
         helper_manager.obj.reset_data_cache()
         assert helper_manager.obj.has_data_cache() is False
         result = helper_manager.obj.get_all_packets(
