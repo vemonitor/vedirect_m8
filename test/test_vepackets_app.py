@@ -252,6 +252,30 @@ class TestVePacketsApp:
         )
         assert is_time_cache is False
 
+        helper_manager.obj._data_cache = (1723021080, {'a': 1})
+        is_time_cache = helper_manager.obj.is_time_to_read_serial(
+            now=1723021164
+        )
+        assert is_time_cache is True
+
+        helper_manager.obj._data_cache = (1723021080, {'a': 1})
+        is_time_cache = helper_manager.obj.is_time_to_read_serial(
+            now=1723021080
+        )
+        assert is_time_cache is False
+
+        helper_manager.obj._data_cache = (1723021080, {'a': 1})
+        is_time_cache = helper_manager.obj.is_time_to_read_serial(
+            now=1723021081
+        )
+        assert is_time_cache is False
+
+        helper_manager.obj._data_cache = (1723021080, {'a': 1})
+        is_time_cache = helper_manager.obj.is_time_to_read_serial(
+            now=1723021082
+        )
+        assert is_time_cache is True
+
     def test_read_data(self, helper_manager):
         """Test read_data method """
         helper_manager.init_vedirect_app()

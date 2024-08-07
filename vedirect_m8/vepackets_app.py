@@ -308,24 +308,25 @@ class VePacketsApp(VedirectController):
         return result
 
     def is_time_to_read_serial(self,
-                               now: float,
-                               min_interval: int = 1
+                               now: float
                                ) -> bool:
         """Test if is time to read from serial"""
         result = True
-        time_cache = self.get_time_cache()
-        if Ut.is_numeric(time_cache, positive=True)\
-                and Ut.is_numeric(now, positive=True)\
-                and Ut.is_numeric(min_interval, positive=True):
-            max_i = Ut.get_int(now) + min_interval
-            result = time_cache > max_i
+        time_cache = Ut.get_int(self.get_time_cache(), default=-1)
+        now = Ut.get_int(now, default=-1)
+        min_interval = Ut.get_int(self._min_interval, default=-1)
+        if Ut.is_int(time_cache, positive=True)\
+                and Ut.is_int(now, positive=True)\
+                and Ut.is_int(min_interval, positive=True):
+            diff = abs(time_cache - now)
+            result = diff > min_interval
             logger.debug(
                 "[VedirectApp::is_time_to_read_serial] "
                 "Evaluate cache validity: %s.\n"
-                "%s <= %s",
+                "Diff %s > %s",
                 result,
-                time_cache,
-                max_i
+                diff,
+                min_interval
             )
 
         return result
