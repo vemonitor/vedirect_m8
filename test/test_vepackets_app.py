@@ -4,7 +4,9 @@ import pytest
 from ve_utils.utype import UType as Ut
 from vedirect_m8.serconnect import SerialConnection
 from vedirect_m8.vepackets_app import VePacketsApp
+from vedirect_m8.exceptions import ReadTimeoutException
 from vedirect_m8.exceptions import SerialConnectionException
+from vedirect_m8.exceptions import VedirectException
 
 
 @pytest.fixture(name="helper_manager", scope="class")
@@ -215,19 +217,19 @@ class TestVePacketsApp:
         )
         assert Ut.is_dict(result, not_null=True, max_items=19)
         # Try SerialVeTimeoutException
-        result = helper_manager.obj.read_serial_data(
-            caller_name="PyTest",
-            timeout=0.0001
-        )
-        assert result is None
+        with pytest.raises(ReadTimeoutException):
+            helper_manager.obj.read_serial_data(
+                caller_name="PyTest",
+                timeout=0.0001
+            )
         # Try search new valid serial port
         helper_manager.obj._com._serial_port = "/dev/vmodem8"
         helper_manager.obj._com.ser.close()
-        result = helper_manager.obj.read_serial_data(
-            caller_name="PyTest",
-            timeout=0.0001
-        )
-        assert result is None
+        with pytest.raises(VedirectException):
+            helper_manager.obj.read_serial_data(
+                caller_name="PyTest",
+                timeout=0.0001
+            )
 
     def test_get_all_packets(self, helper_manager):
         """Test get_all_packets method """
