@@ -385,7 +385,7 @@ class VePacketsApp(VedirectController):
                   timeout: int = 2
                   ) -> Optional[dict]:
         """Read data"""
-        result = None
+        result, is_cache = None, False
         now = time.time()
         logger.debug(
             "[VedirectApp::read_data] Read vedirect data."
@@ -402,6 +402,7 @@ class VePacketsApp(VedirectController):
 
         else:
             result = self.get_data_cache()
+            is_cache = True
             logger.debug(
                 "[VedirectApp::read_data] Read data from cache."
                 "worker: %s - time: %s  \n"
@@ -415,7 +416,7 @@ class VePacketsApp(VedirectController):
                     now=now
                 )  # type: ignore
             )
-        return result
+        return result, is_cache
 
     @staticmethod
     def get_time_cache_diff(time_cache: Union[int, float],
@@ -423,7 +424,9 @@ class VePacketsApp(VedirectController):
                             ) -> Union[int, float]:
         """Test if actual index is equal to last index."""
         result = -1
-        if Ut.is_numeric(time_cache, positive=True)\
-                and Ut.is_numeric(now, positive=True):
-            result = time_cache - now
+        time_cache = Ut.get_int(time_cache, -1)
+        now = Ut.get_int(now, -1)
+        if Ut.is_int(time_cache, positive=True)\
+                and Ut.is_int(now, positive=True):
+            result = abs(time_cache - now)
         return result
