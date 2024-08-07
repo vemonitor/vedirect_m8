@@ -319,7 +319,7 @@ class VePacketsApp(VedirectController):
                 and Ut.is_int(now, positive=True)\
                 and Ut.is_int(min_interval, positive=True):
             diff = abs(time_cache - now)
-            result = diff > min_interval
+            result = diff >= min_interval
             logger.debug(
                 "[VedirectApp::is_time_to_read_serial] "
                 "Evaluate cache validity: %s.\n"
