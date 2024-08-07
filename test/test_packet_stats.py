@@ -2,7 +2,7 @@
 from ve_utils.utype import UType as Ut
 import pytest
 from vedirect_m8.packet_stats import PacketStats
-from vedirect_m8.exceptions import SettingInvalidException
+from vedirect_m8.exceptions import InputReadException, SettingInvalidException
 
 
 @pytest.fixture(name="helper_manager", scope="class")
@@ -112,20 +112,44 @@ class TestPacketStats:
 
     def test_reset_global_stats(self, helper_manager):
         """Test is_app_block method."""
-        assert helper_manager.obj.is_read_stats() is True
+        # test init state
+        assert helper_manager.obj.has_good_read_stats() is True
         assert helper_manager.obj.has_nb_bad_packets() is True
         assert helper_manager.obj.has_serial_read_errors() is True
-        assert helper_manager.obj.add_nb_bad_packets() > 0
-        assert helper_manager.obj.add_serial_read_errors() > 0
+        # Add max_red_error value
+        assert helper_manager.obj.set_max_read_error(
+            value=2
+        ) is True
+        # Add two global read errors and set linear_flow to False
+        assert helper_manager.obj.add_nb_bad_packets() == 1
+        assert helper_manager.obj.add_serial_read_errors() == 1
         assert helper_manager.obj.set_linear_flow(False) is False
-
+        # test success set values
         assert helper_manager.obj.get_nb_bad_packets() == 1
         assert helper_manager.obj.get_serial_read_errors() == 1
         assert helper_manager.obj.is_linear_flow() is False
-        assert helper_manager.obj.is_read_stats() is False
+        # Test has_reached_max_errors
+        assert helper_manager.obj.has_reached_max_errors(
+            raise_exception=False
+        ) is False
+        # Test new global state
+        assert helper_manager.obj.has_good_read_stats() is False
 
+        # Add more global read errors
+        assert helper_manager.obj.add_nb_bad_packets() == 2
+        assert helper_manager.obj.add_serial_read_errors() == 2
+        # Test has_reached_max_errors
+        assert helper_manager.obj.has_reached_max_errors(
+            raise_exception=False
+        ) is True
+        # Test has_reached_max_errors with exception
+        with pytest.raises(InputReadException):
+            helper_manager.obj.has_reached_max_errors()
+
+        # Reset global stats
         helper_manager.obj.reset_global_stats()
-        assert helper_manager.obj.is_read_stats() is True
+        # control new global state
+        assert helper_manager.obj.has_good_read_stats() is True
         assert helper_manager.obj.get_nb_bad_packets() == 0
         assert helper_manager.obj.get_serial_read_errors() == 0
         assert helper_manager.obj.is_linear_flow() is True

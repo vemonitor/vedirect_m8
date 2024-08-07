@@ -3,7 +3,7 @@ Used to get, set and analyse serial packets stats.
 """
 import logging
 from typing import Optional
-from vedirect_m8.exceptions import SettingInvalidException
+from vedirect_m8.exceptions import InputReadException, SettingInvalidException
 from vedirect_m8.serutils import SerialUtils as Ut
 
 __author__ = "Eli Serra"
@@ -20,9 +20,11 @@ class PacketStats:
     """
     def __init__(self,
                  nb_packets: int = 10,
-                 accepted_keys: Optional[list] = None
+                 accepted_keys: Optional[list] = None,
+                 max_read_error: int = 30
                  ):
         self._nb_packets = 10
+        self._max_read_error = 11
         self._max_packets_ever = 0
         self._nb_bad_packets = 0
         self._serial_read_errors = 0
@@ -31,6 +33,10 @@ class PacketStats:
         self._accepted_keys = None
         self._set_nb_packets(nb_packets)
         self.set_accepted_keys(accepted_keys)
+        self.set_max_read_error(
+            value=max_read_error,
+            default=self._nb_packets + 1
+        )
 
     MAX_STAT_PACKETS, NB_PACKETS_SCAN = 20, 10
 
@@ -45,6 +51,22 @@ class PacketStats:
         if self.MAX_STAT_PACKETS > value > 0:
             self._nb_packets = value
         return self._nb_packets
+
+    def get_max_read_error(self) -> Optional[list]:
+        """Get max_read_error value."""
+        return self._max_read_error
+
+    def set_max_read_error(self,
+                           value: int,
+                           default: Optional[int] = 30
+                           ) -> bool:
+        """Set max_read_error value."""
+        result = False
+        max_read_error = Ut.get_int(value, default)
+        if max_read_error >= 0:
+            self._max_read_error = max_read_error
+            result = True
+        return result
 
     def has_accepted_keys(self) -> Optional[list]:
         """Get number of packets available on serial reader."""
@@ -88,11 +110,15 @@ class PacketStats:
                 self._nb_bad_packets += 1
         return result
 
-    def reset_global_stats(self) -> int:
-        """Get number of packets available on serial reader."""
+    def reset_global_counters(self):
+        """Reset global counters."""
         self._max_packets_ever = 0
         self._nb_bad_packets = 0
         self._serial_read_errors = 0
+
+    def reset_global_stats(self):
+        """Reset global stats."""
+        self.reset_global_counters()
         self._is_linear_flow = True
 
     def has_nb_bad_packets(self) -> int:
@@ -136,10 +162,35 @@ class PacketStats:
         """Get number of packets available on serial reader."""
         return self._is_linear_flow is True
 
-    def is_read_stats(self) -> int:
+    def has_good_read_stats(self) -> int:
         """Get number of packets available on serial reader."""
         return self.is_linear_flow()\
-            and self.get_serial_read_errors() == 0
+            and self.get_serial_read_errors() == 0\
+            and self.get_nb_bad_packets() == 0
+
+    def has_reached_max_errors(self, raise_exception: bool = True) -> int:
+        """Get number of packets available on serial reader."""
+        result = False
+        max_read_error = self.get_max_read_error()
+        if max_read_error > 0:
+            max_seial_read = self.get_serial_read_errors() >= max_read_error
+            max_bad_packets = self.get_nb_bad_packets() >= max_read_error
+            has_max_errors = max_seial_read\
+                or max_bad_packets
+
+            if raise_exception is True\
+                    and has_max_errors:
+                raise InputReadException(
+                    "Fatal Error: "
+                    "Max read errors reached. "
+                    "Max Seial Read : "
+                    f"{self.get_serial_read_errors()} / {max_read_error}"
+                    "Max Malformed Packets : "
+                    f"{self.get_nb_bad_packets()} / {max_read_error}"
+                )
+            if has_max_errors:
+                result = True
+        return result
 
     def init_nb_packets(self) -> int:
         """Initialise number of packets available on serial reader."""
