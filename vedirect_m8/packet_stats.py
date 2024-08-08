@@ -41,7 +41,7 @@ class PacketGlobalStats:
 
     def has_nb_bad_packets(self) -> int:
         """Test if instance has nb_bad_packets."""
-        return Ut.is_int(self._serial_read_errors, mini=0)
+        return Ut.is_int(self._nb_bad_packets, mini=0)
 
     def get_nb_bad_packets(self) -> int:
         """Get nb_bad_packets counter."""
@@ -114,7 +114,7 @@ class PacketStats(PacketGlobalStats):
     def __init__(self,
                  nb_packets: int = 10,
                  accepted_keys: Optional[list] = None,
-                 max_read_error: int = 30
+                 max_read_error: int = 0
                  ):
         PacketGlobalStats.__init__(self)
         self._nb_packets = 10
@@ -148,7 +148,7 @@ class PacketStats(PacketGlobalStats):
 
     def set_max_read_error(self,
                            value: int,
-                           default: Optional[int] = 30
+                           default: Optional[int] = 0
                            ) -> bool:
         """Set max_read_error value."""
         result = False
@@ -218,7 +218,7 @@ class PacketStats(PacketGlobalStats):
                     "Fatal Error: "
                     "Max read errors reached. "
                     "Max Seial Read : "
-                    f"{self.get_serial_read_errors()} / {max_read_error}"
+                    f"{self.get_serial_read_errors()} / {max_read_error} "
                     "Max Malformed Packets : "
                     f"{self.get_nb_bad_packets()} / {max_read_error}"
                 )
