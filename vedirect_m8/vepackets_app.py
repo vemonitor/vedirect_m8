@@ -183,7 +183,7 @@ class VePacketsApp(VedirectController):
                 result = True
         except VedirectException as ex:
             logger.debug(
-                "[VedirectApp::try_serial_connection] "
+                "[VePacketsApp::try_serial_connection] "
                 "Unable to connect to serial port %s.\n"
                 "ex: %s",
                 self.get_serial_port(),
@@ -211,10 +211,10 @@ class VePacketsApp(VedirectController):
         """
         if not self.try_serial_connection(caller_name):
             logger.error(
-                "[VedirectApp::try_to_reconnect] "
+                "[VePacketsApp::try_to_reconnect] "
                 "Unable to get valid Serial port."
             )
-            msg = "[Vedirect::try_to_reconnect] "\
+            msg = "[VePacketsApp::try_to_reconnect] "\
                 "Fatal error on reading serial port "\
                 f"{self.get_serial_port()}"
             if isinstance(from_exception, Exception):
@@ -258,9 +258,8 @@ class VePacketsApp(VedirectController):
         Every packet contain 0-18 blocks.
         """
         result = False
-        errors, blocks = 0, []
+        read_errors, blocks = 0, []
         nb_packets = self.packets_stats.get_nb_packets()
-        max_read_error = nb_packets
         self.reset_data_cache()
 
         for i in range(nb_packets):
@@ -277,20 +276,14 @@ class VePacketsApp(VedirectController):
                 else:
                     self.packets_stats.add_serial_read_errors()
                     logger.debug(
-                        "[VedirectApp::read_data] "
+                        "[VePacketsApp::read_data] "
                         "Serial read Error n° %s",
                         read_errors
                     )
 
             except VeReadException as ex:
-                if read_errors >= max_read_error:
-                    raise VedirectException(
-                        "[Vedirect::input_read] "
-                        "Serial input read error"
-                        f"{read_errors} is >= {max_read_error}"
-                    ) from ex
                 logger.debug(
-                    "[VedirectApp::read_data] "
+                    "[VePacketsApp::get_all_packets] "
                     "Serial read Error n° %s ex : %s",
                     read_errors,
                     ex
@@ -301,7 +294,7 @@ class VePacketsApp(VedirectController):
             self.packets_stats.init_nb_packets()
             result = True
             logger.debug(
-                "[VedirectApp::get_serial_packet] "
+                "[VePacketsApp::get_all_packets] "
                 "Read %s blocks from serial. "
                 "len: %s - blocks: %s - "
                 "errors: %s - time ref: %s \n"
@@ -309,7 +302,7 @@ class VePacketsApp(VedirectController):
                 i+1,
                 len(self.get_data_cache()),  # type: ignore
                 blocks,
-                errors,
+                read_errors,
                 self.get_time_cache(),
                 self.get_data_cache()
             )
@@ -329,7 +322,7 @@ class VePacketsApp(VedirectController):
             diff = abs(time_cache - now)
             result = diff >= min_interval
             logger.debug(
-                "[VedirectApp::is_time_to_read_serial] "
+                "[VePacketsApp::is_time_to_read_serial] "
                 "Evaluate cache validity: %s.\n"
                 "Diff %s > %s",
                 result,
@@ -345,6 +338,7 @@ class VePacketsApp(VedirectController):
                             timeout: int = 2
                             ) -> Optional[dict]:
         """Read serial packets from serial."""
+        result = None
         self.init_data_read()
         # reset cache
         self.reset_data_cache()
@@ -352,7 +346,7 @@ class VePacketsApp(VedirectController):
             result = self.get_data_cache()
             if not Ut.is_dict(result, not_null=True):
                 logger.debug(
-                    "[VedirectApp::read_data] "
+                    "[VePacketsApp::read_data] "
                     "Error: Unable read packets from serial. "
                     "Time packet: %s \n"
                     "Time diff: %s \n",
@@ -366,7 +360,7 @@ class VePacketsApp(VedirectController):
                 result = None
 
             logger.debug(
-                "[VedirectApp::read_data] Read data from serial. "
+                "[VePacketsApp::read_data] Read data from serial. "
                 "worker: %s - time: %s  \n"
                 "Time packet: %s \n"
                 "Time diff: %s \n"
@@ -395,7 +389,7 @@ class VePacketsApp(VedirectController):
         result, is_cache = None, False
         now = time.time()
         logger.debug(
-            "[VedirectApp::read_data] Read vedirect data."
+            "[VePacketsApp::read_data] Read vedirect data."
             "worker: %s - time: %s",
             caller_name,
             now
@@ -411,7 +405,7 @@ class VePacketsApp(VedirectController):
             result = self.get_data_cache()
             is_cache = True
             logger.debug(
-                "[VedirectApp::read_data] Read data from cache."
+                "[VePacketsApp::read_data] Read data from cache."
                 "worker: %s - time: %s  \n"
                 "Time packet: %s \n"
                 "Time diff: %s \n",

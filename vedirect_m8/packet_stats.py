@@ -41,7 +41,7 @@ class PacketGlobalStats:
 
     def has_nb_bad_packets(self) -> int:
         """Test if instance has nb_bad_packets."""
-        return Ut.is_int(self._serial_read_errors, mini=0)
+        return Ut.is_int(self._nb_bad_packets, mini=0)
 
     def get_nb_bad_packets(self) -> int:
         """Get nb_bad_packets counter."""
