@@ -36,7 +36,7 @@ class VePacketsApp(VedirectController):
                  nb_packets: int = 10,
                  accepted_keys: Optional[list] = None,
                  min_interval: int = 1,
-                 max_read_error: int = 30
+                 max_read_error: int = 0
                  ):
         """
         Constructor of VedirectController class.
