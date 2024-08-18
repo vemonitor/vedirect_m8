@@ -41,8 +41,8 @@ setup(name='vedirect_m8',
       extras_require={
               "TEST": [
                     "pytest>=8.3.2",
-                    "pytest-cov>=5.0.0"
-                    "coverage>=7.6.1"
+                    "pytest-cov>=5.0.0",
+                    "coverage>=7.6.1",
               ],
               "MQTT": [
                     "paho-mqtt>=1.6.1"
