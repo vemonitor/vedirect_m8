@@ -160,6 +160,17 @@ class Vedirect:
         """Test if class Vedirect is ready"""
         return self._com.get_serial_port()
 
+    def close_serial(self, delete=False) -> bool:
+        """Close serial connection"""
+        result = False
+        if self.has_serial_com():
+            if delete is True:
+                self._com.close_end()
+            else:
+                self._com.close()
+            result = True
+        return result
+
     def connect_to_serial(self) -> bool:
         """
         Connect to serial port if not connected.
