@@ -59,16 +59,16 @@ Anything sent to ```/${HOME}/vmodem0``` will be echoed to ```/${HOME}/vmodem1```
 In other terminal, run the vedirectsim script with your desired device:
 
 ```bash
- python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700
+ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv702
 ```
 
 Or if you need to see the inputs sent on serial port :
 
 ```bash
- python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv700 --debug
+ python examples/vedirectsim.py --port /${HOME}/vmodem0 --device bmv702 --debug
 ```
 
-Device option must be ``bmv700, bluesolar_1.23, or smartsolar_1.39``.
+Device option must be ``bmv702, bluesolar_1.23, or smartsolar_1.39``.
 
 Then, in other terminal, attach the decoder to /${HOME}/vmodem1:
 

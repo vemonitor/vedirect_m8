@@ -27,12 +27,11 @@ setup(name='vedirect_m8',
       classifiers=[
             "License :: OSI Approved :: MIT License",
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.5",
-            "Programming Language :: Python :: 3.6",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
       ],
       include_package_data=True,
       install_requires=[
@@ -41,8 +40,9 @@ setup(name='vedirect_m8',
       ],
       extras_require={
               "TEST": [
-                    "pytest>=7.4.1",
-                    "coverage>=7.3.1"
+                    "pytest>=8.3.2",
+                    "pytest-cov>=5.0.0"
+                    "coverage>=7.6.1"
               ],
               "MQTT": [
                     "paho-mqtt>=1.6.1"

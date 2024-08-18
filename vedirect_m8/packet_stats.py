@@ -301,7 +301,7 @@ class PacketStats(PacketGlobalStats):
                 is_linear=is_linear,
                 stats_packet=stats_equal
             )
-            step = index - stats_equal.get('last_index')
+            step = index - stats_equal.get('last_index', 0)
 
             index_stats = {
                 "last_index": index,

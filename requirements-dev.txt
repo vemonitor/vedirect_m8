@@ -1,5 +1,11 @@
-pytest>=7.4.1
-setuptools>=68.1.2
+pytest>=8.3.2
+pytest-cov>=5.0.0
+coverage>=7.6.1
+setuptools>=72.1.0
+build>=1.2.1
+twine>=5.1.1
+wheel>=0.44.0
+flake8>=7.1.1
 pyserial>=3.5
 ve-utils>=2.5.3
 paho-mqtt>=1.6.1

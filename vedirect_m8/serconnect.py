@@ -154,6 +154,15 @@ class SerialConnection:
         """
         return self.is_settings() and self.is_serial_ready()
 
+    def is_serial(self) -> bool:
+        """
+        Test if is serial connection is Serial Instance.
+
+        :return:
+            True if self._ser is an instance of Serial.
+        """
+        return isinstance(self.ser, Serial)
+
     def is_serial_ready(self) -> bool:
         """
         Test if is serial connection is ready.
@@ -162,7 +171,7 @@ class SerialConnection:
             True if self._ser is an instance of Serial
             and if the serial connection is opened.
         """
-        return isinstance(self.ser, Serial) and self.ser.isOpen()
+        return self.is_serial() and self.ser.isOpen()
 
     def is_settings(self) -> bool:
         """
@@ -256,6 +265,23 @@ class SerialConnection:
                 result.update({'write_timeout': write_timeout})
             if Ut.str_to_bool(exclusive) is True:
                 result.update({'exclusive': True})
+        return result
+
+    def close(self) -> bool:
+        """Close serial connection"""
+        result = False
+        if self.is_serial():
+            self.ser.close()
+            result = True
+        return result
+    
+    def close_end(self) -> bool:
+        """Close and destruct serial connection"""
+        result = False
+        if self.is_serial():
+            self.ser.close()
+            self.ser.__del__()
+            result = True
         return result
 
     def connect(self,

@@ -71,6 +71,20 @@ class TestSerialConnection:
         result = self.obj._set_serial_conf(**conf)
         assert result is None
 
+    def test_close(self):
+        """Test close method."""
+        assert self.obj.connect()
+        assert self.obj.close() is True
+        self.obj.ser = None
+        assert self.obj.close() is False
+
+    def test_close_end(self):
+        """Test close_end method."""
+        assert self.obj.connect()
+        assert self.obj.close_end() is True
+        self.obj.ser = None
+        assert self.obj.close_end() is False
+
     def test_connect(self):
         """Test connect method."""
         assert self.obj.connect()

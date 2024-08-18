@@ -55,6 +55,20 @@ class TestVedirect:
         with pytest.raises(SerialConnectionException):
             helper_manager.obj.connect_to_serial()
 
+    def test_close_serial(self, helper_manager):
+        """Test close_serial method."""
+        helper_manager.init_object()
+        assert helper_manager.obj.is_serial_ready()
+        assert helper_manager.obj.is_ready()
+        assert helper_manager.obj.has_serial_com()
+        assert helper_manager.obj.connect_to_serial()
+
+        assert helper_manager.obj.close_serial(delete=False) is True
+        assert helper_manager.obj.close_serial(delete=True) is True
+        helper_manager.obj._com = None
+        assert helper_manager.obj.close_serial(delete=False) is False
+        assert helper_manager.obj.close_serial(delete=True) is False
+
     def test_set_max_packet_blocks(self, helper_manager):
         """Test set_max_packet_blocks method."""
         assert helper_manager.obj.has_free_block()
