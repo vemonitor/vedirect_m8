@@ -15,6 +15,8 @@ used in their range of MPPT solar charge controllers and battery monitors.
 This is a forked version of a package originally created by Janne Kario
 [VeDirect](https://github.com/karioja/vedirect).
 
+This version was originally developed for the [vemonitor_m8](https://github.com/vemonitor/vemonitor_m8) package.
+
 ## Installation
 
 To install directly from GitHub:
