@@ -61,7 +61,7 @@ class SerialUtils (UType):
         """Test if is valid serial port name pattern."""
         return SerialUtils.is_str(data) and SerialUtils.is_list(
             re.compile(
-                r'^((?:tty(?:USB|ACM)|vmodem|COM)\d{1,3})$'
+                r'^((?:tty(?:USB|ACM|AMA)|vmodem|COM)\d{1,3})$'
             ).findall(data),
             not_null=True
         )
