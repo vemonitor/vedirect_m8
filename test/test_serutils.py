@@ -40,6 +40,18 @@ class TestSerialUtils:
         assert len(tests) == 2
 
     @staticmethod
+    def test_is_serial_port_name_pattern():
+        """Test is_serial_port_name_pattern method."""
+        datas = [
+            'USB1', 'ttyUsb1', 'ttyUS1',  # false
+            'ACM1', 'ttyAcm1', 'ttyAC1',  # false
+            'AMA1', 'ttyAma1', 'ttyAM1',  # false
+            "ttyUSB1", "ttyACM1", "ttyAMA1", "vmodem1", "COM1"  # true
+        ]
+        tests = [x for x in datas if Ut.is_serial_port_name_pattern(x)]
+        assert len(tests) == 5
+
+    @staticmethod
     def test_is_unix_serial_port_pattern():
         """Test is_unix_serial_port_pattern method."""
         datas = [
